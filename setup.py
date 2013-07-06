@@ -11,10 +11,11 @@ setup(
     name='wakatime',
     version=VERSION,
     license='BSD 3 Clause',
-    description=(
+    description=' '.join([
         'Event appender for Wakati.Me, a time',
         'tracking api for text editors.',
-    ),
+    ]),
+    long_description=open('README.rst').read(),
     author='Alan Hamlett',
     author_email='alan.hamlett@gmail.com',
     url='https://github.com/wakatime/wakatime',
@@ -22,6 +23,7 @@ setup(
     package_dir={'wakatime': 'wakatime'},
     include_package_data=True,
     zip_safe=False,
+    platforms='any',
     entry_points={
         'console_scripts': ['wakatime = wakatime.wakatime:main'],
     },
