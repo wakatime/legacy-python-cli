@@ -125,7 +125,7 @@ def get_user_agent(plugin):
 
 def send_action(project=None, tags=None, key=None, targetFile=None,
         timestamp=None, endtime=None, isWrite=None, plugin=None, **kwargs):
-    url = 'https://www.wakatime.local/api/v1/actions'
+    url = 'https://www.wakati.me/api/v1/actions'
     log.debug('Sending action to api at %s' % url)
     data = {
         'time': timestamp,
@@ -180,10 +180,8 @@ def main():
     if os.path.isfile(args.targetFile):
         project = find_project(args.targetFile)
         tags = project.tags()
-        #if send_action(project=project.name(), tags=tags, **vars(args)):
-        #    return 0
-        for num in range(240):
-            send_action(project=project.name(), tags=tags, **vars(args))
+        if send_action(project=project.name(), tags=tags, **vars(args)):
+            return 0
         return 102
     else:
         log.debug('File does not exist; ignoring this action.')
