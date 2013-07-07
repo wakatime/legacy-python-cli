@@ -12,7 +12,7 @@ setup(
     version=VERSION,
     license='BSD 3 Clause',
     description=' '.join([
-        'Event appender for Wakati.Me, a time',
+        'Action event appender for Wakati.Me, a time',
         'tracking api for text editors.',
     ]),
     long_description=open('README.rst').read(),

@@ -3,7 +3,7 @@
     wakatime
     ~~~~~~~~
 
-    Event appender for Wakati.Me, a time tracking api for programmers.
+    Action event appender for Wakati.Me, a time tracking api for text editors.
 
     :copyright: (c) 2013 Alan Hamlett.
     :license: BSD, see LICENSE for more details.
@@ -12,7 +12,7 @@
 from __future__ import print_function
 
 __title__ = 'wakatime'
-__version__ = '0.0.1'
+__version__ = '0.1.1'
 __author__ = 'Alan Hamlett'
 __license__ = 'BSD'
 __copyright__ = 'Copyright 2013 Alan Hamlett'
@@ -63,18 +63,18 @@ def parseArguments():
             description='Wakati.Me event api appender')
     parser.add_argument('--file', dest='targetFile', metavar='file',
             action=FileAction, required=True,
-            help='absolute path to file for current event')
+            help='absolute path to file for current action')
     parser.add_argument('--time', dest='timestamp', metavar='time',
             type=float,
             help='optional floating-point unix epoch timestamp; '+
                 'uses current time by default')
     parser.add_argument('--endtime', dest='endtime',
-            help='optional end timestamp turning this event into '+
-                'a duration; if a non-duration event occurs within a '+
+            help='optional end timestamp turning this action into '+
+                'a duration; if a non-duration action occurs within a '+
                 'duration, the duration is ignored')
     parser.add_argument('--write', dest='isWrite',
             action='store_true',
-            help='note event was triggered from writing to a file')
+            help='note action was triggered from writing to a file')
     parser.add_argument('--plugin', dest='plugin',
             help='optional text editor plugin name and version '+
                 'for User-Agent header')
@@ -105,38 +105,38 @@ def get_api_key(configFile):
         configFile = '~/.wakatime.conf'
     api_key = None
     try:
-        cf = open(os.path.expanduser('~/.wakatime'))
+        cf = open(os.path.expanduser(configFile))
         for line in cf:
             line = line.split('=', 1)
             if line[0] == 'api_key':
                 api_key = line[1].strip()
         cf.close()
     except IOError:
-        log.error('Could not read from config file.')
+        print('Error: Could not read from config file.')
     return api_key
 
 
 def get_user_agent(plugin):
     user_agent = 'wakatime/%s %s' % (__version__, platform.platform())
     if plugin:
-        user_agent = plugin+' '+user_agent
+        user_agent = user_agent+' '+plugin
     return user_agent
 
 
-def send_action(project_name=None, tags=None, key=None, targetFile=None,
+def send_action(project=None, tags=None, key=None, targetFile=None,
         timestamp=None, endtime=None, isWrite=None, plugin=None, **kwargs):
-    url = 'https://www.wakati.me/api/v1/events'
-    log.debug('Sending event to api at %s' % url)
+    url = 'https://www.wakatime.local/api/v1/actions'
+    log.debug('Sending action to api at %s' % url)
     data = {
-        'timestamp': timestamp,
+        'time': timestamp,
         'file': targetFile,
     }
     if endtime:
         data['endtime'] = endtime
     if isWrite:
         data['isWrite'] = isWrite
-    if project_name:
-        data['project'] = project_name
+    if project:
+        data['project'] = project
     if tags:
         data['tags'] = tags
     log.debug(data)
@@ -180,11 +180,13 @@ def main():
     if os.path.isfile(args.targetFile):
         project = find_project(args.targetFile)
         tags = project.tags()
-        if send_action(project=project, tags=tags, **vars(args)):
-            return 0
+        #if send_action(project=project.name(), tags=tags, **vars(args)):
+        #    return 0
+        for num in range(240):
+            send_action(project=project.name(), tags=tags, **vars(args))
         return 102
     else:
-        log.debug('File does not exist; ignoring this event.')
+        log.debug('File does not exist; ignoring this action.')
     return 101
 
 

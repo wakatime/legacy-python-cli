@@ -2,8 +2,8 @@ Wakati.Me
 =========
 
 Wakati.Me is a time tracking api for text editors. This is the command line
-event appender for the Wakati.Me api. You shouldn't need to directly use
-this outside of a text editor plugin.
+action event appender for the Wakati.Me api. You shouldn't need to directly
+use this outside of a text editor plugin.
 
 
 Installation

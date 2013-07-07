@@ -42,7 +42,7 @@ class JsonFormatter(logging.Formatter):
             ('now', self.formatTime(record, self.datefmt)),
             ('version', self.version),
             ('plugin', self.plugin),
-            ('timestamp', self.timestamp),
+            ('time', self.timestamp),
             ('endtime', self.endtime),
             ('isWrite', self.isWrite),
             ('file', self.targetFile),

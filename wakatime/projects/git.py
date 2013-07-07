@@ -53,7 +53,7 @@ class Git(BaseProject):
     def parseConfig(self):
         sections = {}
         try:
-            f = open(config, 'r')
+            f = open(self.config, 'r')
         except IOError as e:
             log.exception("Exception:")
         else:
