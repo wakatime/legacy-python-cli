@@ -97,6 +97,10 @@ def parseArguments():
             args.key = default_key
         else:
             parser.error('Missing api key')
+    if args.endtime and args.endtime < args.timestamp:
+        tmp = args.timestamp
+        args.timestamp = args.endtime
+        args.endtime = tmp
     return args
 
 
@@ -165,12 +169,16 @@ def send_action(project=None, tags=None, key=None, targetFile=None,
             data['traceback'] = traceback.format_exc()
         log.error(data)
     else:
-        log.debug({
+        if response.getcode() >= 200 and response.getcode() < 300:
+            log.debug({
+                'response_code': response.getcode(),
+                'response_content': response.read(),
+            })
+            return True
+        log.error({
             'response_code': response.getcode(),
             'response_content': response.read(),
         })
-        if response.getcode() >= 200 and response.getcode() < 300:
-            return True
     return False
 
 
