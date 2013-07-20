@@ -1,6 +1,6 @@
 from setuptools import setup
 
-from wakatime.wakatime import __version__ as VERSION
+from wakatime.__init__ import __version__ as VERSION
 
 
 packages = [
@@ -25,7 +25,7 @@ setup(
     zip_safe=False,
     platforms='any',
     entry_points={
-        'console_scripts': ['wakatime = wakatime.wakatime:main'],
+        'console_scripts': ['wakatime = wakatime.__init__:main'],
     },
     classifiers=(
         'Development Status :: 3 - Alpha',
