@@ -124,7 +124,7 @@ def send_action(project=None, tags=None, key=None, targetFile=None,
     if project:
         data['project'] = project
     if tags:
-        data['tags'] = tags
+        data['tags'] = set(tags)
     log.debug(data)
     request = urllib2.Request(url=url, data=json.dumps(data))
     user_agent = get_user_agent(plugin)
