@@ -103,7 +103,10 @@ def get_api_key(configFile):
 
 
 def get_user_agent(plugin):
-    user_agent = 'wakatime/%s (%s)' % (__version__, platform.platform())
+    python_version = '%d.%d.%d.%s.%d' % (v.major, v.minor, v.micro,
+        v.releaselevel, v.serial)
+    user_agent = 'wakatime/%s (%s) Python%s' % (__version__,
+        python_version, platform.platform())
     if plugin:
         user_agent = user_agent+' '+plugin
     return user_agent
