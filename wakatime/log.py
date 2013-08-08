@@ -63,6 +63,9 @@ class JsonFormatter(logging.Formatter):
 
 
 def setup_logging(args, version):
+    logger = logging.getLogger()
+    if len(logger.handlers) > 0:
+        return logger
     logfile = args.logfile
     if not logfile:
         logfile = '~/.wakatime.log'
@@ -77,7 +80,6 @@ def setup_logging(args, version):
         plugin=args.plugin,
     )
     handler.setFormatter(formatter)
-    logger = logging.getLogger()
     logger.addHandler(handler)
     level = logging.INFO
     if args.verbose:

@@ -33,6 +33,7 @@ except ImportError:
     from urllib.error import HTTPError
     from urllib.request import Request, urlopen
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from .log import setup_logging
 from .project import find_project
 try:
@@ -52,6 +53,10 @@ class FileAction(argparse.Action):
 
 
 def parseArguments(argv):
+    try:
+        sys.argv
+    except AttributeError:
+        sys.argv = argv
     parser = argparse.ArgumentParser(
             description='Wakati.Me event api appender')
     parser.add_argument('--file', dest='targetFile', metavar='file',
