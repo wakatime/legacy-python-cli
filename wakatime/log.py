@@ -62,8 +62,16 @@ class JsonFormatter(logging.Formatter):
         return exec_info[2].format_exc()
 
 
+def set_log_level(logger, args):
+    level = logging.WARN
+    if args.verbose:
+        level = logging.DEBUG
+    logger.setLevel(level)
+
+
 def setup_logging(args, version):
     logger = logging.getLogger()
+    set_log_level(logger, args)
     if len(logger.handlers) > 0:
         return logger
     logfile = args.logfile
@@ -81,8 +89,4 @@ def setup_logging(args, version):
     )
     handler.setFormatter(formatter)
     logger.addHandler(handler)
-    level = logging.WARN
-    if args.verbose:
-        level = logging.DEBUG
-    logger.setLevel(level)
     return logger
