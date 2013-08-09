@@ -81,7 +81,7 @@ def setup_logging(args, version):
     )
     handler.setFormatter(formatter)
     logger.addHandler(handler)
-    level = logging.INFO
+    level = logging.WARN
     if args.verbose:
         level = logging.DEBUG
     logger.setLevel(level)
