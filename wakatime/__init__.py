@@ -146,9 +146,12 @@ def send_action(project=None, branch=None, key=None, targetFile=None,
         'Authorization': auth,
     }
 
+    # json request content
+    content = json.dumps(data).encode('utf-8')
+
     # send action to api
     try:
-        response = requests.post(url, data=str(json.dumps(data)), headers=headers)
+        response = requests.post(url, data=content, headers=headers)
     except requests.exceptions.RequestException as exc:
         exception_data = {
             sys.exc_info()[0].__name__: str(sys.exc_info()[1]),
