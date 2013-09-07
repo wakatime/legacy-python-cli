@@ -9,10 +9,10 @@
     :license: BSD, see LICENSE for more details.
 """
 
-import json
 import logging
 import os
 
+from .packages import simplejson as json
 try:
     from collections import OrderedDict
 except ImportError:

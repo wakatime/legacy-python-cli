@@ -3,6 +3,12 @@ History
 -------
 
 
+0.4.4 (2013-09-06)
+++++++++++++++++++
+
+- Using urllib2 again because of intermittent problems sending json with requests library
+
+
 0.4.3 (2013-09-04)
 ++++++++++++++++++
 
