@@ -31,7 +31,11 @@ import traceback
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from .log import setup_logging
 from .project import find_project
-from .packages import requests
+try:
+    from urllib2 import HTTPError, Request, urlopen
+except ImportError:
+    from urllib.error import HTTPError
+    from urllib.request import Request, urlopen
 try:
     import argparse
 except ImportError:
@@ -138,21 +142,27 @@ def send_action(project=None, branch=None, key=None, targetFile=None,
         data['branch'] = branch
     log.debug(data)
 
-    # setup api request headers
+    # setup api request
+    request = Request(url=url, data=str.encode(json.dumps(data)))
+    request.add_header('User-Agent', get_user_agent(plugin))
+    request.add_header('Content-Type', 'application/json')
     auth = 'Basic %s' % bytes.decode(base64.b64encode(str.encode(key)))
-    headers = {
-        'User-Agent': get_user_agent(plugin),
-        'Content-Type': 'application/json',
-        'Authorization': auth,
-    }
+    request.add_header('Authorization', auth)
 
-    # json request content
-    content = json.dumps(data).encode('utf-8')
-
-    # send action to api
+    # log time to api
+    response = None
     try:
-        response = requests.post(url, data=content, headers=headers)
-    except requests.exceptions.RequestException as exc:
+        response = urlopen(request)
+    except HTTPError as exc:
+        exception_data = {
+            'response_code': exc.getcode(),
+            'response_content': exc.read(),
+            sys.exc_info()[0].__name__: str(sys.exc_info()[1]),
+        }
+        if log.isEnabledFor(logging.DEBUG):
+            exception_data['traceback'] = traceback.format_exc()
+        log.error(exception_data)
+    except:
         exception_data = {
             sys.exc_info()[0].__name__: str(sys.exc_info()[1]),
         }
@@ -160,14 +170,14 @@ def send_action(project=None, branch=None, key=None, targetFile=None,
             exception_data['traceback'] = traceback.format_exc()
         log.error(exception_data)
     else:
-        if response.status_code == requests.codes.created:
+        if response.getcode() == 201:
             log.debug({
-                'response_code': response.status_code,
+                'response_code': response.getcode(),
             })
             return True
         log.error({
-            'response_code': response.status_code,
-            'response_content': response.text,
+            'response_code': response.getcode(),
+            'response_content': response.read(),
         })
     return False
 
