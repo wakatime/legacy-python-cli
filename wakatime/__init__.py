@@ -153,7 +153,6 @@ def send_action(project=None, branch=None, key=None, targetFile=None,
     except HTTPError as exc:
         exception_data = {
             'response_code': exc.getcode(),
-            'response_content': exc.read(),
             sys.exc_info()[0].__name__: str(sys.exc_info()[1]),
         }
         if log.isEnabledFor(logging.DEBUG):
