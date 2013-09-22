@@ -31,6 +31,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'packages'))
 from .log import setup_logging
 from .project import find_project
+from .stats import get_file_stats
 from .packages import argparse
 from .packages import simplejson as json
 try:
@@ -122,7 +123,7 @@ def get_user_agent(plugin):
     return user_agent
 
 
-def send_action(project=None, branch=None, key=None, targetFile=None,
+def send_action(project=None, branch=None, stats={}, key=None, targetFile=None,
         timestamp=None, endtime=None, isWrite=None, plugin=None, **kwargs):
     url = 'https://www.wakati.me/api/v1/actions'
     log.debug('Sending action to api at %s' % url)
@@ -130,6 +131,10 @@ def send_action(project=None, branch=None, key=None, targetFile=None,
         'time': timestamp,
         'file': targetFile,
     }
+    if stats.get('lines'):
+        data['lines'] = stats['lines']
+    if stats.get('language'):
+        data['language'] = stats['language']
     if endtime:
         data['endtime'] = endtime
     if isWrite:
@@ -187,11 +192,17 @@ def main(argv=None):
     if os.path.isfile(args.targetFile):
         branch = None
         name = None
+        stats = get_file_stats(args.targetFile)
         project = find_project(args.targetFile)
         if project:
             branch = project.branch()
             name = project.name()
-        if send_action(project=name, branch=branch, **vars(args)):
+        if send_action(
+                project=name,
+                branch=branch,
+                stats=stats,
+                **vars(args)
+            ):
             return 0
         return 102
     else:
