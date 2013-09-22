@@ -65,10 +65,6 @@ def parseArguments(argv):
             type=float,
             help='optional floating-point unix epoch timestamp; '+
                 'uses current time by default')
-    parser.add_argument('--endtime', dest='endtime',
-            help='optional end timestamp turning this action into '+
-                'a duration; if a non-duration action occurs within a '+
-                'duration, the duration is ignored')
     parser.add_argument('--write', dest='isWrite',
             action='store_true',
             help='note action was triggered from writing to a file')
@@ -124,7 +120,7 @@ def get_user_agent(plugin):
 
 
 def send_action(project=None, branch=None, stats={}, key=None, targetFile=None,
-        timestamp=None, endtime=None, isWrite=None, plugin=None, **kwargs):
+        timestamp=None, isWrite=None, plugin=None, **kwargs):
     url = 'https://www.wakati.me/api/v1/actions'
     log.debug('Sending action to api at %s' % url)
     data = {
@@ -135,8 +131,6 @@ def send_action(project=None, branch=None, stats={}, key=None, targetFile=None,
         data['lines'] = stats['lines']
     if stats.get('language'):
         data['language'] = stats['language']
-    if endtime:
-        data['endtime'] = endtime
     if isWrite:
         data['is_write'] = isWrite
     if project:
