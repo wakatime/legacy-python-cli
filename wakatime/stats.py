@@ -14,11 +14,11 @@ import os
 import sys
 
 if sys.version_info[0] == 2:
-    from pygments2.lexers import guess_lexer
-    from pygments2.util import ClassNotFound
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'packages', 'pygments2'))
 else:
-    from pygments3.lexers import guess_lexer
-    from pygments3.util import ClassNotFound
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'packages', 'pygments3'))
+from pygments.lexers import guess_lexer
+from pygments.util import ClassNotFound
 
 
 log = logging.getLogger(__name__)
