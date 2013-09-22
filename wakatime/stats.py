@@ -13,8 +13,12 @@ import logging
 import os
 import sys
 
-from pygments.lexers import guess_lexer
-from pygments.util import ClassNotFound
+if sys.version_info[0] == 2:
+    from pygments2.lexers import guess_lexer
+    from pygments2.util import ClassNotFound
+else:
+    from pygments3.lexers import guess_lexer
+    from pygments3.util import ClassNotFound
 
 
 log = logging.getLogger(__name__)
