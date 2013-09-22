@@ -118,7 +118,7 @@ def get_lexer_for_filename(_fn, code=None, **options):
 
     if matches:
         matches.sort(key=get_rating)
-        #print "Possible lexers, after sort:", matches
+        #print("Possible lexers, after sort:", matches)
         return matches[-1][0](**options)
     raise ClassNotFound('no lexer for filename %r found' % _fn)
 
