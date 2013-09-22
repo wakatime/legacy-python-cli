@@ -69,6 +69,15 @@ def setup_logging(args, version):
     logger = logging.getLogger()
     set_log_level(logger, args)
     if len(logger.handlers) > 0:
+        formatter = JsonFormatter(datefmt='%a %b %d %H:%M:%S %Z %Y')
+        formatter.setup(
+            timestamp=args.timestamp,
+            isWrite=args.isWrite,
+            targetFile=args.targetFile,
+            version=version,
+            plugin=args.plugin,
+        )
+        logger.handlers[0].setFormatter(formatter)
         return logger
     logfile = args.logfile
     if not logfile:
