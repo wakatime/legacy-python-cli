@@ -886,7 +886,7 @@ class PhpLexer(RegexLexer):
         self._functions = set()
         if self.funcnamehighlighting:
             from pygments.lexers._phpbuiltins import MODULES
-            for key, value in MODULES.iteritems():
+            for key, value in MODULES.items():
                 if key not in self.disabledmodules:
                     self._functions.update(value)
         RegexLexer.__init__(self, **options)
@@ -2350,7 +2350,7 @@ class SassLexer(ExtendedRegexLexer):
             (r"\*/", Comment, '#pop'),
         ],
     }
-    for group, common in common_sass_tokens.iteritems():
+    for group, common in common_sass_tokens.items():
         tokens[group] = copy.copy(common)
     tokens['value'].append((r'\n', Text, 'root'))
     tokens['selector'].append((r'\n', Text, 'root'))
@@ -2397,7 +2397,7 @@ class ScssLexer(RegexLexer):
             (r"\*/", Comment, '#pop'),
         ],
     }
-    for group, common in common_sass_tokens.iteritems():
+    for group, common in common_sass_tokens.items():
         tokens[group] = copy.copy(common)
     tokens['value'].extend([(r'\n', Text), (r'[;{}]', Punctuation, 'root')])
     tokens['selector'].extend([(r'\n', Text), (r'[;{}]', Punctuation, 'root')])
@@ -3284,7 +3284,7 @@ class XQueryLexer(ExtendedRegexLexer):
         'xml_comment': [
             (r'(-->)', popstate_xmlcomment_callback),
             (r'[^-]{1,2}', Literal),
-            (ur'\t|\r|\n|[\u0020-\uD7FF]|[\uE000-\uFFFD]|' +
+            (r'\t|\r|\n|[\u0020-\uD7FF]|[\uE000-\uFFFD]|' +
              unirange(0x10000, 0x10ffff), Literal),
         ],
         'processing_instruction': [
@@ -3294,12 +3294,12 @@ class XQueryLexer(ExtendedRegexLexer):
         ],
         'processing_instruction_content': [
             (r'\?>', String.Doc, '#pop'),
-            (ur'\t|\r|\n|[\u0020-\uD7FF]|[\uE000-\uFFFD]|' +
+            (r'\t|\r|\n|[\u0020-\uD7FF]|[\uE000-\uFFFD]|' +
              unirange(0x10000, 0x10ffff), Literal),
         ],
         'cdata_section': [
             (r']]>', String.Doc, '#pop'),
-            (ur'\t|\r|\n|[\u0020-\uD7FF]|[\uE000-\uFFFD]|' +
+            (r'\t|\r|\n|[\u0020-\uD7FF]|[\uE000-\uFFFD]|' +
              unirange(0x10000, 0x10ffff), Literal),
         ],
         'start_tag': [
@@ -3368,7 +3368,7 @@ class XQueryLexer(ExtendedRegexLexer):
         ],
         'pragmacontents': [
             (r'#\)', Punctuation, 'operator'),
-            (ur'\t|\r|\n|[\u0020-\uD7FF]|[\uE000-\uFFFD]|' +
+            (r'\t|\r|\n|[\u0020-\uD7FF]|[\uE000-\uFFFD]|' +
              unirange(0x10000, 0x10ffff), Literal),
             (r'(\s+)', Text),
         ],
@@ -3941,9 +3941,9 @@ class LassoLexer(RegexLexer):
         self._members = set()
         if self.builtinshighlighting:
             from pygments.lexers._lassobuiltins import BUILTINS, MEMBERS
-            for key, value in BUILTINS.iteritems():
+            for key, value in BUILTINS.items():
                 self._builtins.update(value)
-            for key, value in MEMBERS.iteritems():
+            for key, value in MEMBERS.items():
                 self._members.update(value)
         RegexLexer.__init__(self, **options)
 

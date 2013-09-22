@@ -1049,12 +1049,12 @@ class AgdaLexer(RegexLexer):
             (r'{!', Comment.Directive, 'hole'),
             # Lexemes:
             #  Identifiers
-            (ur'\b(%s)(?!\')\b' % '|'.join(reserved), Keyword.Reserved),
+            (r'\b(%s)(?!\')\b' % '|'.join(reserved), Keyword.Reserved),
             (r'(import|module)(\s+)', bygroups(Keyword.Reserved, Text), 'module'),
             (r'\b(Set|Prop)\b', Keyword.Type),
             #  Special Symbols
             (r'(\(|\)|\{|\})', Operator),
-            (ur'(\.{1,3}|\||[\u039B]|[\u2200]|[\u2192]|:|=|->)', Operator.Word),
+            (r'(\.{1,3}|\||[\u039B]|[\u2200]|[\u2192]|:|=|->)', Operator.Word),
             #  Numbers
             (r'\d+[eE][+-]?\d+', Number.Float),
             (r'\d+\.\d+([eE][+-]?\d+)?', Number.Float),
@@ -2157,7 +2157,7 @@ class CoqLexer(RegexLexer):
         '<-', '=', '>', '>]', '>}', r'\?', r'\?\?', r'\[', r'\[<', r'\[>',
         r'\[\|', ']', '_', '`', '{', '{<', r'\|', r'\|]', '}', '~', '=>',
         r'/\\', r'\\/',
-        u'Π', u'λ',
+        'Π', 'λ',
     ]
     operators = r'[!$%&*+\./:<=>?@^|~-]'
     word_operators = ['and', 'asr', 'land', 'lor', 'lsl', 'lxor', 'mod', 'or']
@@ -2490,7 +2490,7 @@ class ElixirConsoleLexer(Lexer):
         insertions = []
         for match in line_re.finditer(text):
             line = match.group()
-            if line.startswith(u'** '):
+            if line.startswith('** '):
                 insertions.append((len(curcode),
                                    [(0, Generic.Error, line[:-1])]))
                 curcode += line[-1:]

@@ -135,7 +135,7 @@ def _print_help(what, name):
 
 def _print_list(what):
     if what == 'lexer':
-        print
+        print()
         print("Lexers:")
         print("~~~~~~~")
 
@@ -149,7 +149,7 @@ def _print_list(what):
             print(('* %s\n    %s %s') % i)
 
     elif what == 'formatter':
-        print
+        print()
         print("Formatters:")
         print("~~~~~~~~~~~")
 
@@ -164,7 +164,7 @@ def _print_list(what):
             print(('* %s\n    %s %s') % i)
 
     elif what == 'filter':
-        print
+        print()
         print("Filters:")
         print("~~~~~~~~")
 
@@ -174,7 +174,7 @@ def _print_list(what):
             print("    %s" % docstring_headline(cls))
 
     elif what == 'style':
-        print
+        print()
         print("Styles:")
         print("~~~~~~~")
 
@@ -237,7 +237,7 @@ def main(args=sys.argv):
             print(usage, file=sys.stderr)
             return 2
 
-        # print(version)
+        # print version
         main(['', '-V'])
         if not args:
             args = ['lexer', 'formatter', 'filter', 'style']
@@ -396,7 +396,8 @@ def main(args=sys.argv):
             except ClassNotFound:
                 lexer = TextLexer(**parsed_opts)
         elif not lexer:
-            print('Error: no lexer name given and reading from stdin (try using -g or -l <lexer>)', file=sys.stderr)
+            print('Error: no lexer name given and reading ' + \
+                                'from stdin (try using -g or -l <lexer>)', file=sys.stderr)
             return 2
         else:
             code = sys.stdin.read()
@@ -432,7 +433,7 @@ def main(args=sys.argv):
         if len(info) >= 3:
             # extract relevant file and position info
             msg += '\n   (f%s)' % info[-2].split('\n')[0].strip()[1:]
-        print('', file=sys.stderr)
+        print(file=sys.stderr)
         print('*** Error while highlighting:', file=sys.stderr)
         print(msg, file=sys.stderr)
         return 1

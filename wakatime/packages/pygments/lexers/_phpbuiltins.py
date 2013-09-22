@@ -3711,7 +3711,7 @@ if __name__ == '__main__':
     import re
     import shutil
     import tarfile
-    import urllib
+    import urllib.request, urllib.parse, urllib.error
 
     PHP_MANUAL_URL     = 'http://us3.php.net/distributions/manual/php_manual_en.tar.gz'
     PHP_MANUAL_DIR     = './php-chunked-xhtml/'
@@ -3752,7 +3752,7 @@ if __name__ == '__main__':
         return modules
 
     def get_php_references():
-        download = urllib.urlretrieve(PHP_MANUAL_URL)
+        download = urllib.request.urlretrieve(PHP_MANUAL_URL)
         tar = tarfile.open(download[0])
         tar.extractall()
         tar.close()
@@ -3779,7 +3779,7 @@ if __name__ == '__main__':
     def run():
         print('>> Downloading Function Index')
         modules = get_php_functions()
-        total = sum(len(v) for v in modules.itervalues())
+        total = sum(len(v) for v in modules.values())
         print('%d functions found' % total)
         regenerate(__file__, modules)
         shutil.rmtree(PHP_MANUAL_DIR)

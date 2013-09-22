@@ -12,7 +12,7 @@
 import os
 import sys
 import os.path
-import StringIO
+import io
 
 from pygments.formatter import Formatter
 from pygments.token import Token, Text, STANDARD_TYPES
@@ -27,11 +27,11 @@ __all__ = ['HtmlFormatter']
 
 
 _escape_html_table = {
-    ord('&'): u'&amp;',
-    ord('<'): u'&lt;',
-    ord('>'): u'&gt;',
-    ord('"'): u'&quot;',
-    ord("'"): u'&#39;',
+    ord('&'): '&amp;',
+    ord('<'): '&lt;',
+    ord('>'): '&gt;',
+    ord('"'): '&quot;',
+    ord("'"): '&#39;',
 }
 
 def escape_html(text, table=_escape_html_table):
@@ -453,7 +453,7 @@ class HtmlFormatter(Formatter):
         """
         if arg is None:
             arg = ('cssclass' in self.options and '.'+self.cssclass or '')
-        if isinstance(arg, basestring):
+        if isinstance(arg, str):
             args = [arg]
         else:
             args = list(arg)
@@ -467,7 +467,7 @@ class HtmlFormatter(Formatter):
             return ', '.join(tmp)
 
         styles = [(level, ttype, cls, style)
-                  for cls, (style, ttype, level) in self.class2style.iteritems()
+                  for cls, (style, ttype, level) in self.class2style.items()
                   if cls and style]
         styles.sort()
         lines = ['%s { %s } /* %s */' % (prefix(cls), style, repr(ttype)[6:])
@@ -505,7 +505,8 @@ class HtmlFormatter(Formatter):
                     cssfilename = os.path.join(os.path.dirname(filename),
                                                self.cssfile)
                 except AttributeError:
-                    print('Note: Cannot determine output file name, using current directory as base for the CSS file name', file=sys.stderr)
+                    print('Note: Cannot determine output file name, ' \
+                          'using current directory as base for the CSS file name', file=sys.stderr)
                     cssfilename = self.cssfile
             # write CSS file only if noclobber_cssfile isn't given as an option.
             try:
@@ -514,7 +515,7 @@ class HtmlFormatter(Formatter):
                     cf.write(CSSFILE_TEMPLATE %
                             {'styledefs': self.get_style_defs('body')})
                     cf.close()
-            except IOError, err:
+            except IOError as err:
                 err.strerror = 'Error writing CSS file: ' + err.strerror
                 raise
 
@@ -533,7 +534,7 @@ class HtmlFormatter(Formatter):
         yield 0, DOC_FOOTER
 
     def _wrap_tablelinenos(self, inner):
-        dummyoutfile = StringIO.StringIO()
+        dummyoutfile = io.StringIO()
         lncount = 0
         for t, line in inner:
             if t:

@@ -77,7 +77,7 @@ class RobotFrameworkLexer(Lexer):
             for value, token in row_tokenizer.tokenize(row):
                 for value, token in var_tokenizer.tokenize(value, token):
                     if value:
-                        yield index, token, unicode(value)
+                        yield index, token, str(value)
                         index += len(value)
 
 

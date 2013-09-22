@@ -835,7 +835,7 @@ class DelphiLexer(Lexer):
         if get_bool_opt(options, 'freepascal', True):
             self.keywords.update(self.FREE_PASCAL_KEYWORDS)
         self.builtins = set()
-        for unit in get_list_opt(options, 'units', self.BUILTIN_UNITS.keys()):
+        for unit in get_list_opt(options, 'units', list(self.BUILTIN_UNITS.keys())):
             self.builtins.update(self.BUILTIN_UNITS[unit])
 
     def get_tokens_unprocessed(self, text):
@@ -1630,22 +1630,22 @@ class PrologLexer(RegexLexer):
             (r'(mod|div|not)\b', Operator),
             (r'_', Keyword), # The don't-care variable
             (r'([a-z]+)(:)', bygroups(Name.Namespace, Punctuation)),
-            (u'([a-z\u00c0-\u1fff\u3040-\ud7ff\ue000-\uffef]'
-             u'[a-zA-Z0-9_$\u00c0-\u1fff\u3040-\ud7ff\ue000-\uffef]*)'
-             u'(\\s*)(:-|-->)',
+            ('([a-z\u00c0-\u1fff\u3040-\ud7ff\ue000-\uffef]'
+             '[a-zA-Z0-9_$\u00c0-\u1fff\u3040-\ud7ff\ue000-\uffef]*)'
+             '(\\s*)(:-|-->)',
              bygroups(Name.Function, Text, Operator)), # function defn
-            (u'([a-z\u00c0-\u1fff\u3040-\ud7ff\ue000-\uffef]'
-             u'[a-zA-Z0-9_$\u00c0-\u1fff\u3040-\ud7ff\ue000-\uffef]*)'
-             u'(\\s*)(\\()',
+            ('([a-z\u00c0-\u1fff\u3040-\ud7ff\ue000-\uffef]'
+             '[a-zA-Z0-9_$\u00c0-\u1fff\u3040-\ud7ff\ue000-\uffef]*)'
+             '(\\s*)(\\()',
              bygroups(Name.Function, Text, Punctuation)),
-            (u'[a-z\u00c0-\u1fff\u3040-\ud7ff\ue000-\uffef]'
-             u'[a-zA-Z0-9_$\u00c0-\u1fff\u3040-\ud7ff\ue000-\uffef]*',
+            ('[a-z\u00c0-\u1fff\u3040-\ud7ff\ue000-\uffef]'
+             '[a-zA-Z0-9_$\u00c0-\u1fff\u3040-\ud7ff\ue000-\uffef]*',
              String.Atom), # atom, characters
             # This one includes !
-            (u'[#&*+\\-./:<=>?@\\\\^~\u00a1-\u00bf\u2010-\u303f]+',
+            ('[#&*+\\-./:<=>?@\\\\^~\u00a1-\u00bf\u2010-\u303f]+',
              String.Atom), # atom, graphics
             (r'[A-Z_][A-Za-z0-9_]*', Name.Variable),
-            (u'\\s+|[\u2000-\u200f\ufff0-\ufffe\uffef]', Text),
+            ('\\s+|[\u2000-\u200f\ufff0-\ufffe\uffef]', Text),
         ],
         'nested-comment': [
             (r'\*/', Comment.Multiline, '#pop'),

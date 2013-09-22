@@ -291,7 +291,7 @@ class LatexFormatter(Formatter):
         """
         cp = self.commandprefix
         styles = []
-        for name, definition in self.cmd2def.iteritems():
+        for name, definition in self.cmd2def.items():
             styles.append(r'\expandafter\def\csname %s@tok@%s\endcsname{%s}' %
                           (cp, name, definition))
         return STYLE_TEMPLATE % {'cp': self.commandprefix,
@@ -306,24 +306,24 @@ class LatexFormatter(Formatter):
             realoutfile = outfile
             outfile = StringIO()
 
-        outfile.write(ur'\begin{Verbatim}[commandchars=\\\{\}')
+        outfile.write(r'\begin{Verbatim}[commandchars=\\\{\}')
         if self.linenos:
             start, step = self.linenostart, self.linenostep
-            outfile.write(u',numbers=left' +
-                          (start and u',firstnumber=%d' % start or u'') +
-                          (step and u',stepnumber=%d' % step or u''))
+            outfile.write(',numbers=left' +
+                          (start and ',firstnumber=%d' % start or '') +
+                          (step and ',stepnumber=%d' % step or ''))
         if self.mathescape or self.texcomments:
-            outfile.write(ur',codes={\catcode`\$=3\catcode`\^=7\catcode`\_=8}')
+            outfile.write(r',codes={\catcode`\$=3\catcode`\^=7\catcode`\_=8}')
         if self.verboptions:
-            outfile.write(u',' + self.verboptions)
-        outfile.write(u']\n')
+            outfile.write(',' + self.verboptions)
+        outfile.write(']\n')
 
         for ttype, value in tokensource:
             if ttype in Token.Comment:
                 if self.texcomments:
                     # Try to guess comment starting lexeme and escape it ...
                     start = value[0:1]
-                    for i in xrange(1, len(value)):
+                    for i in range(1, len(value)):
                         if start[0] != value[i]:
                             break
                         start += value[i]
@@ -366,7 +366,7 @@ class LatexFormatter(Formatter):
             else:
                 outfile.write(value)
 
-        outfile.write(u'\\end{Verbatim}\n')
+        outfile.write('\\end{Verbatim}\n')
 
         if self.full:
             realoutfile.write(DOC_TEMPLATE %

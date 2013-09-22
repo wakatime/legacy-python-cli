@@ -10,7 +10,7 @@
 """
 
 import re
-import cStringIO
+import io
 
 from pygments.lexer import Lexer
 from pygments.token import Token, Error, Text
@@ -60,12 +60,12 @@ class RawTokenLexer(Lexer):
         Lexer.__init__(self, **options)
 
     def get_tokens(self, text):
-        if isinstance(text, unicode):
+        if isinstance(text, str):
             # raw token stream never has any non-ASCII characters
             text = text.encode('ascii')
         if self.compress == 'gz':
             import gzip
-            gzipfile = gzip.GzipFile('', 'rb', 9, cStringIO.StringIO(text))
+            gzipfile = gzip.GzipFile('', 'rb', 9, io.StringIO(text))
             text = gzipfile.read()
         elif self.compress == 'bz2':
             import bz2

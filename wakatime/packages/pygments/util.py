@@ -52,7 +52,7 @@ def get_bool_opt(options, optname, default=None):
         return string
     elif isinstance(string, int):
         return bool(string)
-    elif not isinstance(string, basestring):
+    elif not isinstance(string, str):
         raise OptionError('Invalid type %r for option %s; use '
                           '1/0, yes/no, true/false, on/off' % (
                           string, optname))
@@ -82,7 +82,7 @@ def get_int_opt(options, optname, default=None):
 
 def get_list_opt(options, optname, default=None):
     val = options.get(optname, default)
-    if isinstance(val, basestring):
+    if isinstance(val, str):
         return val.split()
     elif isinstance(val, (list, tuple)):
         return list(val)
@@ -222,7 +222,7 @@ def unirange(a, b):
 
     if sys.maxunicode > 0xffff:
         # wide build
-        return u'[%s-%s]' % (unichr(a), unichr(b))
+        return '[%s-%s]' % (chr(a), chr(b))
     else:
         # narrow build stores surrogates, and the 're' module handles them
         # (incorrectly) as characters.  Since there is still ordering among
@@ -236,29 +236,29 @@ def unirange(a, b):
         ah, al = _surrogatepair(a)
         bh, bl = _surrogatepair(b)
         if ah == bh:
-            return u'(?:%s[%s-%s])' % (unichr(ah), unichr(al), unichr(bl))
+            return '(?:%s[%s-%s])' % (chr(ah), chr(al), chr(bl))
         else:
             buf = []
-            buf.append(u'%s[%s-%s]' %
-                       (unichr(ah), unichr(al),
-                        ah == bh and unichr(bl) or unichr(0xdfff)))
+            buf.append('%s[%s-%s]' %
+                       (chr(ah), chr(al),
+                        ah == bh and chr(bl) or chr(0xdfff)))
             if ah - bh > 1:
-                buf.append(u'[%s-%s][%s-%s]' %
-                           unichr(ah+1), unichr(bh-1), unichr(0xdc00), unichr(0xdfff))
+                buf.append('[%s-%s][%s-%s]' %
+                           chr(ah+1), chr(bh-1), chr(0xdc00), chr(0xdfff))
             if ah != bh:
-                buf.append(u'%s[%s-%s]' %
-                           (unichr(bh), unichr(0xdc00), unichr(bl)))
+                buf.append('%s[%s-%s]' %
+                           (chr(bh), chr(0xdc00), chr(bl)))
 
-            return u'(?:' + u'|'.join(buf) + u')'
+            return '(?:' + '|'.join(buf) + ')'
 
 # Python 2/3 compatibility
 
 if sys.version_info < (3,0):
     b = bytes = str
     u_prefix = 'u'
-    import StringIO, cStringIO
-    BytesIO = cStringIO.StringIO
-    StringIO = StringIO.StringIO
+    import io, io
+    BytesIO = io.StringIO
+    StringIO = io.StringIO
     uni_open = codecs.open
 else:
     import builtins
@@ -266,7 +266,7 @@ else:
     u_prefix = ''
     def b(s):
         if isinstance(s, str):
-            return bytes(map(ord, s))
+            return bytes(list(map(ord, s)))
         elif isinstance(s, bytes):
             return s
         else:

@@ -104,10 +104,7 @@ class StyleMeta(type):
         return len(cls._styles)
 
 
-class Style(object):
-    __metaclass__ = StyleMeta
-
-    #: overall background color (``None`` means transparent)
+class Style(object, metaclass=StyleMeta):
     background_color = '#ffffff'
 
     #: highlight background color

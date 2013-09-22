@@ -117,7 +117,7 @@ class KeywordCaseFilter(Filter):
     def __init__(self, **options):
         Filter.__init__(self, **options)
         case = get_choice_opt(options, 'case', ['lower', 'upper', 'capitalize'], 'lower')
-        self.convert = getattr(unicode, case)
+        self.convert = getattr(str, case)
 
     def filter(self, lexer, stream):
         for ttype, value in stream:
@@ -235,9 +235,9 @@ class VisibleWhitespaceFilter(Filter):
 
     def __init__(self, **options):
         Filter.__init__(self, **options)
-        for name, default in {'spaces': u'·', 'tabs': u'»', 'newlines': u'¶'}.items():
+        for name, default in list({'spaces': '·', 'tabs': '»', 'newlines': '¶'}.items()):
             opt = options.get(name, False)
-            if isinstance(opt, basestring) and len(opt) == 1:
+            if isinstance(opt, str) and len(opt) == 1:
                 setattr(self, name, opt)
             else:
                 setattr(self, name, (opt and default or ''))

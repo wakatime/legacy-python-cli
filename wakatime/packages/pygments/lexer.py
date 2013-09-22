@@ -15,6 +15,7 @@ from pygments.filters import get_filter_by_name
 from pygments.token import Error, Text, Other, _TokenType
 from pygments.util import get_bool_opt, get_int_opt, get_list_opt, \
      make_analysator
+import collections
 
 
 __all__ = ['Lexer', 'RegexLexer', 'ExtendedRegexLexer', 'DelegatingLexer',
@@ -42,7 +43,7 @@ class LexerMeta(type):
         return type.__new__(cls, name, bases, d)
 
 
-class Lexer(object):
+class Lexer(object, metaclass=LexerMeta):
     """
     Lexer for a specific language.
 
@@ -83,8 +84,6 @@ class Lexer(object):
 
     #: Priority, should multiple lexers match and no content is provided
     priority = 0
-
-    __metaclass__ = LexerMeta
 
     def __init__(self, **options):
         self.options = options
@@ -136,12 +135,12 @@ class Lexer(object):
         Also preprocess the text, i.e. expand tabs and strip it if
         wanted and applies registered filters.
         """
-        if not isinstance(text, unicode):
+        if not isinstance(text, str):
             if self.encoding == 'guess':
                 try:
                     text = text.decode('utf-8')
-                    if text.startswith(u'\ufeff'):
-                        text = text[len(u'\ufeff'):]
+                    if text.startswith('\ufeff'):
+                        text = text[len('\ufeff'):]
                 except UnicodeDecodeError:
                     text = text.decode('latin1')
             elif self.encoding == 'chardet':
@@ -155,20 +154,20 @@ class Lexer(object):
                 decoded = None
                 for bom, encoding in _encoding_map:
                     if text.startswith(bom):
-                        decoded = unicode(text[len(bom):], encoding,
+                        decoded = str(text[len(bom):], encoding,
                                           errors='replace')
                         break
                 # no BOM found, so use chardet
                 if decoded is None:
                     enc = chardet.detect(text[:1024]) # Guess using first 1KB
-                    decoded = unicode(text, enc.get('encoding') or 'utf-8',
+                    decoded = str(text, enc.get('encoding') or 'utf-8',
                                       errors='replace')
                 text = decoded
             else:
                 text = text.decode(self.encoding)
         else:
-            if text.startswith(u'\ufeff'):
-                text = text[len(u'\ufeff'):]
+            if text.startswith('\ufeff'):
+                text = text[len('\ufeff'):]
 
         # text now *is* a unicode string
         text = text.replace('\r\n', '\n')
@@ -391,7 +390,7 @@ class RegexLexerMeta(LexerMeta):
 
     def _process_token(cls, token):
         """Preprocess the token component of a token definition."""
-        assert type(token) is _TokenType or callable(token), \
+        assert type(token) is _TokenType or isinstance(token, collections.Callable), \
                'token type must be simple type or callable, not %r' % (token,)
         return token
 
@@ -472,7 +471,7 @@ class RegexLexerMeta(LexerMeta):
         """Preprocess a dictionary of token definitions."""
         processed = cls._all_tokens[name] = {}
         tokendefs = tokendefs or cls.tokens[name]
-        for state in tokendefs.keys():
+        for state in list(tokendefs.keys()):
             cls._process_state(tokendefs, processed, state)
         return processed
 
@@ -493,7 +492,7 @@ class RegexLexerMeta(LexerMeta):
         for c in itertools.chain((cls,), cls.__mro__):
             toks = c.__dict__.get('tokens', {})
 
-            for state, items in toks.iteritems():
+            for state, items in toks.items():
                 curitems = tokens.get(state)
                 if curitems is None:
                     tokens[state] = items
@@ -533,13 +532,12 @@ class RegexLexerMeta(LexerMeta):
         return type.__call__(cls, *args, **kwds)
 
 
-class RegexLexer(Lexer):
+class RegexLexer(Lexer, metaclass=RegexLexerMeta):
     """
     Base for simple stateful regular expression-based lexers.
     Simplifies the lexing process so that you need only
     provide a list of states and regular expressions.
     """
-    __metaclass__ = RegexLexerMeta
 
     #: Flags for compiling the regular expressions.
     #: Defaults to MULTILINE.
@@ -609,7 +607,7 @@ class RegexLexer(Lexer):
                         # at EOL, reset state to "root"
                         statestack = ['root']
                         statetokens = tokendefs['root']
-                        yield pos, Text, u'\n'
+                        yield pos, Text, '\n'
                         pos += 1
                         continue
                     yield pos, Error, text[pos]
@@ -693,7 +691,7 @@ class ExtendedRegexLexer(RegexLexer):
                         # at EOL, reset state to "root"
                         ctx.stack = ['root']
                         statetokens = tokendefs['root']
-                        yield ctx.pos, Text, u'\n'
+                        yield ctx.pos, Text, '\n'
                         ctx.pos += 1
                         continue
                     yield ctx.pos, Error, text[ctx.pos]
@@ -718,7 +716,7 @@ def do_insertions(insertions, tokens):
     """
     insertions = iter(insertions)
     try:
-        index, itokens = insertions.next()
+        index, itokens = next(insertions)
     except StopIteration:
         # no insertions
         for item in tokens:
@@ -744,7 +742,7 @@ def do_insertions(insertions, tokens):
                 realpos += len(it_value)
             oldi = index - i
             try:
-                index, itokens = insertions.next()
+                index, itokens = next(insertions)
             except StopIteration:
                 insleft = False
                 break  # not strictly necessary
@@ -759,7 +757,7 @@ def do_insertions(insertions, tokens):
             yield realpos, t, v
             realpos += len(v)
         try:
-            index, itokens = insertions.next()
+            index, itokens = next(insertions)
         except StopIteration:
             insleft = False
             break  # not strictly necessary
