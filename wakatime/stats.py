@@ -3,7 +3,7 @@
     wakatime.stats
     ~~~~~~~~~~~~~~
 
-    Stats about files such as total number of lines, source code language, etc.
+    Stats about files
 
     :copyright: (c) 2013 Alan Hamlett.
     :license: BSD, see LICENSE for more details.
