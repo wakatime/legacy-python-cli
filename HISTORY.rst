@@ -3,6 +3,12 @@ History
 -------
 
 
+0.4.7 (2013-09-30)
+++++++++++++++++++
+
+- Sending local olson timezone string in api request
+
+
 0.4.6 (2013-09-22)
 ++++++++++++++++++
 
