@@ -3,6 +3,12 @@ History
 -------
 
 
+0.4.8 (2013-10-13)
+++++++++++++++++++
+
+- Read git HEAD file to find current branch instead of running git command line
+
+
 0.4.7 (2013-09-30)
 ++++++++++++++++++
 
