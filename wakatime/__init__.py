@@ -110,6 +110,24 @@ def get_api_key(configFile):
     return api_key
 
 
+# TODO merge these into a single config file parsing routine, probably allow
+# any of the command line args to be specified that are reasonable
+def get_ignores(configFile):
+    if not configFile:
+        configFile = os.path.join(os.path.expanduser('~'), '.wakatime.conf')
+    ignore = []
+    try:
+        cf = open(configFile)
+        for line in cf:
+            line = line.split('=', 1)
+            if line[0] == 'ignore':
+                ignore.append(re.compile(line[1].strip()))
+        cf.close()
+    except IOError:
+        print('Error: Could not read from config file.')
+    return ignore
+
+
 def get_user_agent(plugin):
     ver = sys.version_info
     python_version = '%d.%d.%d.%s.%d' % (ver[0], ver[1], ver[2], ver[3], ver[4])
@@ -190,6 +208,13 @@ def main(argv=None):
     args = parseArguments(argv)
     setup_logging(args, __version__)
     if os.path.isfile(args.targetFile):
+        log.debug('Checking file %s against ignores' % args.targetFile)
+        ignore = get_ignores(args.config)
+        for item in ignore:
+            if item.search(args.targetFile):
+                log.debug('File matches %s, not reporting' % item.pattern)
+                return 103
+
         branch = None
         name = None
         stats = get_file_stats(args.targetFile)
