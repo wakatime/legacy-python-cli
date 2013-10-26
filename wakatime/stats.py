@@ -26,7 +26,11 @@ log = logging.getLogger(__name__)
 # force file name extensions to be recognized as a certain language
 EXTENSIONS = {
     'md': 'Markdown',
-    'js': 'JavaScript',
+}
+TRANSLATIONS = {
+    'JavaScript+Lasso': 'JavaScript',
+    'CSS+Lasso': 'CSS',
+    'CSS+Genshi Text': 'CSS',
 }
 
 
@@ -42,7 +46,7 @@ def guess_language(file_name):
     except:
         pass
     if lexer:
-        return str(lexer.name)
+        return translate_language(str(lexer.name))
     else:
         return None
 
@@ -54,6 +58,12 @@ def guess_language_from_extension(extension):
         if extension.lower() in EXTENSIONS:
             return mapping[EXTENSIONS.lower()]
     return None
+
+
+def translate_language(language):
+    if language in TRANSLATIONS:
+        language = TRANSLATIONS[language]
+    return language
 
 
 def number_lines_in_file(file_name):
