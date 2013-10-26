@@ -31,6 +31,7 @@ TRANSLATIONS = {
     'JavaScript+Lasso': 'JavaScript',
     'CSS+Lasso': 'CSS',
     'CSS+Genshi Text': 'CSS',
+    'Perl6': 'Perl',
 }
 
 
