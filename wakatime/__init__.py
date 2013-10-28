@@ -75,6 +75,8 @@ def parseArguments(argv):
     parser.add_argument('--key', dest='key',
             help='your wakati.me api key; uses api_key from '+
                 '~/.wakatime.conf by default')
+    parser.add_argument('--ignore', dest='ignore', action='append',
+            help='filename patterns to ignore for reporting')
     parser.add_argument('--logfile', dest='logfile',
             help='defaults to ~/.wakatime.log')
     parser.add_argument('--config', dest='config',
@@ -83,31 +85,35 @@ def parseArguments(argv):
             help='turns on debug messages in log file')
     parser.add_argument('--version', action='version', version=__version__)
     args = parser.parse_args(args=argv[1:])
+    parse_config(args)
     if not args.timestamp:
         args.timestamp = time.time()
-    if not args.key:
-        default_key = get_api_key(args.config)
-        if default_key:
-            args.key = default_key
-        else:
-            parser.error('Missing api key')
     return args
 
 
-def get_api_key(configFile):
-    if not configFile:
-        configFile = os.path.join(os.path.expanduser('~'), '.wakatime.conf')
-    api_key = None
+def parse_config(args):
+    if not args.config:
+        args.config = os.path.join(os.path.expanduser('~'), '.wakatime.conf')
     try:
-        cf = open(configFile)
+        cf = open(args.config)
         for line in cf:
             line = line.split('=', 1)
+            line[0] = line[0].strip()
             if line[0] == 'api_key':
-                api_key = line[1].strip()
+                if args.key is None:
+                    args.key = line[1].strip()
+            elif line[0] == 'logfile':
+                if args.logfile is None:
+                    args.logfile = line[1].strip()
+            elif line[0] == 'verbose':
+                args.verbose = True
+            elif line[0] == 'ignore':
+                if args.ignore is None:
+                    args.ignore = []
+                args.ignore.append(line[1].strip())
         cf.close()
     except IOError:
         print('Error: Could not read from config file.')
-    return api_key
 
 
 def get_user_agent(plugin):
@@ -190,6 +196,12 @@ def main(argv=None):
     args = parseArguments(argv)
     setup_logging(args, __version__)
     if os.path.isfile(args.targetFile):
+        log.debug('Checking file %s against ignores' % args.targetFile)
+        for item in args.ignore:
+            if re.search(item, args.targetFile):
+                log.debug('File matches %s, not reporting' % item)
+                return 103
+
         branch = None
         name = None
         stats = get_file_stats(args.targetFile)
