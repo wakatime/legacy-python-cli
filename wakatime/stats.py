@@ -35,6 +35,7 @@ TRANSLATIONS = {
     'JavaScript+Genshi Text': 'JavaScript',
     'JavaScript+Lasso': 'JavaScript',
     'Perl6': 'Perl',
+    'RHTML': 'HTML',
 }
 
 
