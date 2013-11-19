@@ -30,7 +30,7 @@ PLUGINS = [
 ]
 
 
-def find_project(path):
+def find_project(path, config):
     for plugin in PLUGINS:
         project = plugin(path)
         if project.process():
