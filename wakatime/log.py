@@ -38,18 +38,15 @@ class CustomEncoder(json.JSONEncoder):
 class JsonFormatter(logging.Formatter):
 
     def setup(self, timestamp, isWrite, targetFile, version, plugin):
-        encoding = sys.getfilesystemencoding()
-
         self.timestamp = timestamp
         self.isWrite = isWrite
-        self.targetFile = targetFile.decode(encoding, 'ignore')
+        self.targetFile = targetFile
         self.version = version
         self.plugin = plugin
 
     def format(self, record):
-        now = self.formatTime(record, self.datefmt).decode('utf-8', 'ignore')
         data = OrderedDict([
-            ('now', now),
+            ('now', self.formatTime(record, self.datefmt)),
             ('version', self.version),
             ('plugin', self.plugin),
             ('time', self.timestamp),
