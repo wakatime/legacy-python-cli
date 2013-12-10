@@ -23,9 +23,7 @@ log = logging.getLogger(__name__)
 
 class ProjectMap(BaseProject):
     def process(self):
-        self.config = self._load_config()
         if self.config:
-            log.debug(self.config)
             return True
 
         return False
@@ -35,21 +33,10 @@ class ProjectMap(BaseProject):
 
     def name(self):
         for path in self._path_generator():
-            if path in self.config:
-                return self.config[path]
+            if self.config.has_option('projectmap', path):
+                return self.config.get('projectmap', path)
 
         return None
-
-    def _load_config(self):
-        map_path = "%s/.waka-projectmap" % os.environ['HOME']
-        if os.path.isfile(map_path):
-            with open(map_path) as map_file:
-                try:
-                    return json.load(map_file)
-                except (IOError, json.JSONDecodeError) as e:
-                    log.exception("ProjectMap Exception: ")
-
-        return False
 
     def _path_generator(self):
         path = self.path.replace(os.environ['HOME'], '')
