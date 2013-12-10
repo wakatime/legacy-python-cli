@@ -22,8 +22,9 @@ class BaseProject(object):
     be found for the current path.
     """
 
-    def __init__(self, path):
+    def __init__(self, path, config):
         self.path = path
+        self.config = config
 
     def type(self):
         """ Returns None if this is the base class.

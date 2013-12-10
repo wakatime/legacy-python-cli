@@ -150,7 +150,7 @@ def parseArguments(argv):
     if not args.logfile and configs.has_option('settings', 'logfile'):
         args.logfile = configs.get('settings', 'logfile')
 
-    return args
+    return args, configs
 
 
 def should_ignore(fileName, patterns):
@@ -244,7 +244,7 @@ def send_action(project=None, branch=None, stats={}, key=None, targetFile=None,
 def main(argv=None):
     if not argv:
         argv = sys.argv
-    args = parseArguments(argv)
+    args, config = parseArguments(argv)
     setup_logging(args, __version__)
     ignore = should_ignore(args.targetFile, args.ignore)
     if ignore is not False:
@@ -254,7 +254,7 @@ def main(argv=None):
         branch = None
         name = None
         stats = get_file_stats(args.targetFile)
-        project = find_project(args.targetFile, args.config)
+        project = find_project(args.targetFile, config)
         if project:
             branch = project.branch()
             name = project.name()
