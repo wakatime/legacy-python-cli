@@ -23,7 +23,7 @@ log = logging.getLogger(__name__)
 
 class ProjectMap(BaseProject):
     def process(self):
-        if self.config:
+        if self.settings:
             return True
 
         return False
@@ -33,8 +33,8 @@ class ProjectMap(BaseProject):
 
     def name(self):
         for path in self._path_generator():
-            if self.config.has_option('projectmap', path):
-                return self.config.get('projectmap', path)
+            if self.settings.has_option('projectmap', path):
+                return self.settings.get('projectmap', path)
 
         return None
 
