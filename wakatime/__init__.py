@@ -27,6 +27,8 @@ import sys
 import time
 import traceback
 
+from ConfigParser import RawConfigParser
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'packages'))
 from .log import setup_logging
@@ -51,16 +53,29 @@ class FileAction(argparse.Action):
         values = os.path.realpath(values)
         setattr(namespace, self.dest, values)
 
+def checkUpdateConfigFile(configFile):
+    """Checks if the config has a header section, if not add it for ConfigParser"""
+    with open(configFile) as fh:
+        configData = fh.read()
+        if not configData.strip().startswith('[settings]'):
+            configData = "[settings]\n" + configData.strip()
+
+            with open(configFile, 'w') as fh:
+                fh.write(configData)
 
 def parseConfigFile(configFile):
     if not configFile:
         configFile = os.path.join(os.path.expanduser('~'), '.wakatime.conf')
 
+    checkUpdateConfigFile(configFile)
+
     # define default config values
-    configs = {
-        'api_key': None,
-        'ignore': [],
-        'verbose': False,
+    defaults = {
+        'settings' : {
+            'api_key': None,
+            'ignore': [],
+            'verbose': False
+        },
     }
 
     if not os.path.isfile(configFile):
@@ -68,24 +83,19 @@ def parseConfigFile(configFile):
 
     try:
         with open(configFile) as fh:
-            for line in fh:
-                line = line.split('=', 1)
-                if len(line) == 2 and line[0].strip() and line[1].strip():
-                    line[0] = line[0].strip()
-                    line[1] = line[1].strip()
-                    if line[0] in configs:
-                        if isinstance(configs[line[0]], list):
-                            configs[line[0]].append(line[1])
-                        elif isinstance(configs[line[0]], bool):
-                            configs[line[0]] = True if line[1].lower() == 'true' else False
-                        else:
-                            configs[line[0]] = line[1]
-                    else:
-                        configs[line[0]] = line[1]
+            configs = RawConfigParser()
+            setConfigDefaults(configs, defaults)
+            configs.readfp(fh)
     except IOError:
         print('Error: Could not read from config file ~/.wakatime.conf')
     return configs
 
+def setConfigDefaults(config, defaults):
+    for section, values in defaults.iteritems():
+        if not config.has_section(section):
+            config.add_section(section)
+        for key, value in values.iteritems():
+            config.set(section, key, value)
 
 def parseArguments(argv):
     try:
@@ -126,20 +136,21 @@ def parseArguments(argv):
     # set arguments from config file
     configs = parseConfigFile(args.config)
     if not args.key:
-        default_key = configs.get('api_key')
+        default_key = configs.get('settings', 'api_key')
         if default_key:
             args.key = default_key
         else:
             parser.error('Missing api key')
-    for pattern in configs.get('ignore', []):
+    for pattern in configs.get('settings', 'ignore'):
         if not args.ignore:
             args.ignore = []
         args.ignore.append(pattern)
-    if not args.verbose and 'verbose' in configs:
-        args.verbose = configs['verbose']
-    if not args.logfile and 'logfile' in configs:
-        args.logfile = configs['logfile']
-    return args
+    if not args.verbose and configs.has_option('settings', 'verbose'):
+        args.verbose = configs.getboolean('settings', 'verbose')
+    if not args.logfile and configs.has_option('settings', 'logfile'):
+        args.logfile = configs.get('settings', 'logfile')
+
+    return args, configs
 
 
 def should_ignore(fileName, patterns):
@@ -233,7 +244,7 @@ def send_action(project=None, branch=None, stats={}, key=None, targetFile=None,
 def main(argv=None):
     if not argv:
         argv = sys.argv
-    args = parseArguments(argv)
+    args, config = parseArguments(argv)
     setup_logging(args, __version__)
     ignore = should_ignore(args.targetFile, args.ignore)
     if ignore is not False:
@@ -243,7 +254,7 @@ def main(argv=None):
         branch = None
         name = None
         stats = get_file_stats(args.targetFile)
-        project = find_project(args.targetFile)
+        project = find_project(args.targetFile, config)
         if project:
             branch = project.branch()
             name = project.name()
