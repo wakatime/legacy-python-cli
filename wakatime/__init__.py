@@ -311,7 +311,7 @@ def main(argv=None):
 
         project = find_project(args.targetFile, configs=configs)
         branch = None
-        name = None
+        project_name = None
         if project:
             branch = project.branch()
             project_name = project.name()
