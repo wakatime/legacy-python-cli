@@ -3,7 +3,18 @@
     wakatime.projects.projectmap
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    Use the ~/.wakatime.cfg file to define custom projects for folders.
+    Use the ~/.wakatime.cfg file to set custom project names by
+    recursively matching folder paths.
+    Project maps go under the [projectmap] config section.
+
+    For example:
+
+        [projectmap]
+        /home/user/projects/foo = new project name
+        /home/user/projects/bar = project2
+
+    Will result in file `/home/user/projects/foo/src/main.c` to have
+    project name `new project name`.
 
     :copyright: (c) 2013 Alan Hamlett.
     :license: BSD, see LICENSE for more details.
