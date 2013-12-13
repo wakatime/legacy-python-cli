@@ -3,7 +3,9 @@
     wakatime
     ~~~~~~~~
 
-    Action event appender for Wakati.Me, auto time tracking for text editors.
+    Common interface to WakaTime.com for most text editor plugins.
+    WakaTime.com is fully automatic time tracking for text editors.
+    More info at http://wakatime.com
 
     :copyright: (c) 2013 Alan Hamlett.
     :license: BSD, see LICENSE for more details.
