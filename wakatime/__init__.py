@@ -69,9 +69,29 @@ def upgradeConfigFile(configFile):
 
     oldConfig = os.path.join(os.path.expanduser('~'), '.wakatime.conf')
     try:
-        with open(oldConfig) as infile:
-            with open(configFile, 'w') as outfile:
-                outfile.write("[settings]\n%s" % infile.read().strip())
+        configs = {
+            'ignore': [],
+        }
+
+        with open(oldConfig) as fh:
+            for line in fh.readlines():
+                line = line.split('=', 1)
+                if len(line) == 2 and line[0].strip() and line[1].strip():
+                    if line[0].strip() == 'ignore':
+                        configs['ignore'].append(line[1].strip())
+                    else:
+                        configs[line[0].strip()] = line[1].strip()
+
+        with open(configFile, 'w') as fh:
+            fh.write("[settings]\n")
+            for name, value in configs.items():
+                if isinstance(value, list):
+                    fh.write("%s=\n" % name)
+                    for item in value:
+                        fh.write("    %s\n" % item)
+                else:
+                    fh.write("%s = %s\n" % (name, value))
+
         os.remove(oldConfig)
     except IOError:
         pass
