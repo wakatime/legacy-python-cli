@@ -26,8 +26,15 @@ import re
 import sys
 import time
 import traceback
-
-from ConfigParser import RawConfigParser
+try:
+    import ConfigParser as configparser
+except ImportError:
+    import configparser
+try:
+    from urllib2 import HTTPError, Request, urlopen
+except ImportError:
+    from urllib.error import HTTPError
+    from urllib.request import Request, urlopen
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'packages'))
@@ -37,11 +44,6 @@ from .stats import get_file_stats
 from .packages import argparse
 from .packages import simplejson as json
 from .packages import tzlocal
-try:
-    from urllib2 import HTTPError, Request, urlopen
-except ImportError:
-    from urllib.error import HTTPError
-    from urllib.request import Request, urlopen
 
 
 log = logging.getLogger(__name__)
@@ -53,55 +55,63 @@ class FileAction(argparse.Action):
         values = os.path.realpath(values)
         setattr(namespace, self.dest, values)
 
-def checkUpdateConfigFile(configFile):
-    """Checks if the config has a header section, if not add it for ConfigParser"""
-    with open(configFile) as fh:
-        configData = fh.read()
-        if not configData.strip().startswith('[settings]'):
-            configData = "[settings]\n" + configData.strip()
 
-            with open(configFile, 'w') as fh:
-                fh.write(configData)
+def upgradeConfigFile(configFile):
+    """For backwards-compatibility, upgrade the existing config file
+    to work with configparser and rename from .wakatime.conf to .wakatime.cfg.
+    """
+
+    if os.path.isfile(configFile):
+        # if upgraded cfg file already exists, don't overwrite it
+        return
+
+    oldConfig = os.path.join(os.path.expanduser('~'), '.wakatime.conf')
+    try:
+        with open(oldConfig) as infile:
+            with open(configFile, 'w') as outfile:
+                outfile.write("[settings]\n%s" % infile.read().strip())
+        os.remove(oldConfig)
+    except IOError:
+        pass
+
 
 def parseConfigFile(configFile):
+    """Returns a configparser.SafeConfigParser instance with configs
+    read from the config file. Default location of the config file is
+    at ~/.wakatime.cfg.
+    """
+
     if not configFile:
-        configFile = os.path.join(os.path.expanduser('~'), '.wakatime.conf')
+        configFile = os.path.join(os.path.expanduser('~'), '.wakatime.cfg')
 
-    checkUpdateConfigFile(configFile)
+    upgradeConfigFile(configFile)
 
-    # define default config values
-    defaults = {
-        'settings' : {
-            'api_key': None,
-            'ignore': [],
-            'verbose': False
-        },
-    }
-
-    if not os.path.isfile(configFile):
-        return configs
-
+    configs = configparser.SafeConfigParser()
     try:
         with open(configFile) as fh:
-            configs = RawConfigParser()
-            setConfigDefaults(configs, defaults)
-            configs.readfp(fh)
+            try:
+                configs.readfp(fh)
+            except configparser.Error:
+                print(traceback.format_exc())
+                return None
     except IOError:
-        print('Error: Could not read from config file ~/.wakatime.conf')
+        if not os.path.isfile(configFile):
+            print('Error: Could not read from config file ~/.wakatime.conf')
     return configs
 
-def setConfigDefaults(config, defaults):
-    for section, values in defaults.iteritems():
-        if not config.has_section(section):
-            config.add_section(section)
-        for key, value in values.iteritems():
-            config.set(section, key, value)
 
 def parseArguments(argv):
+    """Parse command line arguments and configs from ~/.wakatime.cfg.
+    Command line arguments take precedence over config file settings.
+    Returns instances of ArgumentParser and SafeConfigParser.
+    """
+
     try:
         sys.argv
     except AttributeError:
         sys.argv = argv
+
+    # define supported command line arguments
     parser = argparse.ArgumentParser(
             description='Wakati.Me event api appender')
     parser.add_argument('--file', dest='targetFile', metavar='file',
@@ -129,24 +139,41 @@ def parseArguments(argv):
     parser.add_argument('--verbose', dest='verbose', action='store_true',
             help='turns on debug messages in log file')
     parser.add_argument('--version', action='version', version=__version__)
+
+    # parse command line arguments
     args = parser.parse_args(args=argv[1:])
+
+    # use current unix epoch timestamp by default
     if not args.timestamp:
         args.timestamp = time.time()
 
-    # set arguments from config file
+    # parse ~/.wakatime.cfg file
     configs = parseConfigFile(args.config)
+    if configs is None:
+        return args, configs
+
+    # update args from configs
     if not args.key:
-        default_key = configs.get('settings', 'api_key')
+        default_key = None
+        if configs.has_option('settings', 'api_key'):
+            default_key = configs.get('settings', 'api_key')
         if default_key:
             args.key = default_key
         else:
             parser.error('Missing api key')
-    for pattern in configs.get('settings', 'ignore'):
-        if not args.ignore:
-            args.ignore = []
-        args.ignore.append(pattern)
+    if not args.ignore:
+        args.ignore = []
+    if configs.has_option('settings', 'ignore'):
+        try:
+            for pattern in configs.get('settings', 'ignore').split("\n"):
+                if pattern.strip() != '':
+                    args.ignore.append(pattern)
+        except TypeError:
+            pass
     if not args.verbose and configs.has_option('settings', 'verbose'):
         args.verbose = configs.getboolean('settings', 'verbose')
+    if not args.verbose and configs.has_option('settings', 'debug'):
+        args.verbose = configs.getboolean('settings', 'debug')
     if not args.logfile and configs.has_option('settings', 'logfile'):
         args.logfile = configs.get('settings', 'logfile')
 
@@ -244,28 +271,39 @@ def send_action(project=None, branch=None, stats={}, key=None, targetFile=None,
 def main(argv=None):
     if not argv:
         argv = sys.argv
-    args, config = parseArguments(argv)
+
+    args, configs = parseArguments(argv)
+    if configs is None:
+        return 103 # config file parsing error
+
     setup_logging(args, __version__)
+
     ignore = should_ignore(args.targetFile, args.ignore)
     if ignore is not False:
         log.debug('File ignored because matches pattern: %s' % ignore)
         return 0
+
     if os.path.isfile(args.targetFile):
+
+        stats = get_file_stats(args.targetFile)
+
+        project = find_project(args.targetFile, configs=configs)
         branch = None
         name = None
-        stats = get_file_stats(args.targetFile)
-        project = find_project(args.targetFile, config)
         if project:
             branch = project.branch()
-            name = project.name()
+            project_name = project.name()
+
         if send_action(
-                project=name,
+                project=project_name,
                 branch=branch,
                 stats=stats,
                 **vars(args)
             ):
-            return 0
-        return 102
+            return 0 # success
+
+        return 102 # api error
+
     else:
         log.debug('File does not exist; ignoring this action.')
-    return 101
+        return 0
