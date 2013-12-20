@@ -3,9 +3,8 @@
     wakatime
     ~~~~~~~~
 
-    Common interface to WakaTime.com for most text editor plugins.
-    WakaTime.com is fully automatic time tracking for text editors.
-    More info at http://wakatime.com
+    Common interface to the WakaTime api.
+    http://wakatime.com
 
     :copyright: (c) 2013 Alan Hamlett.
     :license: BSD, see LICENSE for more details.
@@ -135,7 +134,7 @@ def parseArguments(argv):
 
     # define supported command line arguments
     parser = argparse.ArgumentParser(
-            description='Wakati.Me event api appender')
+            description='Common interface for the WakaTime api.')
     parser.add_argument('--file', dest='targetFile', metavar='file',
             action=FileAction, required=True,
             help='absolute path to file for current action')
