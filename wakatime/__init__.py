@@ -149,7 +149,7 @@ def parseArguments(argv):
             help='optional text editor plugin name and version '+
                 'for User-Agent header')
     parser.add_argument('--key', dest='key',
-            help='your wakati.me api key; uses api_key from '+
+            help='your wakatime api key; uses api_key from '+
                 '~/.wakatime.conf by default')
     parser.add_argument('--ignore', dest='ignore', action='append',
             help='filename patterns to ignore; POSIX regex syntax; can be used more than once')
@@ -227,7 +227,7 @@ def get_user_agent(plugin):
 
 def send_action(project=None, branch=None, stats={}, key=None, targetFile=None,
         timestamp=None, isWrite=None, plugin=None, **kwargs):
-    url = 'https://www.wakati.me/api/v1/actions'
+    url = 'https://www.wakatime.com/api/v1/actions'
     log.debug('Sending action to api at %s' % url)
     data = {
         'time': timestamp,
