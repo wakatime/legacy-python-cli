@@ -17,4 +17,4 @@ Installation
 Usage
 -----
 
-https://www.wakatime.com/
+https://wakatime.com/
