@@ -148,6 +148,8 @@ def parseArguments(argv):
     parser.add_argument('--plugin', dest='plugin',
             help='optional text editor plugin name and version '+
                 'for User-Agent header')
+    parser.add_argument('--project', dest='project',
+            help='optional project name; will auto-discover by default')
     parser.add_argument('--key', dest='key',
             help='your wakatime api key; uses api_key from '+
                 '~/.wakatime.conf by default')
@@ -308,7 +310,7 @@ def main(argv=None):
 
         stats = get_file_stats(args.targetFile)
 
-        project = find_project(args.targetFile, configs=configs)
+        project = args.project or find_project(args.targetFile, configs=configs)
         branch = None
         project_name = None
         if project:
