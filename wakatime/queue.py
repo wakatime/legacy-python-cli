@@ -24,7 +24,6 @@ class Queue(object):
     DB_FILE = os.path.join(os.path.expanduser('~'), '.wakatime.db')
 
     def connect(self):
-        exists = os.path.exists(self.DB_FILE)
         conn = sqlite3.connect(self.DB_FILE)
         c = conn.cursor()
         c.execute('''CREATE TABLE IF NOT EXISTS action (
@@ -41,27 +40,35 @@ class Queue(object):
 
 
     def push(self, data, plugin):
-        conn, c = self.connect()
-        action = {
-            'file': data.get('file'),
-            'time': data.get('time'),
-            'project': data.get('project'),
-            'language': data.get('language'),
-            'lines': data.get('lines'),
-            'branch': data.get('branch'),
-            'is_write': 1 if data.get('is_write') else 0,
-            'plugin': plugin,
-        }
-        c.execute('INSERT INTO action VALUES (:file,:time,:project,:language,:lines,:branch,:is_write,:plugin)', action)
-        conn.commit()
-        conn.close()
+        try:
+            conn, c = self.connect()
+            action = {
+                'file': data.get('file'),
+                'time': data.get('time'),
+                'project': data.get('project'),
+                'language': data.get('language'),
+                'lines': data.get('lines'),
+                'branch': data.get('branch'),
+                'is_write': 1 if data.get('is_write') else 0,
+                'plugin': plugin,
+            }
+            c.execute('INSERT INTO action VALUES (:file,:time,:project,:language,:lines,:branch,:is_write,:plugin)', action)
+            conn.commit()
+            conn.close()
+        except sqlite3.Error, e:
+            log.error(str(e))
 
 
     def pop(self):
+        return None
         tries = 3
         wait = 0.1
         action = None
-        conn, c = self.connect()
+        try:
+            conn, c = self.connect()
+        except sqlite3.Error, e:
+            log.debug(str(e))
+            return None
         loop = True
         while loop and tries > -1:
             try:
@@ -69,6 +76,7 @@ class Queue(object):
                 c.execute('SELECT * FROM action LIMIT 1')
                 row = c.fetchone()
                 if row is not None:
+                    log.info(row)
                     c.execute('''DELETE FROM action WHERE
                         file=? AND time=? AND project=? AND language=? AND
                         lines=? AND branch=? AND is_write=?''', row[0:7])
@@ -89,5 +97,8 @@ class Queue(object):
                 log.debug(str(e))
                 sleep(wait)
                 tries -= 1
-        conn.close()
+        try:
+            conn.close()
+        except sqlite3.Error, e:
+            log.debug(str(e))
         return action
