@@ -14,6 +14,7 @@
 import logging
 import os
 import sqlite3
+import traceback
 from time import sleep
 
 
@@ -60,14 +61,13 @@ class Queue(object):
 
 
     def pop(self):
-        return None
         tries = 3
         wait = 0.1
         action = None
         try:
             conn, c = self.connect()
         except sqlite3.Error, e:
-            log.debug(str(e))
+            log.debug(traceback.format_exc())
             return None
         loop = True
         while loop and tries > -1:
@@ -76,10 +76,20 @@ class Queue(object):
                 c.execute('SELECT * FROM action LIMIT 1')
                 row = c.fetchone()
                 if row is not None:
-                    log.info(row)
-                    c.execute('''DELETE FROM action WHERE
-                        file=? AND time=? AND project=? AND language=? AND
-                        lines=? AND branch=? AND is_write=?''', row[0:7])
+                    values = []
+                    clauses = []
+                    index = 0
+                    for row_name in ['file', 'time', 'project', 'language', 'lines', 'branch', 'is_write']:
+                        if row[index] is not None:
+                            clauses.append('{0}=?'.format(row_name))
+                            values.append(row[index])
+                        else:
+                            clauses.append('{0} IS NULL'.format(row_name))
+                        index += 1
+                    if len(values) > 0:
+                        c.execute('DELETE FROM action WHERE {0}'.format(u' AND '.join(clauses)), values)
+                    else:
+                        c.execute('DELETE FROM action WHERE {0}'.format(u' AND '.join(clauses)))
                 conn.commit()
                 if row is not None:
                     action = {
@@ -94,11 +104,11 @@ class Queue(object):
                     }
                 loop = False
             except sqlite3.Error, e:
-                log.debug(str(e))
+                log.debug(traceback.format_exc())
                 sleep(wait)
                 tries -= 1
         try:
             conn.close()
         except sqlite3.Error, e:
-            log.debug(str(e))
+            log.debug(traceback.format_exc())
         return action
