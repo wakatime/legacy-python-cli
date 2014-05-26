@@ -3,6 +3,12 @@ History
 -------
 
 
+2.0.0 (2014-05-25)
+++++++++++++++++++
+
+- offline time logging using sqlite3 to queue editor events
+
+
 1.0.2 (2014-05-06)
 ++++++++++++++++++
 
