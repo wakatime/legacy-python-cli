@@ -87,9 +87,9 @@ class Queue(object):
                             clauses.append('{0} IS NULL'.format(row_name))
                         index += 1
                     if len(values) > 0:
-                        c.execute('DELETE FROM action WHERE {0}'.format(u' AND '.join(clauses)), values)
+                        c.execute('DELETE FROM action WHERE {0}'.format(' AND '.join(clauses)), values)
                     else:
-                        c.execute('DELETE FROM action WHERE {0}'.format(u' AND '.join(clauses)))
+                        c.execute('DELETE FROM action WHERE {0}'.format(' AND '.join(clauses)))
                 conn.commit()
                 if row is not None:
                     action = {
