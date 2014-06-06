@@ -45,10 +45,7 @@ from .log import setup_logging
 from .project import find_project
 from .stats import get_file_stats
 from .packages import argparse
-try:
-    from .packages import simplejson as json
-except:
-    from .packages import simplejson3 as json
+from .packages import simplejson as json
 try:
     from .packages import tzlocal
 except:
