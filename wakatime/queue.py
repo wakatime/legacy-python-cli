@@ -13,9 +13,13 @@
 
 import logging
 import os
-import sqlite3
 import traceback
 from time import sleep
+try:
+    import sqlite3
+    HAS_SQL = True
+except ImportError:
+    HAS_SQL = False
 
 
 log = logging.getLogger(__name__)
@@ -41,6 +45,8 @@ class Queue(object):
 
 
     def push(self, data, plugin):
+        if not HAS_SQL:
+            return
         try:
             conn, c = self.connect()
             action = {
@@ -61,6 +67,8 @@ class Queue(object):
 
 
     def pop(self):
+        if not HAS_SQL:
+            return None
         tries = 3
         wait = 0.1
         action = None
