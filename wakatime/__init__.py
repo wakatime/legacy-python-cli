@@ -348,10 +348,10 @@ def main(argv=None):
 
         project = find_project(args.targetFile, configs=configs)
         branch = None
-        project_name = None
+        project_name = args.project_name
         if project:
             branch = project.branch()
-            project_name = args.project_name or project.name()
+            project_name = project.name()
 
         if send_action(
                 project=project_name,
