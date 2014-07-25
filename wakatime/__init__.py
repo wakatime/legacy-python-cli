@@ -127,7 +127,7 @@ def parseConfigFile(configFile):
                 return None
     except IOError:
         if not os.path.isfile(configFile):
-            print('Error: Could not read from config file ~/.wakatime.conf')
+            print('Error: Could not read from config file ~/.wakatime.cfg')
     return configs
 
 
