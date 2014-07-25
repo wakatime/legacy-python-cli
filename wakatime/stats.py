@@ -22,6 +22,11 @@ from pygments.lexers import guess_lexer_for_filename
 
 log = logging.getLogger('WakaTime')
 
+try:
+    unicode
+except NameError:
+    unicode = str
+
 
 # force file name extensions to be recognized as a certain language
 EXTENSIONS = {
@@ -54,7 +59,7 @@ def guess_language(file_name):
     except:
         pass
     if lexer:
-        return translate_language(str(lexer.name))
+        return translate_language(unicode(lexer.name))
     else:
         return None
 
