@@ -52,7 +52,7 @@ except:
     from .packages import tzlocal3
 
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('WakaTime')
 
 
 class FileAction(argparse.Action):

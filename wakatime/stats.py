@@ -20,7 +20,7 @@ else:
 from pygments.lexers import guess_lexer_for_filename
 
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('WakaTime')
 
 
 # force file name extensions to be recognized as a certain language
