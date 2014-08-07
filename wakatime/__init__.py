@@ -284,7 +284,7 @@ def send_action(project=None, branch=None, stats=None, key=None, targetFile=None
     log.debug(data)
 
     # setup api request
-    request = Request(url=url, data=json.dumps(data))
+    request = Request(url=url, data=str.encode(json.dumps(data)))
     request.add_header('User-Agent', get_user_agent(plugin))
     request.add_header('Content-Type', 'application/json')
     auth = unicode('Basic {key}').format(key=bytes.decode(base64.b64encode(str.encode(key))))
