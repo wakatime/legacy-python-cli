@@ -122,8 +122,7 @@ def parseConfigFile(configFile):
                 print(traceback.format_exc())
                 return None
     except IOError:
-        if not os.path.isfile(configFile):
-            print(u('Error: Could not read from config file {0}').format(configFile))
+        print(u('Error: Could not read from config file {0}').format(configFile))
     return configs
 
 
