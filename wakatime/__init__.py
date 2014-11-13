@@ -318,7 +318,9 @@ def send_action(project=None, branch=None, stats=None, key=None, targetFile=None
         if offline:
             queue = Queue()
             queue.push(data, plugin)
-            if log.isEnabledFor(logging.DEBUG):
+            if 'unknown url type: https' in u(sys.exc_info()[1]):
+                log.error(exception_data)
+            elif log.isEnabledFor(logging.DEBUG):
                 log.warn(exception_data)
         else:
             log.error(exception_data)
