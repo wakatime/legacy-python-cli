@@ -287,7 +287,10 @@ def send_action(project=None, branch=None, stats=None, key=None, targetFile=None
     request.add_header('Authorization', auth)
 
     # add Olson timezone to request
-    tz = tzlocal.get_localzone()
+    try:
+        tz = tzlocal.get_localzone()
+    except:
+        tz = None
     if tz:
         request.add_header('TimeZone', u(tz.zone))
 
