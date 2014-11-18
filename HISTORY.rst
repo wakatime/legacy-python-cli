@@ -3,6 +3,12 @@ History
 -------
 
 
+2.1.5 (2014-11-17)
+++++++++++++++++++
+
+- catch exceptions when getting current machine time zone
+
+
 2.1.4 (2014-11-12)
 ++++++++++++++++++
 
