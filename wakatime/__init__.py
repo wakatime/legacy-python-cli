@@ -314,7 +314,7 @@ def send_action(project=None, branch=None, stats=None, key=None, targetFile=None
             queue.push(data, plugin)
             if log.isEnabledFor(logging.DEBUG):
                 log.warn(exception_data)
-            if response.getcode() in ALWAYS_LOG_CODES:
+            if response is not None and response.getcode() in ALWAYS_LOG_CODES:
                 log.error({
                     'response_code': response.getcode(),
                 })
@@ -333,35 +333,37 @@ def send_action(project=None, branch=None, stats=None, key=None, targetFile=None
                 log.error(exception_data)
             elif log.isEnabledFor(logging.DEBUG):
                 log.warn(exception_data)
-            if response.getcode() in ALWAYS_LOG_CODES:
+            if response is not None and response.getcode() in ALWAYS_LOG_CODES:
                 log.error({
                     'response_code': response.getcode(),
                 })
         else:
             log.error(exception_data)
     else:
-        if response.getcode() == 201:
+        if response is not None and response.getcode() == 201:
             log.debug({
                 'response_code': response.getcode(),
             })
             return True
+        response_code = response.getcode() if response is not None else None
+        response_content = response.read() if response is not None else None
         if offline:
             queue = Queue()
             queue.push(data, plugin)
             if log.isEnabledFor(logging.DEBUG):
                 log.warn({
-                    'response_code': response.getcode(),
-                    'response_content': response.read(),
+                    'response_code': response_code,
+                    'response_content': response_content,
                 })
             else:
                 log.error({
-                    'response_code': response.getcode(),
-                    'response_content': response.read(),
+                    'response_code': response_code,
+                    'response_content': response_content,
                 })
         else:
             log.error({
-                'response_code': response.getcode(),
-                'response_content': response.read(),
+                'response_code': response_code,
+                'response_content': response_content,
             })
     return False
 
