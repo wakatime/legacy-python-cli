@@ -122,7 +122,7 @@ def parseConfigFile(configFile):
                 print(traceback.format_exc())
                 return None
     except IOError:
-        print(u('Error: Could not read from config file {0}').format(configFile))
+        print(u('Error: Could not read from config file {0}').format(u(configFile)))
     return configs
 
 
@@ -227,8 +227,8 @@ def should_ignore(fileName, patterns):
                     return pattern
             except re.error as ex:
                 log.warning(u('Regex error ({msg}) for ignore pattern: {pattern}').format(
-                    msg=str(ex),
-                    pattern=pattern,
+                    msg=u(ex),
+                    pattern=u(pattern),
                 ))
     except TypeError:
         pass
@@ -239,14 +239,14 @@ def get_user_agent(plugin):
     ver = sys.version_info
     python_version = '%d.%d.%d.%s.%d' % (ver[0], ver[1], ver[2], ver[3], ver[4])
     user_agent = u('wakatime/{ver} ({platform}) Python{py_ver}').format(
-        ver=__version__,
-        platform=platform.platform(),
+        ver=u(__version__),
+        platform=u(platform.platform()),
         py_ver=python_version,
     )
     if plugin:
         user_agent = u('{user_agent} {plugin}').format(
             user_agent=user_agent,
-            plugin=plugin,
+            plugin=u(plugin),
         )
     return user_agent
 
@@ -263,7 +263,7 @@ def send_action(project=None, branch=None, stats=None, key=None, targetFile=None
     if hidefilenames and targetFile is not None:
         data['file'] = data['file'].rsplit('/', 1)[-1].rsplit('\\', 1)[-1]
         if len(data['file'].strip('.').split('.', 1)) > 1:
-            data['file'] = u('HIDDEN.{ext}').format(ext=data['file'].strip('.').rsplit('.', 1)[-1])
+            data['file'] = u('HIDDEN.{ext}').format(ext=u(data['file'].strip('.').rsplit('.', 1)[-1]))
         else:
             data['file'] = u('HIDDEN')
     if stats.get('lines'):
@@ -381,7 +381,7 @@ def main(argv=None):
     ignore = should_ignore(args.targetFile, args.ignore)
     if ignore is not False:
         log.debug(u('File ignored because matches pattern: {pattern}').format(
-            pattern=ignore,
+            pattern=u(ignore),
         ))
         return 0
 
