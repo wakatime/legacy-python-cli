@@ -13,7 +13,7 @@
 from __future__ import print_function
 
 __title__ = 'wakatime'
-__version__ = '2.1.9'
+__version__ = '2.1.10'
 __author__ = 'Alan Hamlett'
 __license__ = 'BSD'
 __copyright__ = 'Copyright 2014 Alan Hamlett'
@@ -310,7 +310,7 @@ def send_action(project=None, branch=None, stats=None, key=None, targetFile=None
         if log.isEnabledFor(logging.DEBUG):
             exception_data['traceback'] = traceback.format_exc()
         if offline:
-            if response is not None and response.getcode() != 400 and response.getcode() != 401:
+            if response is not None and response.getcode() != 400:
                 queue = Queue()
                 queue.push(data, plugin)
             if log.isEnabledFor(logging.DEBUG):
@@ -328,7 +328,7 @@ def send_action(project=None, branch=None, stats=None, key=None, targetFile=None
         if log.isEnabledFor(logging.DEBUG):
             exception_data['traceback'] = traceback.format_exc()
         if offline:
-            if response is not None and response.getcode() != 400 and response.getcode() != 401:
+            if response is not None and response.getcode() != 400:
                 queue = Queue()
                 queue.push(data, plugin)
             if 'unknown url type: https' in u(sys.exc_info()[1]):
@@ -350,7 +350,7 @@ def send_action(project=None, branch=None, stats=None, key=None, targetFile=None
         response_code = response.getcode() if response is not None else None
         response_content = response.read() if response is not None else None
         if offline:
-            if response is not None and response.getcode() != 400 and response.getcode() != 401:
+            if response is not None and response.getcode() != 400:
                 queue = Queue()
                 queue.push(data, plugin)
             if log.isEnabledFor(logging.DEBUG):
