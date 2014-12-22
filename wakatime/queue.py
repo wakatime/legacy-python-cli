@@ -57,7 +57,7 @@ class Queue(object):
                 'branch': data.get('branch'),
                 'is_write': 1 if data.get('is_write') else 0,
                 'stats': data.get('stats'),
-                'misc': data.get('misc'),
+                'misc': misc,
                 'plugin': plugin,
             }
             c.execute('INSERT INTO heartbeat VALUES (:file,:time,:project,:branch,:is_write,:stats,:misc,:plugin)', heartbeat)
