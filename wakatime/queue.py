@@ -45,7 +45,7 @@ class Queue(object):
         return (conn, c)
 
 
-    def push(self, data, plugin, misc=None):
+    def push(self, data, stats, plugin, misc=None):
         if not HAS_SQL:
             return
         try:
@@ -56,7 +56,7 @@ class Queue(object):
                 'project': data.get('project'),
                 'branch': data.get('branch'),
                 'is_write': 1 if data.get('is_write') else 0,
-                'stats': data.get('stats'),
+                'stats': stats,
                 'misc': misc,
                 'plugin': plugin,
             }
