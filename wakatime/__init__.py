@@ -312,7 +312,7 @@ def send_action(project=None, branch=None, stats={}, key=None, targetFile=None,
         if log.isEnabledFor(logging.DEBUG):
             exception_data['traceback'] = traceback.format_exc()
         if offline:
-            if response is not None and response.getcode() != 400:
+            if response is None or response.getcode() != 400:
                 queue = Queue()
                 queue.push(data, json.dumps(stats), plugin)
             if log.isEnabledFor(logging.DEBUG):
@@ -330,7 +330,7 @@ def send_action(project=None, branch=None, stats={}, key=None, targetFile=None,
         if log.isEnabledFor(logging.DEBUG):
             exception_data['traceback'] = traceback.format_exc()
         if offline:
-            if response is not None and response.getcode() != 400:
+            if response is None or response.getcode() != 400:
                 queue = Queue()
                 queue.push(data, json.dumps(stats), plugin)
             if 'unknown url type: https' in u(sys.exc_info()[1]):
@@ -352,7 +352,7 @@ def send_action(project=None, branch=None, stats={}, key=None, targetFile=None,
         response_code = response.getcode() if response is not None else None
         response_content = response.read() if response is not None else None
         if offline:
-            if response is not None and response.getcode() != 400:
+            if response is None or response.getcode() != 400:
                 queue = Queue()
                 queue.push(data, json.dumps(stats), plugin)
             if log.isEnabledFor(logging.DEBUG):
