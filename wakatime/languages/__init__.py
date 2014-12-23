@@ -9,7 +9,12 @@
     :license: BSD, see LICENSE for more details.
 """
 
+import logging
+
 from ..compat import open, import_module
+
+
+log = logging.getLogger('WakaTime')
 
 
 class TokenParser(object):
@@ -29,15 +34,15 @@ class TokenParser(object):
             self.tokens = self._extract_tokens()
         raise Exception('Not yet implemented.')
 
-    def append(self, dep):
-        self._save_dependency(dep)
+    def append(self, dep, truncate=True):
+        self._save_dependency(dep, truncate=truncate)
 
     def _extract_tokens(self):
         with open(self.source_file, 'r', encoding='utf-8') as fh:
             return self.lexer.get_tokens_unprocessed(fh.read(512000))
 
-    def _save_dependency(self, dep):
-        dep = dep.strip().split('.')[0].strip()
+    def _save_dependency(self, dep, truncate=True):
+        dep = dep.strip().split('.')[0].strip() if truncate else dep.strip()
         if dep:
             self.dependencies.append(dep)
 
@@ -56,8 +61,8 @@ class DependencyParser(object):
             class_name = self.lexer.__class__.__name__.replace('Lexer', 'Parser', 1)
             module = import_module('.%s' % module_name, package=__package__)
             self.parser = getattr(module, class_name)
-        except ImportError:
-            pass
+        except ImportError as ex:
+            log.debug(ex)
 
     def parse(self):
         if self.parser:
