@@ -5,7 +5,7 @@
 
     Parse dependencies from a source code file.
 
-    :copyright: (c) 2013 Alan Hamlett.
+    :copyright: (c) 2014 Alan Hamlett.
     :license: BSD, see LICENSE for more details.
 """
 
