@@ -34,11 +34,5 @@ class CSharpParser(TokenParser):
             content = content[0] if len(content) == 1 else '.'.join(content[0:len(content)-1])
             self.append(content, truncate=False)
 
-    def _process_text(self, token, content):
-        if self.state is not None:
-            if content == "\n" and self.parens == 0:
-                self.state = None
-                self.nonpackage = False
-
     def _process_other(self, token, content):
         pass
