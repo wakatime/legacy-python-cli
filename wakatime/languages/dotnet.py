@@ -29,7 +29,7 @@ class CSharpParser(TokenParser):
             self._process_other(token, content)
 
     def _process_namespace(self, token, content):
-        if content != 'import':
+        if content != 'import' and content != 'package' and content != 'namespace':
             content = content.split('.')
             content = content[0] if len(content) == 1 else '.'.join(content[0:len(content)-1])
             self.append(content, truncate=False)
