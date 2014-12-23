@@ -18,6 +18,10 @@ log = logging.getLogger('WakaTime')
 
 
 class TokenParser(object):
+    """The base class for all dependency parsers. To add support for your
+    language, inherit from this class and implement the :meth:`parse` method
+    to return a list of dependency strings.
+    """
     source_file = None
     lexer = None
     dependencies = []
