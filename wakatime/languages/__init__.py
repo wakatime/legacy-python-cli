@@ -10,6 +10,7 @@
 """
 
 import logging
+import traceback
 
 from ..compat import open, import_module
 
@@ -69,7 +70,7 @@ class DependencyParser(object):
                 module = import_module('.%s' % module_name, package=__package__)
                 self.parser = getattr(module, class_name)
             except ImportError as ex:
-                log.debug(ex)
+                log.debug(traceback.format_exc())
 
     def parse(self):
         if self.parser:
