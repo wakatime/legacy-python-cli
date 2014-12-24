@@ -102,7 +102,7 @@ def upgradeConfigFile(configFile):
         pass
 
 
-def parseConfigFile(configFile):
+def parseConfigFile(configFile=None):
     """Returns a configparser.SafeConfigParser instance with configs
     read from the config file. Default location of the config file is
     at ~/.wakatime.cfg.
