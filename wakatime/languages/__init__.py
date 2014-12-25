@@ -83,16 +83,20 @@ class DependencyParser(object):
         self.lexer = lexer
 
         if self.lexer:
+            module_name = self.lexer.__module__.split('.')[-1]
+            class_name = self.lexer.__class__.__name__.replace('Lexer', 'Parser', 1)
+        else:
+            module_name = 'unknown'
+            class_name = 'UnknownParser'
+
+        try:
+            module = import_module('.%s' % module_name, package=__package__)
             try:
-                module_name = self.lexer.__module__.split('.')[-1]
-                class_name = self.lexer.__class__.__name__.replace('Lexer', 'Parser', 1)
-                module = import_module('.%s' % module_name, package=__package__)
-                try:
-                    self.parser = getattr(module, class_name)
-                except AttributeError:
-                    log.debug(traceback.format_exc())
-            except ImportError:
+                self.parser = getattr(module, class_name)
+            except AttributeError:
                 log.debug(traceback.format_exc())
+        except ImportError:
+            log.debug(traceback.format_exc())
 
     def parse(self):
         if self.parser:
