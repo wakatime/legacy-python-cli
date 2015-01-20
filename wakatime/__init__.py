@@ -191,6 +191,8 @@ def parseArguments(argv):
         default_key = None
         if configs.has_option('settings', 'api_key'):
             default_key = configs.get('settings', 'api_key')
+        elif configs.has_option('settings', 'apikey'):
+            default_key = configs.get('settings', 'apikey')
         if default_key:
             args.key = default_key
         else:
