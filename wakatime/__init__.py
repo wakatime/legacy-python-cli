@@ -50,7 +50,7 @@ from .packages import simplejson as json
 try:
     from .packages import tzlocal
 except:
-    from .packages import tzlocal3
+    from .packages import tzlocal3 as tzlocal
 
 
 log = logging.getLogger('WakaTime')
