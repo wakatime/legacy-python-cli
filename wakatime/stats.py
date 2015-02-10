@@ -65,7 +65,7 @@ def guess_language_from_extension(extension):
         if extension in EXTENSIONS:
             return EXTENSIONS[extension]
         if extension.lower() in EXTENSIONS:
-            return mapping[EXTENSIONS.lower()]
+            return EXTENSIONS[extension.lower()]
     return None
 
 
