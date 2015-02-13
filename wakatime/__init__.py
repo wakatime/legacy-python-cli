@@ -31,11 +31,6 @@ try:
     import ConfigParser as configparser
 except ImportError:
     import configparser
-try:
-    from urllib2 import HTTPError, Request, urlopen
-except ImportError:
-    from urllib.error import HTTPError
-    from urllib.request import Request, urlopen
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'packages'))
@@ -47,6 +42,8 @@ from .project import find_project
 from .stats import get_file_stats
 from .packages import argparse
 from .packages import simplejson as json
+from .packages import requests
+from .packages.requests.exceptions import RequestException
 try:
     from .packages import tzlocal
 except:
@@ -290,15 +287,14 @@ def send_heartbeat(project=None, branch=None, stats={}, key=None, targetFile=Non
 
     # setup api request
     request_body = json.dumps(data)
-    request = Request(url=url, data=str.encode(request_body) if is_py3 else request_body)
-    request.add_header('User-Agent', get_user_agent(plugin))
-    request.add_header('Content-Type', 'application/json')
-    auth = u('Basic {key}').format(key=u(base64.b64encode(str.encode(key) if is_py3 else key)))
-    request.add_header('Authorization', auth)
-
-    ALWAYS_LOG_CODES = [
-        401,
-    ]
+    api_key = u(base64.b64encode(str.encode(key) if is_py3 else key))
+    auth = u('Basic {api_key}').format(api_key=api_key)
+    headers = {
+        'User-Agent': get_user_agent(plugin),
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': auth,
+    }
 
     # add Olson timezone to request
     try:
@@ -306,68 +302,47 @@ def send_heartbeat(project=None, branch=None, stats={}, key=None, targetFile=Non
     except:
         tz = None
     if tz:
-        request.add_header('TimeZone', u(tz.zone))
+        headers['TimeZone'] = u(tz.zone)
 
     # log time to api
     response = None
     try:
-        response = urlopen(request)
-    except HTTPError as exc:
+        response = requests.post(url, data=request_body, headers=headers)
+    except RequestException:
         exception_data = {
-            'response_code': exc.getcode(),
             sys.exc_info()[0].__name__: u(sys.exc_info()[1]),
         }
         if log.isEnabledFor(logging.DEBUG):
             exception_data['traceback'] = traceback.format_exc()
         if offline:
-            if response is None or response.getcode() != 400:
-                queue = Queue()
-                queue.push(data, json.dumps(stats), plugin)
+            queue = Queue()
+            queue.push(data, json.dumps(stats), plugin)
             if log.isEnabledFor(logging.DEBUG):
                 log.warn(exception_data)
-            if response is not None and response.getcode() in ALWAYS_LOG_CODES:
-                log.error({
-                    'response_code': response.getcode(),
-                })
-        else:
-            log.error(exception_data)
-    except:
-        exception_data = {
-            sys.exc_info()[0].__name__: u(sys.exc_info()[1]),
-        }
-        if log.isEnabledFor(logging.DEBUG):
-            exception_data['traceback'] = traceback.format_exc()
-        if offline:
-            if response is None or response.getcode() != 400:
-                queue = Queue()
-                queue.push(data, json.dumps(stats), plugin)
-            if 'unknown url type: https' in u(sys.exc_info()[1]):
-                log.error(exception_data)
-            elif log.isEnabledFor(logging.DEBUG):
-                log.warn(exception_data)
-            if response is not None and response.getcode() in ALWAYS_LOG_CODES:
-                log.error({
-                    'response_code': response.getcode(),
-                })
         else:
             log.error(exception_data)
     else:
-        if response is not None and response.getcode() == 201:
+        response_code = response.status_code if response is not None else None
+        response_content = response.text if response is not None else None
+        if response_code == 201:
             log.debug({
-                'response_code': response.getcode(),
+                'response_code': response_code,
             })
             return True
-        response_code = response.getcode() if response is not None else None
-        response_content = response.read() if response is not None else None
         if offline:
-            if response is None or response.getcode() != 400:
+            if response_code != 400:
                 queue = Queue()
                 queue.push(data, json.dumps(stats), plugin)
-            if log.isEnabledFor(logging.DEBUG):
-                log.warn({
-                    'response_code': response_code,
-                    'response_content': response_content,
-                })
+                if response_code == 401:
+                    log.error({
+                        'response_code': response_code,
+                        'response_content': response_content,
+                    })
+                elif log.isEnabledFor(logging.DEBUG):
+                    log.warn({
+                        'response_code': response_code,
+                        'response_content': response_content,
+                    })
             else:
                 log.error({
                     'response_code': response_code,
