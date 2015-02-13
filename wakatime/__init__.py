@@ -215,6 +215,8 @@ def parseArguments(argv):
         args.offline = configs.getboolean('settings', 'offline')
     if not args.hidefilenames and configs.has_option('settings', 'hidefilenames'):
         args.hidefilenames = configs.getboolean('settings', 'hidefilenames')
+    if not args.proxy and configs.has_option('settings', 'proxy'):
+        args.proxy = configs.get('settings', 'proxy')
     if not args.verbose and configs.has_option('settings', 'verbose'):
         args.verbose = configs.getboolean('settings', 'verbose')
     if not args.verbose and configs.has_option('settings', 'debug'):
