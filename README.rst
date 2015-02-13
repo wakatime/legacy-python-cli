@@ -13,17 +13,17 @@ Usage
 
 Install the plugin for your IDE/editor at https://wakatime.com/plugins
 
-If you are building a plugin using the [WakaTime API](https://wakatime.com/developers/)
-then follow the [Creating a Plugin](https://wakatime.com/help/misc/creating-plugin)
-guide for information about using `wakatime-cli.py`.
+If you are building a plugin using the `WakaTime API <https://wakatime.com/developers/>`
+then follow the `Creating a Plugin <https://wakatime.com/help/misc/creating-plugin>`
+guide for information about using ``wakatime-cli.py``.
 
 
 Configuring
 -----------
 
-Options can be passed via command line, or set in the `$HOME/.wakatime.cfg`
+Options can be passed via command line, or set in the ``$HOME/.wakatime.cfg``
 config file. Command line arguments take precedence over config file settings.
-The `$HOME/.wakatime.cfg` file is in [INI](http://en.wikipedia.org/wiki/INI_file)
+The ``$HOME/.wakatime.cfg`` file is in `INI <http://en.wikipedia.org/wiki/INI_file>`
 format. An example config file looks like::
     [settings]
     debug = false
@@ -42,6 +42,5 @@ Installation
 ------------
 
 Each plugin installs wakatime for you, but for testing you can install the
-common api interface with pip:
-
+common api interface with pip::
     pip install wakatime
