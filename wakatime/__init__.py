@@ -36,7 +36,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'packages'))
 
 from .compat import u, open, is_py3
-from .queue import Queue
+from .offlinequeue import Queue
 from .log import setup_logging
 from .project import find_project
 from .stats import get_file_stats
