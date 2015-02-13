@@ -157,6 +157,9 @@ def parseArguments(argv):
     parser.add_argument('--notfile', dest='notfile', action='store_true',
             help='when set, will accept any value for the file. for example, '+
                  'a domain name or other item you want to log time towards.')
+    parser.add_argument('--proxy', dest='proxy',
+                        help='optional https proxy url; for example: '+
+                        'https://user:pass@localhost:8080')
     parser.add_argument('--project', dest='project_name',
             help='optional project name; will auto-discover by default')
     parser.add_argument('--disableoffline', dest='offline',
@@ -258,7 +261,7 @@ def get_user_agent(plugin):
 
 def send_heartbeat(project=None, branch=None, stats={}, key=None, targetFile=None,
         timestamp=None, isWrite=None, plugin=None, offline=None,
-        hidefilenames=None, notfile=False, **kwargs):
+        hidefilenames=None, notfile=False, proxy=None, **kwargs):
     url = 'https://wakatime.com/api/v1/heartbeats'
     log.debug('Sending heartbeat to api at %s' % url)
     data = {
@@ -295,6 +298,9 @@ def send_heartbeat(project=None, branch=None, stats={}, key=None, targetFile=Non
         'Accept': 'application/json',
         'Authorization': auth,
     }
+    proxies = {}
+    if proxy:
+        proxies['https'] = proxy
 
     # add Olson timezone to request
     try:
@@ -307,7 +313,8 @@ def send_heartbeat(project=None, branch=None, stats={}, key=None, targetFile=Non
     # log time to api
     response = None
     try:
-        response = requests.post(url, data=request_body, headers=headers)
+        response = requests.post(url, data=request_body, headers=headers,
+                                 proxies=proxies)
     except RequestException:
         exception_data = {
             sys.exc_info()[0].__name__: u(sys.exc_info()[1]),
@@ -407,7 +414,8 @@ def main(argv=None):
                                    plugin=heartbeat['plugin'],
                                    offline=args.offline,
                                    hidefilenames=args.hidefilenames,
-                                   notfile=args.notfile)
+                                   notfile=args.notfile,
+                                   proxy=args.proxy)
                 if not sent:
                     break
             return 0 # success
