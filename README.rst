@@ -24,21 +24,18 @@ Configuring
 Options can be passed via command line, or set in the `$HOME/.wakatime.cfg`
 config file. Command line arguments take precedence over config file settings.
 The `$HOME/.wakatime.cfg` file is in [INI](http://en.wikipedia.org/wiki/INI_file)
-format. An example config file looks like:
-
-```
-[settings]
-debug = false
-api_key = your-api-key
-hidefilenames = false
-ignore =
-    ^COMMIT_EDITMSG$
-    ^TAG_EDITMSG$
-    ^/var/
-    ^/etc/
-offline = true
-proxy = https://user:pass@localhost:8080
-```
+format. An example config file looks like::
+    [settings]
+    debug = false
+    api_key = your-api-key
+    hidefilenames = false
+    ignore =
+        ^COMMIT_EDITMSG$
+        ^TAG_EDITMSG$
+        ^/var/
+        ^/etc/
+    offline = true
+    proxy = https://user:pass@localhost:8080
 
 
 Installation
