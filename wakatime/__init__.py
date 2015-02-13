@@ -143,21 +143,25 @@ def parseArguments(argv):
     parser.add_argument('--file', dest='targetFile', metavar='file',
             action=FileAction, required=True,
             help='absolute path to file for current heartbeat')
-    parser.add_argument('--time', dest='timestamp', metavar='time',
-            type=float,
-            help='optional floating-point unix epoch timestamp; '+
-                'uses current time by default')
-    parser.add_argument('--write', dest='isWrite',
-            action='store_true',
-            help='note heartbeat was triggered from writing to a file')
-    parser.add_argument('--plugin', dest='plugin',
-            help='optional text editor plugin name and version '+
-                'for User-Agent header')
-    parser.add_argument('--project', dest='project_name',
-            help='optional project name; will auto-discover by default')
     parser.add_argument('--key', dest='key',
             help='your wakatime api key; uses api_key from '+
                 '~/.wakatime.conf by default')
+    parser.add_argument('--write', dest='isWrite',
+            action='store_true',
+            help='when set, tells api this heartbeat was triggered from '+
+                 'writing to a file')
+    parser.add_argument('--plugin', dest='plugin',
+            help='optional text editor plugin name and version '+
+                 'for User-Agent header')
+    parser.add_argument('--time', dest='timestamp', metavar='time',
+            type=float,
+            help='optional floating-point unix epoch timestamp; '+
+                 'uses current time by default')
+    parser.add_argument('--notfile', dest='notfile', action='store_true',
+            help='when set, will accept any value for the file. for example, '+
+                 'a domain name or other item you want to log time towards.')
+    parser.add_argument('--project', dest='project_name',
+            help='optional project name; will auto-discover by default')
     parser.add_argument('--disableoffline', dest='offline',
             action='store_false',
             help='disables offline time logging instead of queuing logged time')
@@ -165,7 +169,8 @@ def parseArguments(argv):
             action='store_true',
             help='obfuscate file names; will not send file names to api')
     parser.add_argument('--ignore', dest='ignore', action='append',
-            help='filename patterns to ignore; POSIX regex syntax; can be used more than once')
+            help='filename patterns to ignore; POSIX regex syntax; can be used'+
+                 ' more than once')
     parser.add_argument('--logfile', dest='logfile',
             help='defaults to ~/.wakatime.log')
     parser.add_argument('--config', dest='config',
@@ -221,19 +226,20 @@ def parseArguments(argv):
 
 
 def should_ignore(fileName, patterns):
-    try:
-        for pattern in patterns:
-            try:
-                compiled = re.compile(pattern, re.IGNORECASE)
-                if compiled.search(fileName):
-                    return pattern
-            except re.error as ex:
-                log.warning(u('Regex error ({msg}) for ignore pattern: {pattern}').format(
-                    msg=u(ex),
-                    pattern=u(pattern),
-                ))
-    except TypeError:
-        pass
+    if fileName is not None and fileName.strip() != '':
+        try:
+            for pattern in patterns:
+                try:
+                    compiled = re.compile(pattern, re.IGNORECASE)
+                    if compiled.search(fileName):
+                        return pattern
+                except re.error as ex:
+                    log.warning(u('Regex error ({msg}) for ignore pattern: {pattern}').format(
+                        msg=u(ex),
+                        pattern=u(pattern),
+                    ))
+        except TypeError:
+            pass
     return False
 
 
@@ -255,14 +261,14 @@ def get_user_agent(plugin):
 
 def send_heartbeat(project=None, branch=None, stats={}, key=None, targetFile=None,
         timestamp=None, isWrite=None, plugin=None, offline=None,
-        hidefilenames=None, **kwargs):
+        hidefilenames=None, notfile=False, **kwargs):
     url = 'https://wakatime.com/api/v1/heartbeats'
     log.debug('Sending heartbeat to api at %s' % url)
     data = {
         'time': timestamp,
         'file': targetFile,
     }
-    if hidefilenames and targetFile is not None:
+    if hidefilenames and targetFile is not None and not notfile:
         data['file'] = data['file'].rsplit('/', 1)[-1].rsplit('\\', 1)[-1]
         if len(data['file'].strip('.').split('.', 1)) > 1:
             data['file'] = u('HIDDEN.{ext}').format(ext=u(data['file'].strip('.').rsplit('.', 1)[-1]))
@@ -392,11 +398,13 @@ def main(argv=None):
         ))
         return 0
 
-    if os.path.isfile(args.targetFile):
+    if os.path.isfile(args.targetFile) or args.notfile:
 
-        stats = get_file_stats(args.targetFile)
+        stats = get_file_stats(args.targetFile, notfile=args.notfile)
 
-        project = find_project(args.targetFile, configs=configs)
+        project = None
+        if not args.notfile:
+            project = find_project(args.targetFile, configs=configs)
         branch = None
         project_name = args.project_name
         if project:
@@ -423,7 +431,8 @@ def main(argv=None):
                                    isWrite=heartbeat['is_write'],
                                    plugin=heartbeat['plugin'],
                                    offline=args.offline,
-                                   hidefilenames=args.hidefilenames)
+                                   hidefilenames=args.hidefilenames,
+                                   notfile=args.notfile)
                 if not sent:
                     break
             return 0 # success
