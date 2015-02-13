@@ -256,6 +256,10 @@ def get_user_agent(plugin):
             user_agent=user_agent,
             plugin=u(plugin),
         )
+    else:
+        user_agent = u('{user_agent} Unknown/0').format(
+            user_agent=user_agent,
+        )
     return user_agent
 
 
