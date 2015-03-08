@@ -3,6 +3,12 @@ History
 -------
 
 
+4.0.2 (2015-03-07)
+++++++++++++++++++
+
+- include cacert.pem file in pypi distribution for SSL with requests package
+
+
 4.0.1 (2015-03-03)
 ++++++++++++++++++
 
