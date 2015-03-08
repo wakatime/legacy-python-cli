@@ -1,2 +1,3 @@
 include README.rst LICENSE HISTORY.rst
 recursive-include wakatime *.py
+recursive-include wakatime *.pem
