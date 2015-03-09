@@ -11,4 +11,7 @@
 """
 
 
-__all__ = ['base.main']
+__all__ = ['main']
+
+
+from .base import main
