@@ -1,23 +1,31 @@
 from setuptools import setup
 
-from wakatime.__init__ import __version__ as VERSION
+from wakatime.__about__ import (
+    __author__,
+    __author_email__,
+    __description__,
+    __license__,
+    __title__,
+    __url__,
+    __version__,
+)
 
 
 packages = [
-    'wakatime',
+    __title__,
 ]
 
 setup(
-    name='wakatime',
-    version=VERSION,
-    license='BSD 3 Clause',
-    description='Interface to the WakaTime api.',
+    name=__title__,
+    version=__version__,
+    license=__license__,
+    description=__description__,
     long_description=open('README.rst').read(),
-    author='Alan Hamlett',
-    author_email='alan@wakatime.com',
-    url='https://github.com/wakatime/wakatime',
+    author=__author__,
+    author_email=__author_email__,
+    url=__url__,
     packages=packages,
-    package_dir={'wakatime': 'wakatime'},
+    package_dir={__title__: __title__},
     include_package_data=True,
     zip_safe=False,
     platforms='any',
