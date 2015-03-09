@@ -3,6 +3,12 @@ History
 -------
 
 
+4.0.4 (2015-03-09)
+++++++++++++++++++
+
+- add back --ignore argument for backwards compatibility
+
+
 4.0.3 (2015-03-09)
 ++++++++++++++++++
 
