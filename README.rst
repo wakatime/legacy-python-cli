@@ -3,7 +3,7 @@ WakaTime
 
 Fully automatic time tracking for programmers.
 
-This is the common interface for the WakaTime api. You shouldn't need to directly use this package unless you are creating a new plugin or your text editor's plugin asks you to install the wakatime-cli interface.
+This is the common interface for the WakaTime api. You shouldn't need to directly use this package unless you are creating a new plugin or your text editor's plugin asks you to install the wakatime cli interface.
 
 Go to http://wakatime.com to install the plugin for your text editor.
 
@@ -15,7 +15,7 @@ Install the plugin for your IDE/editor at https://wakatime.com/plugins
 
 If you are building a plugin using the `WakaTime API <https://wakatime.com/developers/>`_
 then follow the `Creating a Plugin <https://wakatime.com/help/misc/creating-plugin>`_
-guide for information about using ``wakatime-cli.py``.
+guide.
 
 
 Configuring
