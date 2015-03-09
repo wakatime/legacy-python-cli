@@ -168,6 +168,8 @@ def parseArguments(argv):
             help='filename patterns to log; when used in combination with '+
                  '--exclude, files matching include will still be logged; '+
                  'POSIX regex syntax; can be used more than once')
+    parser.add_argument('--ignore', dest='ignore', action='append',
+            help=argparse.SUPPRESS)
     parser.add_argument('--logfile', dest='logfile',
             help='defaults to ~/.wakatime.log')
     parser.add_argument('--config', dest='config',
