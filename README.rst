@@ -44,5 +44,5 @@ Installation
 ------------
 
 Each `plugin <https://wakatime.com/plugins>`_ should install wakatime for you, except for the `Emacs WakaTime plugin <https://github.com/wakatime/wakatime-mode>`_.
-If your plugin does not install wakatime cli, install it with::
+If your plugin does not install wakatime cli(this package), install it with::
     pip install wakatime
