@@ -43,6 +43,7 @@ format. An example config file looks like::
 Installation
 ------------
 
-Each plugin installs wakatime for you, but for testing you can install the
-common api interface with pip::
+Each `plugin <https://wakatime.com/plugins>`_ should install wakatime for you, except for the `Emacs WakaTime plugin <https://github.com/wakatime/wakatime-mode>`_.
+
+If your plugin does not install wakatime cli, install it with::
     pip install wakatime
