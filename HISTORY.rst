@@ -3,6 +3,13 @@ History
 -------
 
 
+4.0.5 (2015-03-31)
+++++++++++++++++++
+
+- update requests package to v2.0.6
+- update simplejson to v3.6.5
+
+
 4.0.4 (2015-03-09)
 ++++++++++++++++++
 
