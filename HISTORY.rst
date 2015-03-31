@@ -3,6 +3,12 @@ History
 -------
 
 
+4.0.6 (2015-03-31)
+++++++++++++++++++
+
+- add requests.packages directory to sys.path
+
+
 4.0.5 (2015-03-31)
 ++++++++++++++++++
 
