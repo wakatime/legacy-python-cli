@@ -31,7 +31,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'pac
 from .__about__ import __version__
 from .compat import u, open, is_py3
 from .offlinequeue import Queue
-from .log import setup_logging
+from .logger import setup_logging
 from .project import find_project
 from .stats import get_file_stats
 from .packages import argparse
