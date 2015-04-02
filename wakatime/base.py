@@ -154,7 +154,7 @@ def parseArguments(argv):
                         help='optional https proxy url; for example: '+
                         'https://user:pass@localhost:8080')
     parser.add_argument('--project', dest='project_name',
-            help='optional project name; will auto-discover by default')
+            help='optional project name; auto-discovered project takes priority')
     parser.add_argument('--disableoffline', dest='offline',
             action='store_false',
             help='disables offline time logging instead of queuing logged time')
