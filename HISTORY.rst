@@ -3,6 +3,12 @@ History
 -------
 
 
+4.0.8 (2015-04-04)
+++++++++++++++++++
+
+- added api_url config option and --apiurl cli argument for customizing api url
+
+
 4.0.7 (2015-04-02)
 ++++++++++++++++++
 
