@@ -147,6 +147,8 @@ def parseArguments(argv):
             type=float,
             help='optional floating-point unix epoch timestamp; '+
                  'uses current time by default')
+    parser.add_argument('--lineno', dest='lineno',
+            help='optional line number; current line being edited')
     parser.add_argument('--notfile', dest='notfile', action='store_true',
             help='when set, will accept any value for the file. for example, '+
                  'a domain name or other item you want to log time towards.')
@@ -322,6 +324,8 @@ def send_heartbeat(project=None, branch=None, stats={}, key=None, targetFile=Non
         data['language'] = stats['language']
     if stats.get('dependencies'):
         data['dependencies'] = stats['dependencies']
+    if stats.get('lineno'):
+        data['lineno'] = stats['lineno']
     if isWrite:
         data['is_write'] = isWrite
     if project:
@@ -424,7 +428,7 @@ def main(argv=None):
 
     if os.path.isfile(args.targetFile) or args.notfile:
 
-        stats = get_file_stats(args.targetFile, notfile=args.notfile)
+        stats = get_file_stats(args.targetFile, notfile=args.notfile, lineno=args.lineno)
 
         project = None
         if not args.notfile:
