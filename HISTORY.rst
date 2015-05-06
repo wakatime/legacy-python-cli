@@ -3,6 +3,12 @@ History
 -------
 
 
+4.0.10 (2015-05-06)
+++++++++++++++++++
+
+- new --cursorpos argument for passing index of cursor within the file contents
+
+
 4.0.9 (2015-05-06)
 ++++++++++++++++++
 
