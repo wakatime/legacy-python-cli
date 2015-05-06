@@ -3,6 +3,14 @@ History
 -------
 
 
+4.0.9 (2015-05-06)
+++++++++++++++++++
+
+- new --lineno argument for passing line number of cursor at time of heartbeat
+- format py.warnings log messages same as other log messages
+- include package namespace and line number in logger output
+
+
 4.0.8 (2015-04-04)
 ++++++++++++++++++
 
