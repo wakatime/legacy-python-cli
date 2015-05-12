@@ -3,6 +3,12 @@ History
 -------
 
 
+4.0.11 (2015-05-12)
+++++++++++++++++++
+
+- reuse SSL connection across multiple processes for improved performance
+
+
 4.0.10 (2015-05-06)
 ++++++++++++++++++
 
