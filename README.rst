@@ -46,3 +46,29 @@ Installation
 Each `plugin <https://wakatime.com/plugins>`_ should install wakatime for you, except for the `Emacs WakaTime plugin <https://github.com/wakatime/wakatime-mode>`_.
 If your plugin does not install wakatime cli(this package), install it with::
     pip install wakatime
+
+
+Troubleshooting
+---------------
+
+WakaTime CLI writes errors to a common log file in your User $HOME directory:
+
+``$HOME/.wakatime.log``
+
+Set ``debug=true`` in ``~/.wakatime.cfg`` for more verbose logging, but don't forget to set it back to ``debug=false`` afterwards or your editor might be laggy while waiting for wakatime cli to finish executing.
+
+Each plugin also has it's own log file for things outside of the common wakatime cli:
+
+* **Atom** writes errors to the developer console (View -> Developer -> Toggle Developer Tools)
+* **Brackets** errors go to the developer console (Debug -> Show Developer Tools)
+* **Eclipse** logs can be found in the Eclipse ``Error Log`` (Window -> Show View -> Error Log)
+* **Emacs** messages go to the *messages* buffer window
+* **Jetbrains IDEs (IntelliJ IDEA, PyCharm, RubyMine, PhpStorm, AppCode, AndroidStudio, WebStorm)** log to ``idea.log`` (`locating IDE log files <https://intellij-support.jetbrains.com/entries/23352446-Locating-IDE-log-files>`_)
+* **Komodo** logs are written to ``pystderr.log`` (Help -> Troubleshooting -> View Log File)
+* **Netbeans** logs to it's own log file (View -> IDE Log)
+* **Notepad++** errors go to ``notepadpp-wakatime.log`` in your User home directory (this file is only created when an error occurs)
+* **Sublime** Text logs to the Sublime Console (View -> Show Console)
+* **TextMate** logs to stderr so run TextMate from Terminal to see any errors (`enable logging <https://github.com/textmate/textmate/wiki/Enable-Logging>`_)
+* **Vim** errors get displayed in the status line or inline (use ``:redraw!`` to clear inline errors)
+* **Visual Studio** errors go to ActivityLog.xml (`more info... <http://blogs.msdn.com/b/visualstudio/archive/2010/02/24/troubleshooting-with-the-activity-log.aspx>`_)
+* **Xcode** errors go to ``dmesg`` (type ``dmesg`` in a Terminal to view them)
