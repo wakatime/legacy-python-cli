@@ -51,9 +51,9 @@ If your plugin does not install wakatime cli(this package), install it with::
 Troubleshooting
 ---------------
 
-WakaTime CLI writes errors to a common log file in your User $HOME directory:
+WakaTime CLI writes errors to a common log file in your User ``$HOME`` directory:
 
-``$HOME/.wakatime.log``
+``~/.wakatime.log``
 
 Set ``debug=true`` in ``~/.wakatime.cfg`` for more verbose logging, but don't forget to set it back to ``debug=false`` afterwards or your editor might be laggy while waiting for wakatime cli to finish executing.
 
