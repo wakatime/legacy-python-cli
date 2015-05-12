@@ -29,14 +29,14 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'pac
 
 from .__about__ import __version__
 from .compat import u, open, is_py3
-from .offlinequeue import Queue
 from .logger import setup_logging
-from .project import find_project
-from .stats import get_file_stats
+from .offlinequeue import Queue
 from .packages import argparse
 from .packages import simplejson as json
-from .packages import requests
 from .packages.requests.exceptions import RequestException
+from .project import find_project
+from .session_cache import SessionCache
+from .stats import get_file_stats
 try:
     from .packages import tzlocal
 except:
@@ -360,10 +360,13 @@ def send_heartbeat(project=None, branch=None, stats={}, key=None, targetFile=Non
     if tz:
         headers['TimeZone'] = u(tz.zone)
 
+    session_cache = SessionCache()
+    session = session_cache.get()
+
     # log time to api
     response = None
     try:
-        response = requests.post(api_url, data=request_body, headers=headers,
+        response = session.post(api_url, data=request_body, headers=headers,
                                  proxies=proxies)
     except RequestException:
         exception_data = {
@@ -385,6 +388,7 @@ def send_heartbeat(project=None, branch=None, stats={}, key=None, targetFile=Non
             log.debug({
                 'response_code': response_code,
             })
+            session_cache.save(session)
             return True
         if offline:
             if response_code != 400:
@@ -410,6 +414,7 @@ def send_heartbeat(project=None, branch=None, stats={}, key=None, targetFile=Non
                 'response_code': response_code,
                 'response_content': response_content,
             })
+    session_cache.delete()
     return False
 
 
