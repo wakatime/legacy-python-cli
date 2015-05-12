@@ -72,3 +72,5 @@ Each plugin also has it's own log file for things outside of the common wakatime
 * **Vim** errors get displayed in the status line or inline (use ``:redraw!`` to clear inline errors)
 * **Visual Studio** errors go to ActivityLog.xml (`more info... <http://blogs.msdn.com/b/visualstudio/archive/2010/02/24/troubleshooting-with-the-activity-log.aspx>`_)
 * **Xcode** errors go to ``dmesg`` (type ``dmesg`` in a Terminal to view them)
+
+Check that heartbeats are received by the WakaTime api with the ``last_heartbeat`` and ``last_plugin`` attributes from the `current user <https://wakatime.com/api/v1/users/current>`_ api resource. Saving a file forces a heartbeat to be sent.
