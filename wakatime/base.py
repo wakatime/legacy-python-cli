@@ -447,7 +447,8 @@ def main(argv=None):
         project_name = args.project_name
         if project:
             branch = project.branch()
-            project_name = project.name()
+            if not project_name:
+                project_name = project.name()
 
         if send_heartbeat(
                 project=project_name,
