@@ -29,14 +29,14 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'pac
 
 from .__about__ import __version__
 from .compat import u, open, is_py3
-from .logger import setup_logging
 from .offlinequeue import Queue
+from .logger import setup_logging
+from .project import find_project
+from .stats import get_file_stats
 from .packages import argparse
 from .packages import simplejson as json
+from .packages import requests
 from .packages.requests.exceptions import RequestException
-from .project import find_project
-from .session_cache import SessionCache
-from .stats import get_file_stats
 try:
     from .packages import tzlocal
 except:
@@ -147,10 +147,6 @@ def parseArguments(argv):
             type=float,
             help='optional floating-point unix epoch timestamp; '+
                  'uses current time by default')
-    parser.add_argument('--lineno', dest='lineno',
-            help='optional line number; current line being edited')
-    parser.add_argument('--cursorpos', dest='cursorpos',
-            help='optional cursor position in the current file')
     parser.add_argument('--notfile', dest='notfile', action='store_true',
             help='when set, will accept any value for the file. for example, '+
                  'a domain name or other item you want to log time towards.')
@@ -326,10 +322,6 @@ def send_heartbeat(project=None, branch=None, stats={}, key=None, targetFile=Non
         data['language'] = stats['language']
     if stats.get('dependencies'):
         data['dependencies'] = stats['dependencies']
-    if stats.get('lineno'):
-        data['lineno'] = stats['lineno']
-    if stats.get('cursorpos'):
-        data['cursorpos'] = stats['cursorpos']
     if isWrite:
         data['is_write'] = isWrite
     if project:
@@ -360,13 +352,10 @@ def send_heartbeat(project=None, branch=None, stats={}, key=None, targetFile=Non
     if tz:
         headers['TimeZone'] = u(tz.zone)
 
-    session_cache = SessionCache()
-    session = session_cache.get()
-
     # log time to api
     response = None
     try:
-        response = session.post(api_url, data=request_body, headers=headers,
+        response = requests.post(api_url, data=request_body, headers=headers,
                                  proxies=proxies)
     except RequestException:
         exception_data = {
@@ -388,7 +377,6 @@ def send_heartbeat(project=None, branch=None, stats={}, key=None, targetFile=Non
             log.debug({
                 'response_code': response_code,
             })
-            session_cache.save(session)
             return True
         if offline:
             if response_code != 400:
@@ -414,7 +402,6 @@ def send_heartbeat(project=None, branch=None, stats={}, key=None, targetFile=Non
                 'response_code': response_code,
                 'response_content': response_content,
             })
-    session_cache.delete()
     return False
 
 
@@ -437,8 +424,7 @@ def main(argv=None):
 
     if os.path.isfile(args.targetFile) or args.notfile:
 
-        stats = get_file_stats(args.targetFile, notfile=args.notfile,
-                               lineno=args.lineno, cursorpos=args.cursorpos)
+        stats = get_file_stats(args.targetFile, notfile=args.notfile)
 
         project = None
         if not args.notfile:
@@ -447,8 +433,9 @@ def main(argv=None):
         project_name = args.project_name
         if project:
             branch = project.branch()
-            project_name = project.name()
-
+            if not project_name:
+                project_name = project.name()
+			
         if send_heartbeat(
                 project=project_name,
                 branch=branch,
