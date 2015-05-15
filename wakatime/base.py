@@ -157,8 +157,10 @@ def parseArguments(argv):
     parser.add_argument('--proxy', dest='proxy',
                         help='optional https proxy url; for example: '+
                         'https://user:pass@localhost:8080')
-    parser.add_argument('--project', dest='project_name',
-            help='optional project name; auto-discovered project takes priority')
+    parser.add_argument('--project', dest='project',
+            help='optional project name')
+    parser.add_argument('--alternate-project', dest='alternate_project',
+            help='optional alternate project name; auto-discovered project takes priority')
     parser.add_argument('--disableoffline', dest='offline',
             action='store_false',
             help='disables offline time logging instead of queuing logged time')
@@ -444,10 +446,13 @@ def main(argv=None):
         if not args.notfile:
             project = find_project(args.targetFile, configs=configs)
         branch = None
-        project_name = args.project_name
+        project_name = args.project
         if project:
             branch = project.branch()
-            project_name = project.name()
+            if not project_name:
+                project_name = project.name()
+        if not project_name:
+            project_name = args.alternate_project
 
         if send_heartbeat(
                 project=project_name,
