@@ -3,6 +3,14 @@ History
 -------
 
 
+4.0.12 (2015-05-15)
+++++++++++++++++++
+
+- correctly display caller and lineno in log file when debug is true
+- project passed with --project argument will always be used
+- new --alternate-project argument
+
+
 4.0.11 (2015-05-12)
 ++++++++++++++++++
 
