@@ -454,11 +454,15 @@ def main(argv=None):
         if not project_name:
             project_name = args.alternate_project
 
+        kwargs = vars(args)
+        if 'project' in kwargs:
+            del kwargs['project']
+
         if send_heartbeat(
                 project=project_name,
                 branch=branch,
                 stats=stats,
-                **vars(args)
+                **kwargs
             ):
             queue = Queue()
             while True:
