@@ -66,7 +66,7 @@ Each plugin also has it's own log file for things outside of the common wakatime
 * **Jetbrains IDEs (IntelliJ IDEA, PyCharm, RubyMine, PhpStorm, AppCode, AndroidStudio, WebStorm)** log to ``idea.log`` (`locating IDE log files <https://intellij-support.jetbrains.com/entries/23352446-Locating-IDE-log-files>`_)
 * **Komodo** logs are written to ``pystderr.log`` (Help -> Troubleshooting -> View Log File)
 * **Netbeans** logs to it's own log file (View -> IDE Log)
-* **Notepad++** errors go to ``notepadpp-wakatime.log`` in your User home directory (this file is only created when an error occurs)
+* **Notepad++** errors go to ``AppData\Roaming\Notepad++\plugins\config\WakaTime.log`` (this file is only created when an error occurs)
 * **Sublime** Text logs to the Sublime Console (View -> Show Console)
 * **TextMate** logs to stderr so run TextMate from Terminal to see any errors (`enable logging <https://github.com/textmate/textmate/wiki/Enable-Logging>`_)
 * **Vim** errors get displayed in the status line or inline (use ``:redraw!`` to clear inline errors)
