@@ -3,6 +3,12 @@ History
 -------
 
 
+4.0.14 (2015-05-31)
+++++++++++++++++++
+
+- correctly log message from py.warnings module
+
+
 4.0.13 (2015-05-16)
 ++++++++++++++++++
 
