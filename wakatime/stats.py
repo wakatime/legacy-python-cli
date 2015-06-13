@@ -26,7 +26,7 @@ from pygments.lexers import guess_lexer, guess_lexer_for_filename
 log = logging.getLogger('WakaTime')
 
 
-# force file name extensions to be recognized as a certain language
+# extensions taking priority over lexer
 EXTENSIONS = {
     'j2': 'HTML',
     'markdown': 'Markdown',
@@ -34,6 +34,8 @@ EXTENSIONS = {
     'mdown': 'Markdown',
     'twig': 'Twig',
 }
+
+# lexers to human readable languages
 TRANSLATIONS = {
     'CSS+Genshi Text': 'CSS',
     'CSS+Lasso': 'CSS',
@@ -43,6 +45,11 @@ TRANSLATIONS = {
     'JavaScript+Lasso': 'JavaScript',
     'Perl6': 'Perl',
     'RHTML': 'HTML',
+}
+
+# extensions for when no lexer is found
+AUXILIARY_EXTENSIONS = {
+    'vb': 'VB.net',
 }
 
 
@@ -58,11 +65,17 @@ def guess_language(file_name):
 
     # guess language from file extension
     if file_name:
-        language = guess_language_from_extension(file_name.rsplit('.', 1)[-1])
+        language = get_language_from_extension(file_name, EXTENSIONS)
 
     # get language from lexer if we didn't have a hard-coded extension rule
     if language is None and lexer:
-        language = translate_language(u(lexer.name))
+        language = u(lexer.name)
+
+    if language is None:
+        language = get_language_from_extension(file_name, AUXILIARY_EXTENSIONS)
+
+    if language is not None:
+        language = translate_language(language)
 
     return language, lexer
 
@@ -104,15 +117,18 @@ def smart_guess_lexer(file_name):
     return lexer
 
 
-def guess_language_from_extension(extension):
-    """Checks hard-coded extension map for a matching language.
+def get_language_from_extension(file_name, extension_map):
+    """Returns a matching language for the given file_name using extension_map.
     """
 
+    extension = file_name.rsplit('.', 1)[-1] if len(file_name.rsplit('.', 1)) > 1 else None
+
     if extension:
-        if extension in EXTENSIONS:
-            return EXTENSIONS[extension]
-        if extension.lower() in EXTENSIONS:
-            return EXTENSIONS[extension.lower()]
+        if extension in extension_map:
+            return extension_map[extension]
+        if extension.lower() in extension_map:
+            return extension_map[extension.lower()]
+
     return None
 
 
