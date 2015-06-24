@@ -3,6 +3,13 @@ History
 -------
 
 
+4.0.16 (2015-06-23)
+++++++++++++++++++
+
+- fix offline logging
+- limit language detection to known file extensions, unless file contents has a vim modeline
+
+
 4.0.15 (2015-06-11)
 ++++++++++++++++++
 
