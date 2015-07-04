@@ -162,7 +162,7 @@ def parseArguments(argv):
             help='optional project name')
     parser.add_argument('--alternate-project', dest='alternate_project',
             help='optional alternate project name; auto-discovered project takes priority')
-    parser.add_argument('--workplace', dest='workplace', help='workplace you are currently logging.')
+    parser.add_argument('--hostname', dest='hostname', help='hostname of current machine.')
     parser.add_argument('--disableoffline', dest='offline',
             action='store_false',
             help='disables offline time logging instead of queuing logged time')
@@ -304,10 +304,8 @@ def get_user_agent(plugin):
         )
     return user_agent
 
-def get_hostname():
-    return socket.gethostname()
 
-def send_heartbeat(project=None, branch=None, workplace=None, stats={}, key=None, targetFile=None,
+def send_heartbeat(project=None, branch=None, hostname=None, stats={}, key=None, targetFile=None,
         timestamp=None, isWrite=None, plugin=None, offline=None, notfile=False,
         hidefilenames=None, proxy=None, api_url=None, **kwargs):
     """Sends heartbeat as POST request to WakaTime api server.
@@ -354,9 +352,9 @@ def send_heartbeat(project=None, branch=None, workplace=None, stats={}, key=None
         'Content-Type': 'application/json',
         'Accept': 'application/json',
         'Authorization': auth,
-        'X-Machine-Name': workplace
     }
-    log.debug(headers)
+    if hostname:
+        headers['X-Machine-Name'] = hostname
     proxies = {}
     if proxy:
         proxies['https'] = proxy
@@ -453,15 +451,11 @@ def main(argv=None):
         if not args.notfile:
             project, branch = get_project_info(configs=configs, args=args)
 
-        workplace = args.workplace
-        if not args.workplace:
-            workplace = get_hostname()
-			
         kwargs = vars(args)
         kwargs['project'] = project
         kwargs['branch'] = branch
         kwargs['stats'] = stats
-        kwargs['workplace'] = workplace
+        kwargs['hostname'] = args.hostname or socket.gethostname()
 
         if send_heartbeat(**kwargs):
             queue = Queue()
@@ -474,7 +468,7 @@ def main(argv=None):
                     targetFile=heartbeat['file'],
                     timestamp=heartbeat['time'],
                     branch=heartbeat['branch'],
-                    workplace=heartbeat['workplace'],
+                    hostname=kwargs['hostname'],
                     stats=json.loads(heartbeat['stats']),
                     key=args.key,
                     isWrite=heartbeat['is_write'],
