@@ -3,6 +3,46 @@ History
 -------
 
 
+4.1.0 (2015-06-29)
+++++++++++++++++++
+
+- correct priority for project detection
+
+
+4.0.16 (2015-06-23)
+++++++++++++++++++
+
+- fix offline logging
+- limit language detection to known file extensions, unless file contents has a vim modeline
+
+
+4.0.15 (2015-06-11)
+++++++++++++++++++
+
+- guess language using multiple methods, then use most accurate guess
+- use entity and type for new heartbeats api resource schema
+
+
+4.0.14 (2015-05-31)
+++++++++++++++++++
+
+- correctly log message from py.warnings module
+
+
+4.0.13 (2015-05-16)
+++++++++++++++++++
+
+- fix bug with auto detecting project name
+
+
+4.0.12 (2015-05-15)
+++++++++++++++++++
+
+- correctly display caller and lineno in log file when debug is true
+- project passed with --project argument will always be used
+- new --alternate-project argument
+
+
 4.0.11 (2015-05-12)
 ++++++++++++++++++
 

@@ -34,7 +34,7 @@ from .offlinequeue import Queue
 from .packages import argparse
 from .packages import simplejson as json
 from .packages.requests.exceptions import RequestException
-from .project import find_project
+from .project import get_project_info
 from .session_cache import SessionCache
 from .stats import get_file_stats
 try:
@@ -157,8 +157,10 @@ def parseArguments(argv):
     parser.add_argument('--proxy', dest='proxy',
                         help='optional https proxy url; for example: '+
                         'https://user:pass@localhost:8080')
-    parser.add_argument('--project', dest='project_name',
-            help='optional project name; auto-discovered project takes priority')
+    parser.add_argument('--project', dest='project',
+            help='optional project name')
+    parser.add_argument('--alternate-project', dest='alternate_project',
+            help='optional alternate project name; auto-discovered project takes priority')
     parser.add_argument('--disableoffline', dest='offline',
             action='store_false',
             help='disables offline time logging instead of queuing logged time')
@@ -312,14 +314,15 @@ def send_heartbeat(project=None, branch=None, stats={}, key=None, targetFile=Non
     log.debug('Sending heartbeat to api at %s' % api_url)
     data = {
         'time': timestamp,
-        'file': targetFile,
+        'entity': targetFile,
+        'type': 'file',
     }
     if hidefilenames and targetFile is not None and not notfile:
-        data['file'] = data['file'].rsplit('/', 1)[-1].rsplit('\\', 1)[-1]
-        if len(data['file'].strip('.').split('.', 1)) > 1:
-            data['file'] = u('HIDDEN.{ext}').format(ext=u(data['file'].strip('.').rsplit('.', 1)[-1]))
+        data['entity'] = data['entity'].rsplit('/', 1)[-1].rsplit('\\', 1)[-1]
+        if len(data['entity'].strip('.').split('.', 1)) > 1:
+            data['entity'] = u('HIDDEN.{ext}').format(ext=u(data['entity'].strip('.').rsplit('.', 1)[-1]))
         else:
-            data['file'] = u('HIDDEN')
+            data['entity'] = u('HIDDEN')
     if stats.get('lines'):
         data['lines'] = stats['lines']
     if stats.get('language'):
@@ -440,22 +443,16 @@ def main(argv=None):
         stats = get_file_stats(args.targetFile, notfile=args.notfile,
                                lineno=args.lineno, cursorpos=args.cursorpos)
 
-        project = None
+        project, branch = None, None
         if not args.notfile:
-            project = find_project(args.targetFile, configs=configs)
-        branch = None
-        project_name = args.project_name
-        if project:
-            branch = project.branch()
-            if not project_name:
-                project_name = project.name()
+            project, branch = get_project_info(configs=configs, args=args)
 
-        if send_heartbeat(
-                project=project_name,
-                branch=branch,
-                stats=stats,
-                **vars(args)
-            ):
+        kwargs = vars(args)
+        kwargs['project'] = project
+        kwargs['branch'] = branch
+        kwargs['stats'] = stats
+
+        if send_heartbeat(**kwargs):
             queue = Queue()
             while True:
                 heartbeat = queue.pop()
