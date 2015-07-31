@@ -55,18 +55,17 @@ def request(method, url, **kwargs):
     return response
 
 
-def get(url, params=None, **kwargs):
+def get(url, **kwargs):
     """Sends a GET request.
 
     :param url: URL for the new :class:`Request` object.
-    :param params: (optional) Dictionary or bytes to be sent in the query string for the :class:`Request`.
     :param \*\*kwargs: Optional arguments that ``request`` takes.
     :return: :class:`Response <Response>` object
     :rtype: requests.Response
     """
 
     kwargs.setdefault('allow_redirects', True)
-    return request('get', url, params=params, **kwargs)
+    return request('get', url, **kwargs)
 
 
 def options(url, **kwargs):

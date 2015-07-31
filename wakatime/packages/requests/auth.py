@@ -103,8 +103,7 @@ class HTTPDigestAuth(AuthBase):
         # XXX not implemented yet
         entdig = None
         p_parsed = urlparse(url)
-        #: path is request-uri defined in RFC 2616 which should not be empty
-        path = p_parsed.path or "/"
+        path = p_parsed.path
         if p_parsed.query:
             path += '?' + p_parsed.query
 
@@ -179,7 +178,7 @@ class HTTPDigestAuth(AuthBase):
             # Consume content and release the original connection
             # to allow our new request to reuse the same one.
             r.content
-            r.close()
+            r.raw.release_conn()
             prep = r.request.copy()
             extract_cookies_to_jar(prep._cookies, r.request, r.raw)
             prep.prepare_cookies(prep._cookies)

@@ -35,7 +35,6 @@ from .auth import _basic_auth_str
 DEFAULT_POOLBLOCK = False
 DEFAULT_POOLSIZE = 10
 DEFAULT_RETRIES = 0
-DEFAULT_POOL_TIMEOUT = None
 
 
 class BaseAdapter(object):
@@ -376,7 +375,7 @@ class HTTPAdapter(BaseAdapter):
                 if hasattr(conn, 'proxy_pool'):
                     conn = conn.proxy_pool
 
-                low_conn = conn._get_conn(timeout=DEFAULT_POOL_TIMEOUT)
+                low_conn = conn._get_conn(timeout=timeout)
 
                 try:
                     low_conn.putrequest(request.method,
@@ -408,6 +407,9 @@ class HTTPAdapter(BaseAdapter):
                     # Then, reraise so that we can handle the actual exception.
                     low_conn.close()
                     raise
+                else:
+                    # All is well, return the connection to the pool.
+                    conn._put_conn(low_conn)
 
         except (ProtocolError, socket.error) as err:
             raise ConnectionError(err, request=request)

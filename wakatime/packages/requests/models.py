@@ -15,7 +15,7 @@ from .hooks import default_hooks
 from .structures import CaseInsensitiveDict
 
 from .auth import HTTPBasicAuth
-from .cookies import cookiejar_from_dict, get_cookie_header, _copy_cookie_jar
+from .cookies import cookiejar_from_dict, get_cookie_header
 from .packages.urllib3.fields import RequestField
 from .packages.urllib3.filepost import encode_multipart_formdata
 from .packages.urllib3.util import parse_url
@@ -30,8 +30,7 @@ from .utils import (
     iter_slices, guess_json_utf, super_len, to_native_string)
 from .compat import (
     cookielib, urlunparse, urlsplit, urlencode, str, bytes, StringIO,
-    is_py2, chardet, builtin_str, basestring)
-from .compat import json as complexjson
+    is_py2, chardet, json, builtin_str, basestring)
 from .status_codes import codes
 
 #: The set of HTTP status codes that indicate an automatically
@@ -43,10 +42,11 @@ REDIRECT_STATI = (
     codes.temporary_redirect, # 307
     codes.permanent_redirect, # 308
 )
-
 DEFAULT_REDIRECT_LIMIT = 30
 CONTENT_CHUNK_SIZE = 10 * 1024
 ITER_CHUNK_SIZE = 512
+
+json_dumps = json.dumps
 
 
 class RequestEncodingMixin(object):
@@ -149,7 +149,8 @@ class RequestEncodingMixin(object):
             else:
                 fdata = fp.read()
 
-            rf = RequestField(name=k, data=fdata, filename=fn, headers=fh)
+            rf = RequestField(name=k, data=fdata,
+                              filename=fn, headers=fh)
             rf.make_multipart(content_type=ft)
             new_fields.append(rf)
 
@@ -206,8 +207,17 @@ class Request(RequestHooksMixin):
       <PreparedRequest [GET]>
 
     """
-    def __init__(self, method=None, url=None, headers=None, files=None,
-        data=None, params=None, auth=None, cookies=None, hooks=None, json=None):
+    def __init__(self,
+        method=None,
+        url=None,
+        headers=None,
+        files=None,
+        data=None,
+        params=None,
+        auth=None,
+        cookies=None,
+        hooks=None,
+        json=None):
 
         # Default empty dicts for dict params.
         data = [] if data is None else data
@@ -286,7 +296,8 @@ class PreparedRequest(RequestEncodingMixin, RequestHooksMixin):
         self.hooks = default_hooks()
 
     def prepare(self, method=None, url=None, headers=None, files=None,
-        data=None, params=None, auth=None, cookies=None, hooks=None, json=None):
+                data=None, params=None, auth=None, cookies=None, hooks=None,
+                json=None):
         """Prepares the entire request with the given parameters."""
 
         self.prepare_method(method)
@@ -295,7 +306,6 @@ class PreparedRequest(RequestEncodingMixin, RequestHooksMixin):
         self.prepare_cookies(cookies)
         self.prepare_body(data, files, json)
         self.prepare_auth(auth, url)
-
         # Note that prepare_auth must be last to enable authentication schemes
         # such as OAuth to work on a fully prepared request.
 
@@ -310,7 +320,7 @@ class PreparedRequest(RequestEncodingMixin, RequestHooksMixin):
         p.method = self.method
         p.url = self.url
         p.headers = self.headers.copy() if self.headers is not None else None
-        p._cookies = _copy_cookie_jar(self._cookies)
+        p._cookies = self._cookies.copy() if self._cookies is not None else None
         p.body = self.body
         p.hooks = self.hooks
         return p
@@ -347,10 +357,8 @@ class PreparedRequest(RequestEncodingMixin, RequestHooksMixin):
             raise InvalidURL(*e.args)
 
         if not scheme:
-            error = ("Invalid URL {0!r}: No schema supplied. Perhaps you meant http://{0}?")
-            error = error.format(to_native_string(url, 'utf8'))
-
-            raise MissingSchema(error)
+            raise MissingSchema("Invalid URL {0!r}: No schema supplied. "
+                                "Perhaps you meant http://{0}?".format(url))
 
         if not host:
             raise InvalidURL("Invalid URL %r: No host supplied" % url)
@@ -416,7 +424,7 @@ class PreparedRequest(RequestEncodingMixin, RequestHooksMixin):
 
         if json is not None:
             content_type = 'application/json'
-            body = complexjson.dumps(json)
+            body = json_dumps(json)
 
         is_stream = all([
             hasattr(data, '__iter__'),
@@ -493,15 +501,7 @@ class PreparedRequest(RequestEncodingMixin, RequestHooksMixin):
             self.prepare_content_length(self.body)
 
     def prepare_cookies(self, cookies):
-        """Prepares the given HTTP cookie data.
-
-        This function eventually generates a ``Cookie`` header from the
-        given cookies using cookielib. Due to cookielib's design, the header
-        will not be regenerated if it already exists, meaning this function
-        can only be called once for the life of the
-        :class:`PreparedRequest <PreparedRequest>` object. Any subsequent calls
-        to ``prepare_cookies`` will have no actual effect, unless the "Cookie"
-        header is removed beforehand."""
+        """Prepares the given HTTP cookie data."""
 
         if isinstance(cookies, cookielib.CookieJar):
             self._cookies = cookies
@@ -514,10 +514,6 @@ class PreparedRequest(RequestEncodingMixin, RequestHooksMixin):
 
     def prepare_hooks(self, hooks):
         """Prepares the given hooks."""
-        # hooks can be passed as None to the prepare method and to this
-        # method. To prevent iterating over None, simply use an empty list
-        # if hooks is False-y
-        hooks = hooks or []
         for event in hooks:
             self.register_hook(event, hooks[event])
 
@@ -528,8 +524,16 @@ class Response(object):
     """
 
     __attrs__ = [
-        '_content', 'status_code', 'headers', 'url', 'history',
-        'encoding', 'reason', 'cookies', 'elapsed', 'request'
+        '_content',
+        'status_code',
+        'headers',
+        'url',
+        'history',
+        'encoding',
+        'reason',
+        'cookies',
+        'elapsed',
+        'request',
     ]
 
     def __init__(self):
@@ -649,10 +653,9 @@ class Response(object):
         If decode_unicode is True, content will be decoded using the best
         available encoding based on the response.
         """
-
         def generate():
-            # Special case for urllib3.
-            if hasattr(self.raw, 'stream'):
+            try:
+                # Special case for urllib3.
                 try:
                     for chunk in self.raw.stream(chunk_size, decode_content=True):
                         yield chunk
@@ -662,7 +665,7 @@ class Response(object):
                     raise ContentDecodingError(e)
                 except ReadTimeoutError as e:
                     raise ConnectionError(e)
-            else:
+            except AttributeError:
                 # Standard file-like object.
                 while True:
                     chunk = self.raw.read(chunk_size)
@@ -793,16 +796,14 @@ class Response(object):
             encoding = guess_json_utf(self.content)
             if encoding is not None:
                 try:
-                    return complexjson.loads(
-                        self.content.decode(encoding), **kwargs
-                    )
+                    return json.loads(self.content.decode(encoding), **kwargs)
                 except UnicodeDecodeError:
                     # Wrong UTF codec detected; usually because it's not UTF-8
                     # but some other 8-bit codec.  This is an RFC violation,
                     # and the server didn't bother to tell us what codec *was*
                     # used.
                     pass
-        return complexjson.loads(self.text, **kwargs)
+        return json.loads(self.text, **kwargs)
 
     @property
     def links(self):
@@ -828,10 +829,10 @@ class Response(object):
         http_error_msg = ''
 
         if 400 <= self.status_code < 500:
-            http_error_msg = '%s Client Error: %s for url: %s' % (self.status_code, self.reason, self.url)
+            http_error_msg = '%s Client Error: %s' % (self.status_code, self.reason)
 
         elif 500 <= self.status_code < 600:
-            http_error_msg = '%s Server Error: %s for url: %s' % (self.status_code, self.reason, self.url)
+            http_error_msg = '%s Server Error: %s' % (self.status_code, self.reason)
 
         if http_error_msg:
             raise HTTPError(http_error_msg, response=self)
@@ -842,7 +843,4 @@ class Response(object):
 
         *Note: Should not normally need to be called explicitly.*
         """
-        if not self._content_consumed:
-            return self.raw.close()
-
         return self.raw.release_conn()
