@@ -71,6 +71,6 @@ Each plugin also has it's own log file for things outside of the common wakatime
 * **TextMate** logs to stderr so run TextMate from Terminal to see any errors (`enable logging <https://github.com/textmate/textmate/wiki/Enable-Logging>`_)
 * **Vim** errors get displayed in the status line or inline (use ``:redraw!`` to clear inline errors)
 * **Visual Studio** logs to the Output window, but uncaught exceptions go to ActivityLog.xml (`more info... <http://blogs.msdn.com/b/visualstudio/archive/2010/02/24/troubleshooting-with-the-activity-log.aspx>`_)
-* **Xcode** errors go to ``dmesg`` (type ``dmesg`` in a Terminal to view them)
+* **Xcode** type ``sudo tail -f /var/log/system.log`` in a Terminal to view any Xcode plugin messages)
 
 Check that heartbeats are received by the WakaTime api with the ``last_heartbeat`` and ``last_plugin`` attributes from the `current user <https://wakatime.com/api/v1/users/current>`_ api resource. Saving a file forces a heartbeat to be sent.
