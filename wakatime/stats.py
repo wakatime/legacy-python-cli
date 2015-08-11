@@ -123,13 +123,15 @@ def get_language_from_extension(file_name):
     """Returns a matching language for the given file extension.
     """
 
-    extension = file_name.rsplit('.', 1)[-1] if len(file_name.rsplit('.', 1)) > 1 else ''
-    file_minus_extension = file_name.rsplit('.', 1)[0] if len(file_name.rsplit('.', 1)) > 1 else file_name
-
-    if extension.lower() == 'h':
-        if os.path.isfile(file_minus_extension + '.cpp'):
+    extension = os.path.splitext(file_name)[1].lower()
+    if extension == '.h':
+        directory = os.path.dirname(file_name)
+        available_files = os.listdir(directory)
+        available_extensions = zip(*map(os.path.splitext, available_files))[1]
+        available_extensions = [ext.lower() for ext in available_extensions]
+        if '.cpp' in available_extensions:
             return 'C++'
-        if os.path.isfile(file_minus_extension + '.c'):
+        if '.c' in available_extensions:
             return 'C'
 
     return None
