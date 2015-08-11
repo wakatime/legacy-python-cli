@@ -74,3 +74,16 @@ Each plugin also has it's own log file for things outside of the common wakatime
 * **Xcode** type ``sudo tail -f /var/log/system.log`` in a Terminal to view Xcode errors
 
 Check that heartbeats are received by the WakaTime api with the ``last_heartbeat`` and ``last_plugin`` attributes from the `current user <https://wakatime.com/api/v1/users/current>`_ api resource. Saving a file forces a heartbeat to be sent.
+
+
+Contributing
+------------
+
+Before contributing a pull request, make sure tests pass:
+
+    virtualenv venv
+    . venv/bin/activate
+    pip install -r dev-requirements.txt
+    nosetests
+
+Many thanks to all [contributors](./AUTHORS)!
