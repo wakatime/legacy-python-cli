@@ -81,9 +81,11 @@ Contributing
 
 Before contributing a pull request, make sure tests pass:
 
+.. code-block::
+
     virtualenv venv
     . venv/bin/activate
     pip install -r dev-requirements.txt
     nosetests
 
-Many thanks to all [contributors](./AUTHORS)!
+Many thanks to all `contributors <./AUTHORS>`_!
