@@ -38,13 +38,13 @@ from .project import get_project_info
 from .session_cache import SessionCache
 from .stats import get_file_stats
 try:
-    from .packages import simplejson as json
+    from .packages import simplejson as json  # pragma: nocover
 except (ImportError, SyntaxError):
-    import json
+    import json  # pragma: nocover
 try:
-    from .packages import tzlocal
+    from .packages import tzlocal  # pragma: nocover
 except:  # pragma: nocover
-    from .packages import tzlocal3 as tzlocal
+    from .packages import tzlocal3 as tzlocal  # pragma: nocover
 
 
 log = logging.getLogger('WakaTime')
@@ -57,45 +57,6 @@ class FileAction(argparse.Action):
         setattr(namespace, self.dest, values)
 
 
-def upgradeConfigFile(configFile):
-    """For backwards-compatibility, upgrade the existing config file
-    to work with configparser and rename from .wakatime.conf to .wakatime.cfg.
-    """
-
-    if os.path.isfile(configFile):
-        # if upgraded cfg file already exists, don't overwrite it
-        return
-
-    oldConfig = os.path.join(os.path.expanduser('~'), '.wakatime.conf')
-    try:
-        configs = {
-            'ignore': [],
-        }
-
-        with open(oldConfig, 'r', encoding='utf-8') as fh:
-            for line in fh.readlines():
-                line = line.split('=', 1)
-                if len(line) == 2 and line[0].strip() and line[1].strip():
-                    if line[0].strip() == 'ignore':
-                        configs['ignore'].append(line[1].strip())
-                    else:
-                        configs[line[0].strip()] = line[1].strip()
-
-        with open(configFile, 'w', encoding='utf-8') as fh:
-            fh.write("[settings]\n")
-            for name, value in configs.items():
-                if isinstance(value, list):
-                    fh.write("%s=\n" % name)
-                    for item in value:
-                        fh.write("    %s\n" % item)
-                else:
-                    fh.write("%s = %s\n" % (name, value))
-
-        os.remove(oldConfig)
-    except IOError:
-        pass
-
-
 def parseConfigFile(configFile=None):
     """Returns a configparser.SafeConfigParser instance with configs
     read from the config file. Default location of the config file is
@@ -104,8 +65,6 @@ def parseConfigFile(configFile=None):
 
     if not configFile:
         configFile = os.path.join(os.path.expanduser('~'), '.wakatime.cfg')
-
-    upgradeConfigFile(configFile)
 
     configs = configparser.SafeConfigParser()
     try:
