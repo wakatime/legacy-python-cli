@@ -9,3 +9,4 @@ python:
 install: "pip install -r dev-requirements.txt"
 # command to run tests
 script: nosetests
+sudo: false
