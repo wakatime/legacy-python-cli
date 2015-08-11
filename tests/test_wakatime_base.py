@@ -2,13 +2,18 @@
 
 
 import logging
-import unittest
 from wakatime.packages.requests.models import Response
 
 try:
     from mock import patch
-except:
+except ImportError:
     from unittest.mock import patch
+try:
+    # Python 2.6
+    import unittest2 as unittest
+except ImportError:
+    # Python >= 2.7
+    import unittest
 
 from wakatime.base import main
 
@@ -21,8 +26,8 @@ class BaseTestCase(unittest.TestCase):
         logging.disable(logging.CRITICAL)
 
     def test_help_contents(self, mock_requests):
+        args = ['', '--help']
         with self.assertRaises(SystemExit):
-            args = ['', '--help']
             retval = main(args)
             self.assertEquals(retval, 0)
 
