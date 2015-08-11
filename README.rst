@@ -88,4 +88,4 @@ Before contributing a pull request, make sure tests pass::
     pip install -r dev-requirements.txt
     nosetests
 
-Many thanks to all `contributors <./AUTHORS>`_!
+Many thanks to all `contributors <https://github.com/wakatime/wakatime/blob/master/AUTHORS>`_!
