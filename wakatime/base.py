@@ -33,11 +33,14 @@ from .compat import u, open, is_py3
 from .logger import setup_logging
 from .offlinequeue import Queue
 from .packages import argparse
-from .packages import simplejson as json
 from .packages.requests.exceptions import RequestException
 from .project import get_project_info
 from .session_cache import SessionCache
 from .stats import get_file_stats
+try:
+    from .packages import simplejson as json
+except (ImportError, SyntaxError):
+    import json
 try:
     from .packages import tzlocal
 except:  # pragma: nocover

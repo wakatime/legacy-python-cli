@@ -13,12 +13,15 @@ import logging
 import os
 import sys
 
-from .packages import simplejson as json
 from .compat import u
 try:
     from collections import OrderedDict
 except ImportError:
     from .packages.ordereddict import OrderedDict
+try:
+    from .packages import simplejson as json
+except (ImportError, SyntaxError):
+    import json
 
 
 class CustomEncoder(json.JSONEncoder):
