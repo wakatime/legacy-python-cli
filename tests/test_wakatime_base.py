@@ -26,6 +26,6 @@ class BaseTestCase(unittest.TestCase):
             self.assertEquals(retval, 0)
 
     def test_argument_parsing(self, mock_post):
-        args = ['', '--file', 'tests/samples/emptyfile.txt']
+        args = ['', '--file', 'tests/samples/emptyfile.txt', '--key', '123']
         retval = main(args)
         self.assertEquals(retval, 0)
