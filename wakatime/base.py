@@ -22,7 +22,7 @@ import traceback
 import socket
 try:
     import ConfigParser as configparser
-except ImportError:
+except ImportError:  # pragma: nocover
     import configparser
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -40,7 +40,7 @@ from .session_cache import SessionCache
 from .stats import get_file_stats
 try:
     from .packages import tzlocal
-except:
+except:  # pragma: nocover
     from .packages import tzlocal3 as tzlocal
 
 

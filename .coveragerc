@@ -1,3 +1,4 @@
 [run]
 branch = false
-omit = wakatime/packages/*
+omit =
+    wakatime/packages/*
