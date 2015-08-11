@@ -25,6 +25,7 @@ Options can be passed via command line, or set in the ``$HOME/.wakatime.cfg``
 config file. Command line arguments take precedence over config file settings.
 The ``$HOME/.wakatime.cfg`` file is in `INI <http://en.wikipedia.org/wiki/INI_file>`_
 format. An example config file looks like::
+
     [settings]
     debug = false
     api_key = your-api-key
@@ -45,15 +46,16 @@ Installation
 
 Each `plugin <https://wakatime.com/plugins>`_ should install wakatime for you, except for the `Emacs WakaTime plugin <https://github.com/wakatime/wakatime-mode>`_.
 If your plugin does not install wakatime cli(this package), install it with::
+
     pip install wakatime
 
 
 Troubleshooting
 ---------------
 
-WakaTime CLI writes errors to a common log file in your User ``$HOME`` directory:
+WakaTime CLI writes errors to a common log file in your User ``$HOME`` directory::
 
-``~/.wakatime.log``
+    ~/.wakatime.log
 
 Set ``debug=true`` in ``~/.wakatime.cfg`` for more verbose logging, but don't forget to set it back to ``debug=false`` afterwards or your editor might be laggy while waiting for wakatime cli to finish executing.
 
@@ -79,9 +81,7 @@ Check that heartbeats are received by the WakaTime api with the ``last_heartbeat
 Contributing
 ------------
 
-Before contributing a pull request, make sure tests pass:
-
-.. code-block::
+Before contributing a pull request, make sure tests pass::
 
     virtualenv venv
     . venv/bin/activate
