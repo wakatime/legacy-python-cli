@@ -88,7 +88,7 @@ Before contributing a pull request, make sure tests pass::
 
     virtualenv venv
     . venv/bin/activate
-    pip install -r dev-requirements.txt
-    nosetests
+    pip install tox
+    tox
 
 Many thanks to all `contributors <https://github.com/wakatime/wakatime/blob/master/AUTHORS>`_!
