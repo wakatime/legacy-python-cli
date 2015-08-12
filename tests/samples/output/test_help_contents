@@ -1,0 +1,47 @@
+usage: nosetests [-h] --file file [--key KEY] [--write] [--plugin PLUGIN]
+                 [--time time] [--lineno LINENO] [--cursorpos CURSORPOS]
+                 [--notfile] [--proxy PROXY] [--project PROJECT]
+                 [--alternate-project ALTERNATE_PROJECT] [--hostname HOSTNAME]
+                 [--disableoffline] [--hidefilenames] [--exclude EXCLUDE]
+                 [--include INCLUDE] [--logfile LOGFILE] [--apiurl API_URL]
+                 [--config CONFIG] [--verbose] [--version]
+
+Common interface for the WakaTime api.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --file file           absolute path to file for current heartbeat
+  --key KEY             your wakatime api key; uses api_key from
+                        ~/.wakatime.conf by default
+  --write               when set, tells api this heartbeat was triggered from
+                        writing to a file
+  --plugin PLUGIN       optional text editor plugin name and version for User-
+                        Agent header
+  --time time           optional floating-point unix epoch timestamp; uses
+                        current time by default
+  --lineno LINENO       optional line number; current line being edited
+  --cursorpos CURSORPOS
+                        optional cursor position in the current file
+  --notfile             when set, will accept any value for the file. for
+                        example, a domain name or other item you want to log
+                        time towards.
+  --proxy PROXY         optional https proxy url; for example:
+                        https://user:pass@localhost:8080
+  --project PROJECT     optional project name
+  --alternate-project ALTERNATE_PROJECT
+                        optional alternate project name; auto-discovered
+                        project takes priority
+  --hostname HOSTNAME   hostname of current machine.
+  --disableoffline      disables offline time logging instead of queuing
+                        logged time
+  --hidefilenames       obfuscate file names; will not send file names to api
+  --exclude EXCLUDE     filename patterns to exclude from logging; POSIX regex
+                        syntax; can be used more than once
+  --include INCLUDE     filename patterns to log; when used in combination
+                        with --exclude, files matching include will still be
+                        logged; POSIX regex syntax; can be used more than once
+  --logfile LOGFILE     defaults to ~/.wakatime.log
+  --apiurl API_URL      heartbeats api url; for debugging with a local server
+  --config CONFIG       defaults to ~/.wakatime.conf
+  --verbose             turns on debug messages in log file
+  --version             show program's version number and exit
