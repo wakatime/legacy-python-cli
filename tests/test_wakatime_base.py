@@ -221,3 +221,71 @@ class BaseTestCase(utils.TestCase):
 
         self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
+
+    def test_alternate_project(self):
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        now = u(int(time.time()))
+        entity = 'tests/samples/twolinefile.txt'
+        config = 'tests/samples/sample.cfg'
+
+        args = ['--file', entity, '--alternate-project', 'xyz', '--config', config, '--time', now]
+
+        retval = main(args)
+        self.assertEquals(retval, 102)
+        self.assertEquals(sys.stdout.getvalue(), '')
+        self.assertEquals(sys.stderr.getvalue(), '')
+
+        self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
+        self.patched['wakatime.session_cache.SessionCache.delete'].assert_called_once_with()
+        self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
+
+        heartbeat = {
+            'language': 'Text only',
+            'lines': 2,
+            'entity': os.path.abspath(entity),
+            'project': os.path.basename(os.path.abspath('.')),
+            'branch': os.environ.get('TRAVIS_COMMIT', ANY),
+            'time': float(now),
+            'type': 'file',
+        }
+        stats = '{"cursorpos": null, "dependencies": [], "lines": 2, "lineno": null, "language": "Text only"}'
+
+        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, stats, None)
+        self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
+
+    def test_set_project_from_command_line(self):
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        now = u(int(time.time()))
+        entity = 'tests/samples/twolinefile.txt'
+        config = 'tests/samples/sample.cfg'
+
+        args = ['--file', entity, '--project', 'xyz', '--config', config, '--time', now]
+
+        retval = main(args)
+        self.assertEquals(retval, 102)
+        self.assertEquals(sys.stdout.getvalue(), '')
+        self.assertEquals(sys.stderr.getvalue(), '')
+
+        self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
+        self.patched['wakatime.session_cache.SessionCache.delete'].assert_called_once_with()
+        self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
+
+        heartbeat = {
+            'language': 'Text only',
+            'lines': 2,
+            'entity': os.path.abspath(entity),
+            'project': 'xyz',
+            'branch': os.environ.get('TRAVIS_COMMIT', ANY),
+            'time': float(now),
+            'type': 'file',
+        }
+        stats = '{"cursorpos": null, "dependencies": [], "lines": 2, "lineno": null, "language": "Text only"}'
+
+        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, stats, None)
+        self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
