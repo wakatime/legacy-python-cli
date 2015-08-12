@@ -122,7 +122,7 @@ class BaseTestCase(utils.TestCase):
             'lines': 2,
             'entity': os.path.abspath(entity),
             'project': os.path.basename(os.path.abspath('.')),
-            'branch': os.environ.get('TRAVIS_COMMIT', 'master'),
+            'branch': os.environ.get('TRAVIS_COMMIT', ANY),
             'time': float(now),
             'type': 'file',
         }
@@ -156,7 +156,7 @@ class BaseTestCase(utils.TestCase):
             'lines': 2,
             'entity': 'HIDDEN.txt',
             'project': os.path.basename(os.path.abspath('.')),
-            'branch': os.environ.get('TRAVIS_COMMIT', 'master'),
+            'branch': os.environ.get('TRAVIS_COMMIT', ANY),
             'time': float(now),
             'type': 'file',
         }
@@ -190,7 +190,7 @@ class BaseTestCase(utils.TestCase):
             'lines': 2,
             'entity': 'HIDDEN.txt',
             'project': os.path.basename(os.path.abspath('.')),
-            'branch': os.environ.get('TRAVIS_COMMIT', 'master'),
+            'branch': os.environ.get('TRAVIS_COMMIT', ANY),
             'time': float(now),
             'type': 'file',
         }
