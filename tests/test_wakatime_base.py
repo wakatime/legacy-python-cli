@@ -121,8 +121,8 @@ class BaseTestCase(utils.TestCase):
             'language': 'Text only',
             'lines': 2,
             'entity': os.path.abspath(entity),
-            'project': 'wakatime-cli',
-            'branch': 'master',
+            'project': os.path.basename(os.path.abspath('.')),
+            'branch': os.environ.get('TRAVIS_COMMIT', 'master'),
             'time': float(now),
             'type': 'file',
         }
@@ -155,8 +155,8 @@ class BaseTestCase(utils.TestCase):
             'language': 'Text only',
             'lines': 2,
             'entity': 'HIDDEN.txt',
-            'project': 'wakatime-cli',
-            'branch': 'master',
+            'project': os.path.basename(os.path.abspath('.')),
+            'branch': os.environ.get('TRAVIS_COMMIT', 'master'),
             'time': float(now),
             'type': 'file',
         }
@@ -189,8 +189,8 @@ class BaseTestCase(utils.TestCase):
             'language': 'Text only',
             'lines': 2,
             'entity': 'HIDDEN.txt',
-            'project': 'wakatime-cli',
-            'branch': 'master',
+            'project': os.path.basename(os.path.abspath('.')),
+            'branch': os.environ.get('TRAVIS_COMMIT', 'master'),
             'time': float(now),
             'type': 'file',
         }
