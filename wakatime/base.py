@@ -224,7 +224,7 @@ def should_exclude(fileName, include, exclude):
                         msg=u(ex),
                         pattern=u(pattern),
                     ))
-        except TypeError:
+        except TypeError:  # pragma: nocover
             pass
         try:
             for pattern in exclude:
@@ -237,7 +237,7 @@ def should_exclude(fileName, include, exclude):
                         msg=u(ex),
                         pattern=u(pattern),
                     ))
-        except TypeError:
+        except TypeError:  # pragma: nocover
             pass
     return False
 
