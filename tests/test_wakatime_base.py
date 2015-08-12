@@ -18,7 +18,7 @@ from wakatime.base import main
 class BaseTestCase(utils.TestCase):
 
     def test_help_contents(self, mock_requests):
-        args = ['', '--help']
+        args = ['--help']
         with self.assertRaises(SystemExit):
             main(args)
         expected_stdout = open('tests/samples/output/test_help_contents').read()
@@ -29,7 +29,7 @@ class BaseTestCase(utils.TestCase):
         response = Response()
         response.status_code = 201
         mock_requests.return_value = response
-        args = ['', '--file', 'tests/samples/emptyfile.txt', '--key', '123', '--config', 'foo']
+        args = ['--file', 'tests/samples/emptyfile.txt', '--key', '123', '--config', 'foo']
         retval = main(args)
         self.assertEquals(retval, 0)
         expected_stdout = u("Error: Could not read from config file foo\n")
@@ -37,7 +37,7 @@ class BaseTestCase(utils.TestCase):
         self.assertEquals(sys.stderr.getvalue(), '')
 
     def test_missing_config_file(self, mock_requests):
-        args = ['', '--file', 'tests/samples/emptyfile.txt', '--config', 'foo']
+        args = ['--file', 'tests/samples/emptyfile.txt', '--config', 'foo']
         with self.assertRaises(SystemExit):
             main(args)
         expected_stdout = u("Error: Could not read from config file foo\n")
@@ -49,14 +49,14 @@ class BaseTestCase(utils.TestCase):
         response = Response()
         response.status_code = 201
         mock_requests.return_value = response
-        args = ['', '--file', 'tests/samples/emptyfile.txt', '--config', 'tests/samples/sample.cfg']
+        args = ['--file', 'tests/samples/emptyfile.txt', '--config', 'tests/samples/sample.cfg']
         retval = main(args)
         self.assertEquals(retval, 0)
         self.assertEquals(sys.stdout.getvalue(), '')
         self.assertEquals(sys.stderr.getvalue(), '')
 
     def test_parse_bad_config_file(self, mock_requests):
-        args = ['', '--file', 'tests/samples/emptyfile.txt', '--config', 'tests/samples/bad_config.cfg']
+        args = ['--file', 'tests/samples/emptyfile.txt', '--config', 'tests/samples/bad_config.cfg']
         retval = main(args)
         self.assertEquals(retval, 103)
         self.assertIn('ParsingError', sys.stdout.getvalue())

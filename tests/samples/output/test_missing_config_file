@@ -1,8 +1,8 @@
-usage: nosetests [-h] --file file [--key KEY] [--write] [--plugin PLUGIN]
-                 [--time time] [--lineno LINENO] [--cursorpos CURSORPOS]
-                 [--notfile] [--proxy PROXY] [--project PROJECT]
-                 [--alternate-project ALTERNATE_PROJECT] [--hostname HOSTNAME]
-                 [--disableoffline] [--hidefilenames] [--exclude EXCLUDE]
-                 [--include INCLUDE] [--logfile LOGFILE] [--apiurl API_URL]
-                 [--config CONFIG] [--verbose] [--version]
-nosetests: error: Missing api key
+usage: wakatime [-h] --file file [--key KEY] [--write] [--plugin PLUGIN]
+                [--time time] [--lineno LINENO] [--cursorpos CURSORPOS]
+                [--notfile] [--proxy PROXY] [--project PROJECT]
+                [--alternate-project ALTERNATE_PROJECT] [--hostname HOSTNAME]
+                [--disableoffline] [--hidefilenames] [--exclude EXCLUDE]
+                [--include INCLUDE] [--logfile LOGFILE] [--apiurl API_URL]
+                [--config CONFIG] [--verbose] [--version]
+wakatime: error: Missing api key

@@ -79,16 +79,11 @@ def parseConfigFile(configFile=None):
     return configs
 
 
-def parseArguments(argv):
+def parseArguments():
     """Parse command line arguments and configs from ~/.wakatime.cfg.
     Command line arguments take precedence over config file settings.
     Returns instances of ArgumentParser and SafeConfigParser.
     """
-
-    try:
-        sys.argv
-    except AttributeError:
-        sys.argv = argv
 
     # define supported command line arguments
     parser = argparse.ArgumentParser(
@@ -151,7 +146,7 @@ def parseArguments(argv):
     parser.add_argument('--version', action='version', version=__version__)
 
     # parse command line arguments
-    args = parser.parse_args(args=argv[1:])
+    args = parser.parse_args()
 
     # use current unix epoch timestamp by default
     if not args.timestamp:
@@ -384,11 +379,10 @@ def send_heartbeat(project=None, branch=None, hostname=None, stats={}, key=None,
     return False
 
 
-def main(argv=None):
-    if not argv:
-        argv = sys.argv
+def main(argv):
+    sys.argv = ['wakatime'] + argv
 
-    args, configs = parseArguments(argv)
+    args, configs = parseArguments()
     if configs is None:
         return 103 # config file parsing error
 

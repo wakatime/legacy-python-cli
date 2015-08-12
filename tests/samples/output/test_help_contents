@@ -1,10 +1,10 @@
-usage: nosetests [-h] --file file [--key KEY] [--write] [--plugin PLUGIN]
-                 [--time time] [--lineno LINENO] [--cursorpos CURSORPOS]
-                 [--notfile] [--proxy PROXY] [--project PROJECT]
-                 [--alternate-project ALTERNATE_PROJECT] [--hostname HOSTNAME]
-                 [--disableoffline] [--hidefilenames] [--exclude EXCLUDE]
-                 [--include INCLUDE] [--logfile LOGFILE] [--apiurl API_URL]
-                 [--config CONFIG] [--verbose] [--version]
+usage: wakatime [-h] --file file [--key KEY] [--write] [--plugin PLUGIN]
+                [--time time] [--lineno LINENO] [--cursorpos CURSORPOS]
+                [--notfile] [--proxy PROXY] [--project PROJECT]
+                [--alternate-project ALTERNATE_PROJECT] [--hostname HOSTNAME]
+                [--disableoffline] [--hidefilenames] [--exclude EXCLUDE]
+                [--include INCLUDE] [--logfile LOGFILE] [--apiurl API_URL]
+                [--config CONFIG] [--verbose] [--version]
 
 Common interface for the WakaTime api.
 
