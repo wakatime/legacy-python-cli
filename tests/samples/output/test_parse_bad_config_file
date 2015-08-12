@@ -1,9 +1,0 @@
-Traceback (most recent call last):
-  File "/Users/alanhamlett/git/wakatime-cli/wakatime/base.py", line 73, in parseConfigFile
-    configs.readfp(fh)
-  File "/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/ConfigParser.py", line 324, in readfp
-    self._read(fp, filename)
-  File "/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/ConfigParser.py", line 546, in _read
-    raise e
-ParsingError: File contains parsing errors: tests/samples/bad_config.cfg
-[line  2]: u'api_key\n'
