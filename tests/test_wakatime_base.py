@@ -29,10 +29,11 @@ class BaseTestCase(utils.TestCase):
         response = Response()
         response.status_code = 201
         mock_requests.return_value = response
-        args = ['', '--file', 'tests/samples/emptyfile.txt', '--key', '123']
+        args = ['', '--file', 'tests/samples/emptyfile.txt', '--key', '123', '--config', 'foo']
         retval = main(args)
         self.assertEquals(retval, 0)
-        self.assertEquals(sys.stdout.getvalue(), '')
+        expected_stdout = u("Error: Could not read from config file foo\n")
+        self.assertEquals(sys.stdout.getvalue(), expected_stdout)
         self.assertEquals(sys.stderr.getvalue(), '')
 
     def test_missing_config_file(self, mock_requests):
@@ -58,5 +59,5 @@ class BaseTestCase(utils.TestCase):
         args = ['', '--file', 'tests/samples/emptyfile.txt', '--config', 'tests/samples/bad_config.cfg']
         retval = main(args)
         self.assertEquals(retval, 103)
-        self.assertTrue('ParsingError' in sys.stdout.getvalue())
+        self.assertIn('ParsingError', sys.stdout.getvalue())
         self.assertEquals(sys.stderr.getvalue(), '')
