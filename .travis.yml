@@ -8,7 +8,10 @@ python:
 install: 
     - if [[ $TRAVIS_PYTHON_VERSION == '2.6' ]]; then travis_retry pip install --use-mirrors unittest2; fi
     - travis_retry pip install --use-mirrors -r dev-requirements.txt
+    - travis_retry pip install --use-mirrors coveralls
 # command to run tests
 script: nosetests
 # use new travis-ci container-based infrastructure
 sudo: false
+after_success:
+    - coveralls
