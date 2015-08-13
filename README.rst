@@ -4,6 +4,9 @@ WakaTime
 .. image:: https://travis-ci.org/wakatime/wakatime.svg
     :target: https://travis-ci.org/wakatime/wakatime
 
+.. image:: https://coveralls.io/repos/wakatime/wakatime/badge.svg?branch=master&service=github
+    :target: https://coveralls.io/github/wakatime/wakatime?branch=master
+
 Fully automatic time tracking for programmers.
 
 This is the common interface for the WakaTime api. You shouldn't need to directly use this package unless you are creating a new plugin or your text editor's plugin asks you to install the wakatime cli interface.
