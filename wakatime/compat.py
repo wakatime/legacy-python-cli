@@ -40,6 +40,7 @@ elif is_py3:  # pragma: nocover
     open = open
     basestring = (str, bytes)
 
+
 try:
     from importlib import import_module
 except ImportError:  # pragma: nocover
