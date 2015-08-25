@@ -3,6 +3,12 @@ History
 -------
 
 
+4.1.2 (2015-08-25)
+++++++++++++++++++
+
+- fix bug in offline caching which prevented heartbeats from being cleaned up
+
+
 4.1.1 (2015-08-25)
 ++++++++++++++++++
 
