@@ -3,7 +3,7 @@ History
 -------
 
 
-4.1.1 (unreleased)
+4.1.1 (2015-08-25)
 ++++++++++++++++++
 
 - send hostname in X-Machine-Name header
