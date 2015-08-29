@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
-from wakatime.base import main
+from wakatime.main import execute
 from wakatime.packages import requests
 
 import os
@@ -30,7 +30,7 @@ class BaseTestCase(utils.TestCase):
     def test_help_contents(self):
         args = ['--help']
         with self.assertRaises(SystemExit):
-            main(args)
+            execute(args)
         expected_stdout = open('tests/samples/output/test_help_contents').read()
         self.assertEquals(sys.stdout.getvalue(), expected_stdout)
         self.assertEquals(sys.stderr.getvalue(), '')
@@ -45,7 +45,7 @@ class BaseTestCase(utils.TestCase):
 
         args = ['--file', 'tests/samples/twolinefile.txt', '--key', '123', '--config', 'tests/samples/sample.cfg']
 
-        retval = main(args)
+        retval = execute(args)
         self.assertEquals(retval, 0)
         self.assertEquals(sys.stdout.getvalue(), '')
         self.assertEquals(sys.stderr.getvalue(), '')
@@ -60,7 +60,7 @@ class BaseTestCase(utils.TestCase):
     def test_missing_config_file(self):
         args = ['--file', 'tests/samples/emptyfile.txt', '--config', 'foo']
         with self.assertRaises(SystemExit):
-            main(args)
+            execute(args)
         expected_stdout = u("Error: Could not read from config file foo\n")
         expected_stderr = open('tests/samples/output/test_missing_config_file').read()
         self.assertEquals(sys.stdout.getvalue(), expected_stdout)
@@ -74,7 +74,7 @@ class BaseTestCase(utils.TestCase):
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
         args = ['--file', 'tests/samples/emptyfile.txt', '--config', 'tests/samples/sample.cfg']
-        retval = main(args)
+        retval = execute(args)
         self.assertEquals(retval, 0)
         self.assertEquals(sys.stdout.getvalue(), '')
         self.assertEquals(sys.stderr.getvalue(), '')
@@ -88,7 +88,7 @@ class BaseTestCase(utils.TestCase):
 
     def test_bad_config_file(self):
         args = ['--file', 'tests/samples/emptyfile.txt', '--config', 'tests/samples/bad_config.cfg']
-        retval = main(args)
+        retval = execute(args)
         self.assertEquals(retval, 103)
         self.assertIn('ParsingError', sys.stdout.getvalue())
         self.assertEquals(sys.stderr.getvalue(), '')
@@ -108,7 +108,7 @@ class BaseTestCase(utils.TestCase):
 
         args = ['--file', entity, '--key', '123', '--config', config, '--time', now]
 
-        retval = main(args)
+        retval = execute(args)
         self.assertEquals(retval, 102)
         self.assertEquals(sys.stdout.getvalue(), '')
         self.assertEquals(sys.stderr.getvalue(), '')
@@ -126,7 +126,7 @@ class BaseTestCase(utils.TestCase):
             'time': float(now),
             'type': 'file',
         }
-        stats = '{"cursorpos": null, "dependencies": [], "lines": 2, "lineno": null, "language": "Text only"}'
+        stats = ANY
 
         self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, stats, None)
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
@@ -142,7 +142,7 @@ class BaseTestCase(utils.TestCase):
 
         args = ['--file', entity, '--key', '123', '--config', config, '--time', now]
 
-        retval = main(args)
+        retval = execute(args)
         self.assertEquals(retval, 102)
         self.assertEquals(sys.stdout.getvalue(), '')
         self.assertEquals(sys.stderr.getvalue(), '')
@@ -160,7 +160,7 @@ class BaseTestCase(utils.TestCase):
             'time': float(now),
             'type': 'file',
         }
-        stats = '{"cursorpos": null, "dependencies": [], "lines": 2, "lineno": null, "language": "Text only"}'
+        stats = ANY
 
         self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, stats, None)
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
@@ -176,7 +176,7 @@ class BaseTestCase(utils.TestCase):
                 '--config', 'tests/samples/paranoid.cfg', '--time', now]
 
 
-        retval = main(args)
+        retval = execute(args)
         self.assertEquals(retval, 102)
         self.assertEquals(sys.stdout.getvalue(), '')
         self.assertEquals(sys.stderr.getvalue(), '')
@@ -194,7 +194,7 @@ class BaseTestCase(utils.TestCase):
             'time': float(now),
             'type': 'file',
         }
-        stats = '{"cursorpos": null, "dependencies": [], "lines": 2, "lineno": null, "language": "Text only"}'
+        stats = ANY
 
         self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, stats, None)
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
@@ -210,7 +210,7 @@ class BaseTestCase(utils.TestCase):
                 '--config', 'tests/samples/paranoid.cfg', '--time', now]
 
 
-        retval = main(args)
+        retval = execute(args)
         self.assertEquals(retval, 102)
         self.assertEquals(sys.stdout.getvalue(), '')
         self.assertEquals(sys.stderr.getvalue(), '')
@@ -233,7 +233,7 @@ class BaseTestCase(utils.TestCase):
 
         args = ['--file', entity, '--alternate-project', 'xyz', '--config', config, '--time', now]
 
-        retval = main(args)
+        retval = execute(args)
         self.assertEquals(retval, 102)
         self.assertEquals(sys.stdout.getvalue(), '')
         self.assertEquals(sys.stderr.getvalue(), '')
@@ -251,7 +251,7 @@ class BaseTestCase(utils.TestCase):
             'time': float(now),
             'type': 'file',
         }
-        stats = '{"cursorpos": null, "dependencies": [], "lines": 2, "lineno": null, "language": "Text only"}'
+        stats = ANY
 
         self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, stats, None)
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
@@ -267,7 +267,7 @@ class BaseTestCase(utils.TestCase):
 
         args = ['--file', entity, '--project', 'xyz', '--config', config, '--time', now]
 
-        retval = main(args)
+        retval = execute(args)
         self.assertEquals(retval, 102)
         self.assertEquals(sys.stdout.getvalue(), '')
         self.assertEquals(sys.stderr.getvalue(), '')
@@ -285,7 +285,7 @@ class BaseTestCase(utils.TestCase):
             'time': float(now),
             'type': 'file',
         }
-        stats = '{"cursorpos": null, "dependencies": [], "lines": 2, "lineno": null, "language": "Text only"}'
+        stats = ANY
 
         self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, stats, None)
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()

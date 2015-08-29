@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
-from wakatime.base import main
+from wakatime.main import execute
 from wakatime.packages import requests
 
 import os
@@ -38,7 +38,7 @@ class LanguagesTestCase(utils.TestCase):
 
         args = ['--file', entity, '--config', config, '--time', now]
 
-        retval = main(args)
+        retval = execute(args)
         self.assertEquals(retval, 102)
         self.assertEquals(sys.stdout.getvalue(), '')
         self.assertEquals(sys.stderr.getvalue(), '')
@@ -48,16 +48,19 @@ class LanguagesTestCase(utils.TestCase):
         self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
 
         heartbeat = {
-            'language': 'Python',
+            'language': u('Python'),
             'lines': 26,
             'entity': os.path.abspath(entity),
-            'project': os.path.basename(os.path.abspath('.')),
-            'dependencies': ['wakatime', 'os', 'mock', 'simplejson', 'django'],
+            'project': u(os.path.basename(os.path.abspath('.'))),
+            'dependencies': ANY,
             'branch': os.environ.get('TRAVIS_COMMIT', ANY),
             'time': float(now),
             'type': 'file',
         }
-        stats = '{"cursorpos": null, "dependencies": ["wakatime", "os", "mock", "simplejson", "django"], "lines": 26, "lineno": null, "language": "Python"}'
+        stats = ANY
+        expected_dependencies = ['wakatime', 'mock', 'django', 'simplejson', 'os']
 
         self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, stats, None)
+        for dep in expected_dependencies:
+            self.assertIn(dep, self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['dependencies'])
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()

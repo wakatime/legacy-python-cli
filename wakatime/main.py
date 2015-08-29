@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-    wakatime.base
+    wakatime.main
     ~~~~~~~~~~~~~
 
     wakatime module entry point.
@@ -109,9 +109,9 @@ def parseArguments():
             help='optional line number; current line being edited')
     parser.add_argument('--cursorpos', dest='cursorpos',
             help='optional cursor position in the current file')
-    parser.add_argument('--notfile', dest='notfile', action='store_true',
-            help='when set, will accept any value for the file. for example, '+
-                 'a domain name or other item you want to log time towards.')
+    parser.add_argument('--entitytype', dest='entity_type',
+            help='entity type for this heartbeat. can be one of "file", '+
+                 '"url", or "domain"; defaults to file.')
     parser.add_argument('--proxy', dest='proxy',
                         help='optional https proxy url; for example: '+
                         'https://user:pass@localhost:8080')
@@ -168,6 +168,8 @@ def parseArguments():
             args.key = default_key
         else:
             parser.error('Missing api key')
+    if not args.entity_type:
+        args.entity_type = 'file'
     if not args.exclude:
         args.exclude = []
     if configs.has_option('settings', 'ignore'):
@@ -263,7 +265,7 @@ def get_user_agent(plugin):
 
 
 def send_heartbeat(project=None, branch=None, hostname=None, stats={}, key=None, targetFile=None,
-        timestamp=None, isWrite=None, plugin=None, offline=None, notfile=False,
+        timestamp=None, isWrite=None, plugin=None, offline=None, entity_type='file',
         hidefilenames=None, proxy=None, api_url=None, **kwargs):
     """Sends heartbeat as POST request to WakaTime api server.
     """
@@ -274,9 +276,9 @@ def send_heartbeat(project=None, branch=None, hostname=None, stats={}, key=None,
     data = {
         'time': timestamp,
         'entity': targetFile,
-        'type': 'file',
+        'type': entity_type,
     }
-    if hidefilenames and targetFile is not None and not notfile:
+    if hidefilenames and targetFile is not None and entity_type == 'file':
         extension = u(os.path.splitext(data['entity'])[1])
         data['entity'] = u('HIDDEN{0}').format(extension)
     if stats.get('lines'):
@@ -379,7 +381,7 @@ def send_heartbeat(project=None, branch=None, hostname=None, stats={}, key=None,
     return False
 
 
-def main(argv):
+def execute(argv):
     sys.argv = ['wakatime'] + argv
 
     args, configs = parseArguments()
@@ -395,14 +397,15 @@ def main(argv):
         ))
         return 0
 
-    if os.path.isfile(args.targetFile) or args.notfile:
+    if args.entity_type != 'file' or os.path.isfile(args.targetFile):
 
-        stats = get_file_stats(args.targetFile, notfile=args.notfile,
+        stats = get_file_stats(args.targetFile, entity_type=args.entity_type,
                                lineno=args.lineno, cursorpos=args.cursorpos)
 
-        project, branch = None, None
-        if not args.notfile:
-            project, branch = get_project_info(configs=configs, args=args)
+        project = args.project or args.alternate_project
+        branch = None
+        if args.entity_type == 'file':
+            project, branch = get_project_info(configs, args)
 
         kwargs = vars(args)
         kwargs['project'] = project
@@ -428,7 +431,7 @@ def main(argv):
                     plugin=heartbeat['plugin'],
                     offline=args.offline,
                     hidefilenames=args.hidefilenames,
-                    notfile=args.notfile,
+                    entity_type=heartbeat['type'],
                     proxy=args.proxy,
                     api_url=args.api_url,
                 )

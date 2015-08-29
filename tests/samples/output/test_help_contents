@@ -1,6 +1,6 @@
 usage: wakatime [-h] --file file [--key KEY] [--write] [--plugin PLUGIN]
                 [--time time] [--lineno LINENO] [--cursorpos CURSORPOS]
-                [--notfile] [--proxy PROXY] [--project PROJECT]
+                [--entitytype ENTITY_TYPE] [--proxy PROXY] [--project PROJECT]
                 [--alternate-project ALTERNATE_PROJECT] [--hostname HOSTNAME]
                 [--disableoffline] [--hidefilenames] [--exclude EXCLUDE]
                 [--include INCLUDE] [--logfile LOGFILE] [--apiurl API_URL]
@@ -22,9 +22,9 @@ optional arguments:
   --lineno LINENO       optional line number; current line being edited
   --cursorpos CURSORPOS
                         optional cursor position in the current file
-  --notfile             when set, will accept any value for the file. for
-                        example, a domain name or other item you want to log
-                        time towards.
+  --entitytype ENTITY_TYPE
+                        entity type for this heartbeat. can be one of "file",
+                        "url", or "domain"; defaults to file.
   --proxy PROXY         optional https proxy url; for example:
                         https://user:pass@localhost:8080
   --project PROJECT     optional project name
