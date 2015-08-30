@@ -12,6 +12,10 @@ from wakatime.packages.requests.models import Response
 from . import utils
 
 try:
+    from .packages import simplejson as json
+except (ImportError, SyntaxError):
+    import json
+try:
     from mock import ANY
 except ImportError:
     from unittest.mock import ANY
@@ -126,9 +130,16 @@ class BaseTestCase(utils.TestCase):
             'time': float(now),
             'type': 'file',
         }
-        stats = ANY
+        stats = {
+            u('cursorpos'): None,
+            u('dependencies'): [],
+            u('language'): u('Text only'),
+            u('lineno'): None,
+            u('lines'): 2,
+        }
 
-        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, stats, None)
+        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, ANY, None)
+        self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
     def test_hidden_filename(self):
@@ -160,9 +171,16 @@ class BaseTestCase(utils.TestCase):
             'time': float(now),
             'type': 'file',
         }
-        stats = ANY
+        stats = {
+            u('cursorpos'): None,
+            u('dependencies'): [],
+            u('language'): u('Text only'),
+            u('lineno'): None,
+            u('lines'): 2,
+        }
 
-        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, stats, None)
+        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, ANY, None)
+        self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
     def test_500_response(self):
@@ -194,9 +212,16 @@ class BaseTestCase(utils.TestCase):
             'time': float(now),
             'type': 'file',
         }
-        stats = ANY
+        stats = {
+            u('cursorpos'): None,
+            u('dependencies'): [],
+            u('language'): u('Text only'),
+            u('lineno'): None,
+            u('lines'): 2,
+        }
 
-        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, stats, None)
+        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, ANY, None)
+        self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
     def test_400_response(self):
@@ -251,9 +276,16 @@ class BaseTestCase(utils.TestCase):
             'time': float(now),
             'type': 'file',
         }
-        stats = ANY
+        stats = {
+            u('cursorpos'): None,
+            u('dependencies'): [],
+            u('language'): u('Text only'),
+            u('lineno'): None,
+            u('lines'): 2,
+        }
 
-        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, stats, None)
+        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, ANY, None)
+        self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
     def test_set_project_from_command_line(self):
@@ -285,7 +317,14 @@ class BaseTestCase(utils.TestCase):
             'time': float(now),
             'type': 'file',
         }
-        stats = ANY
+        stats = {
+            u('cursorpos'): None,
+            u('dependencies'): [],
+            u('language'): u('Text only'),
+            u('lineno'): None,
+            u('lines'): 2,
+        }
 
-        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, stats, None)
+        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, ANY, None)
+        self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()

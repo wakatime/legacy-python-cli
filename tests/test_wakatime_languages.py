@@ -12,6 +12,10 @@ from wakatime.packages.requests.models import Response
 from . import utils
 
 try:
+    from .packages import simplejson as json
+except (ImportError, SyntaxError):
+    import json
+try:
     from mock import ANY
 except ImportError:
     from unittest.mock import ANY
@@ -57,10 +61,18 @@ class LanguagesTestCase(utils.TestCase):
             'time': float(now),
             'type': 'file',
         }
-        stats = ANY
+        stats = {
+            u('cursorpos'): None,
+            u('dependencies'): ANY,
+            u('language'): u('Python'),
+            u('lineno'): None,
+            u('lines'): 26,
+        }
+        expected_dependencies = ['wakatime', 'mock', 'django', 'simplejson', 'os']
         expected_dependencies = ['wakatime', 'mock', 'django', 'simplejson', 'os']
 
-        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, stats, None)
+        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, ANY, None)
         for dep in expected_dependencies:
             self.assertIn(dep, self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['dependencies'])
+        self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
