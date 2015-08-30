@@ -1,4 +1,4 @@
-usage: wakatime [-h] --file file [--key KEY] [--write] [--plugin PLUGIN]
+usage: wakatime [-h] [--entity FILE] [--key KEY] [--write] [--plugin PLUGIN]
                 [--time time] [--lineno LINENO] [--cursorpos CURSORPOS]
                 [--entitytype ENTITY_TYPE] [--proxy PROXY] [--project PROJECT]
                 [--alternate-project ALTERNATE_PROJECT] [--hostname HOSTNAME]
@@ -10,7 +10,8 @@ Common interface for the WakaTime api.
 
 optional arguments:
   -h, --help            show this help message and exit
-  --file file           absolute path to file for current heartbeat
+  --entity FILE         absolute path to file for the heartbeat; can also be a
+                        url, domain, or app when --entitytype is not file
   --key KEY             your wakatime api key; uses api_key from
                         ~/.wakatime.conf by default
   --write               when set, tells api this heartbeat was triggered from
@@ -24,7 +25,7 @@ optional arguments:
                         optional cursor position in the current file
   --entitytype ENTITY_TYPE
                         entity type for this heartbeat. can be one of "file",
-                        "url", or "domain"; defaults to file.
+                        "url", "domain", or "app"; defaults to file.
   --proxy PROXY         optional https proxy url; for example:
                         https://user:pass@localhost:8080
   --project PROJECT     optional project name
