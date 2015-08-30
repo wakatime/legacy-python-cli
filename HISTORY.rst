@@ -3,6 +3,12 @@ History
 -------
 
 
+4.1.4 (2015-08-29)
+++++++++++++++++++
+
+- new --entity and --entitytype command line arguments
+
+
 4.1.3 (2015-08-28)
 ++++++++++++++++++
 
