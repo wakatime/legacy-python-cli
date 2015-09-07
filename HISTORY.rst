@@ -3,6 +3,12 @@ History
 -------
 
 
+4.1.6 (2015-09-06)
+++++++++++++++++++
+
+- allow passing command line arguments using sys.argv
+
+
 4.1.5 (2015-09-06)
 ++++++++++++++++++
 
