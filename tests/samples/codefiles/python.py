@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# vim: set filetype=python
 
 
 import os

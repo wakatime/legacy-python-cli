@@ -63,7 +63,7 @@ def smart_guess_lexer(file_name):
         lexer = lexer1
     if (lexer2 and accuracy2 and
         (not accuracy1 or accuracy2 > accuracy1)):
-        lexer = lexer2
+        lexer = lexer2  # pragma: nocover
 
     return lexer
 
@@ -84,7 +84,7 @@ def guess_lexer_using_filename(file_name, text):
     if lexer is not None:
         try:
             accuracy = lexer.analyse_text(text)
-        except:
+        except:  # pragma: nocover
             pass
 
     return lexer, accuracy
@@ -101,19 +101,19 @@ def guess_lexer_using_modeline(text):
     file_type = None
     try:
         file_type = get_filetype_from_buffer(text)
-    except:
+    except:  # pragma: nocover
         pass
 
     if file_type is not None:
         try:
             lexer = get_lexer_by_name(file_type)
-        except ClassNotFound:
+        except ClassNotFound:  # pragma: nocover
             pass
 
     if lexer is not None:
         try:
             accuracy = lexer.analyse_text(text)
-        except:
+        except:  # pragma: nocover
             pass
 
     return lexer, accuracy

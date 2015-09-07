@@ -53,7 +53,7 @@ class LanguagesTestCase(utils.TestCase):
 
         heartbeat = {
             'language': u('Python'),
-            'lines': 26,
+            'lines': 27,
             'entity': os.path.realpath(entity),
             'project': u(os.path.basename(os.path.realpath('.'))),
             'dependencies': ANY,
@@ -66,7 +66,7 @@ class LanguagesTestCase(utils.TestCase):
             u('dependencies'): ANY,
             u('language'): u('Python'),
             u('lineno'): None,
-            u('lines'): 26,
+            u('lines'): 27,
         }
         expected_dependencies = ['wakatime', 'mock', 'django', 'simplejson', 'os']
         expected_dependencies = ['wakatime', 'mock', 'django', 'simplejson', 'os']
