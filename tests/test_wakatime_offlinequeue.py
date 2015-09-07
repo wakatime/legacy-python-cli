@@ -6,6 +6,7 @@ from wakatime.offlinequeue import Queue
 from wakatime.packages import requests
 
 import os
+import tempfile
 import time
 from wakatime.compat import u
 from wakatime.packages.requests.models import Response
@@ -29,12 +30,12 @@ class OfflineQueueTestCase(utils.TestCase):
         entity = 'tests/samples/twolinefile.txt'
         config = 'tests/samples/sample.cfg'
 
-        args = ['--file', entity, '--alternate-project', 'xyz', '--config', config, '--time', now]
+        args = ['--file', entity, '--config', config, '--time', now]
         execute(args)
 
         queue = Queue()
         saved_heartbeat = queue.pop()
-        self.assertEquals(os.path.abspath(entity), saved_heartbeat['entity'])
+        self.assertEquals(os.path.realpath(entity), saved_heartbeat['entity'])
 
     def test_heartbeat_discarded_from_400_response(self):
         response = Response()
@@ -45,7 +46,7 @@ class OfflineQueueTestCase(utils.TestCase):
         entity = 'tests/samples/twolinefile.txt'
         config = 'tests/samples/sample.cfg'
 
-        args = ['--file', entity, '--alternate-project', 'xyz', '--config', config, '--time', now]
+        args = ['--file', entity, '--config', config, '--time', now]
         execute(args)
 
         queue = Queue()
@@ -61,7 +62,7 @@ class OfflineQueueTestCase(utils.TestCase):
         entity = 'tests/samples/twolinefile.txt'
         config = 'tests/samples/sample.cfg'
 
-        args = ['--file', entity, '--alternate-project', 'xyz', '--config', config, '--time', now]
+        args = ['--file', entity, '--config', config, '--time', now]
         execute(args)
 
         response.status_code = 201
@@ -70,3 +71,21 @@ class OfflineQueueTestCase(utils.TestCase):
         queue = Queue()
         saved_heartbeat = queue.pop()
         self.assertEquals(None, saved_heartbeat)
+
+    def test_empty_project_can_be_saved(self):
+        response = Response()
+        response.status_code = 500
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        with tempfile.NamedTemporaryFile() as fh:
+
+            now = u(int(time.time()))
+            entity = fh.name
+            config = 'tests/samples/sample.cfg'
+
+            args = ['--file', entity, '--config', config, '--time', now]
+            execute(args)
+
+            queue = Queue()
+            saved_heartbeat = queue.pop()
+            self.assertEquals(os.path.realpath(entity), saved_heartbeat['entity'])
