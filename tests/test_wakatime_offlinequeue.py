@@ -27,7 +27,7 @@ class OfflineQueueTestCase(utils.TestCase):
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
         now = u(int(time.time()))
-        entity = 'tests/samples/twolinefile.txt'
+        entity = 'tests/samples/codefiles/twolinefile.txt'
         config = 'tests/samples/sample.cfg'
 
         args = ['--file', entity, '--config', config, '--time', now]
@@ -43,7 +43,7 @@ class OfflineQueueTestCase(utils.TestCase):
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
         now = u(int(time.time()))
-        entity = 'tests/samples/twolinefile.txt'
+        entity = 'tests/samples/codefiles/twolinefile.txt'
         config = 'tests/samples/sample.cfg'
 
         args = ['--file', entity, '--config', config, '--time', now]
@@ -59,7 +59,7 @@ class OfflineQueueTestCase(utils.TestCase):
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
         now = u(int(time.time()))
-        entity = 'tests/samples/twolinefile.txt'
+        entity = 'tests/samples/codefiles/twolinefile.txt'
         config = 'tests/samples/sample.cfg'
 
         args = ['--file', entity, '--config', config, '--time', now]

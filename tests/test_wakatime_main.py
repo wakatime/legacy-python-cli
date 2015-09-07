@@ -47,7 +47,7 @@ class BaseTestCase(utils.TestCase):
         response.status_code = 201
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
-        args = ['--file', 'tests/samples/twolinefile.txt', '--key', '123', '--config', 'tests/samples/sample.cfg']
+        args = ['--file', 'tests/samples/codefiles/twolinefile.txt', '--key', '123', '--config', 'tests/samples/sample.cfg']
 
         retval = execute(args)
         self.assertEquals(retval, 0)
@@ -62,7 +62,7 @@ class BaseTestCase(utils.TestCase):
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_called_once_with()
 
     def test_missing_config_file(self):
-        args = ['--file', 'tests/samples/emptyfile.txt', '--config', 'foo']
+        args = ['--file', 'tests/samples/codefiles/emptyfile.txt', '--config', 'foo']
         with self.assertRaises(SystemExit):
             execute(args)
         expected_stdout = u("Error: Could not read from config file foo\n")
@@ -77,7 +77,7 @@ class BaseTestCase(utils.TestCase):
         response.status_code = 201
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
-        args = ['--file', 'tests/samples/emptyfile.txt', '--config', 'tests/samples/sample.cfg']
+        args = ['--file', 'tests/samples/codefiles/emptyfile.txt', '--config', 'tests/samples/sample.cfg']
         retval = execute(args)
         self.assertEquals(retval, 0)
         self.assertEquals(sys.stdout.getvalue(), '')
@@ -91,7 +91,7 @@ class BaseTestCase(utils.TestCase):
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_called_once_with()
 
     def test_bad_config_file(self):
-        args = ['--file', 'tests/samples/emptyfile.txt', '--config', 'tests/samples/bad_config.cfg']
+        args = ['--file', 'tests/samples/codefiles/emptyfile.txt', '--config', 'tests/samples/bad_config.cfg']
         retval = execute(args)
         self.assertEquals(retval, 103)
         self.assertIn('ParsingError', sys.stdout.getvalue())
@@ -107,7 +107,7 @@ class BaseTestCase(utils.TestCase):
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
         now = u(int(time.time()))
-        entity = 'tests/samples/twolinefile.txt'
+        entity = 'tests/samples/codefiles/twolinefile.txt'
         config = 'tests/samples/sample.cfg'
 
         args = ['--file', entity, '--key', '123', '--config', config, '--time', now]
@@ -148,7 +148,7 @@ class BaseTestCase(utils.TestCase):
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
         now = u(int(time.time()))
-        entity = 'tests/samples/twolinefile.txt'
+        entity = 'tests/samples/codefiles/twolinefile.txt'
         config = 'tests/samples/paranoid.cfg'
 
         args = ['--file', entity, '--key', '123', '--config', config, '--time', now]
@@ -190,7 +190,7 @@ class BaseTestCase(utils.TestCase):
 
         now = u(int(time.time()))
 
-        args = ['--file', 'tests/samples/twolinefile.txt', '--key', '123',
+        args = ['--file', 'tests/samples/codefiles/twolinefile.txt', '--key', '123',
                 '--config', 'tests/samples/paranoid.cfg', '--time', now]
 
 
@@ -231,7 +231,7 @@ class BaseTestCase(utils.TestCase):
 
         now = u(int(time.time()))
 
-        args = ['--file', 'tests/samples/twolinefile.txt', '--key', '123',
+        args = ['--file', 'tests/samples/codefiles/twolinefile.txt', '--key', '123',
                 '--config', 'tests/samples/paranoid.cfg', '--time', now]
 
 
@@ -253,7 +253,7 @@ class BaseTestCase(utils.TestCase):
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
         now = u(int(time.time()))
-        entity = 'tests/samples/twolinefile.txt'
+        entity = 'tests/samples/codefiles/twolinefile.txt'
         config = 'tests/samples/sample.cfg'
 
         args = ['--file', entity, '--alternate-project', 'xyz', '--config', config, '--time', now]
@@ -294,7 +294,7 @@ class BaseTestCase(utils.TestCase):
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
         now = u(int(time.time()))
-        entity = 'tests/samples/twolinefile.txt'
+        entity = 'tests/samples/codefiles/twolinefile.txt'
         config = 'tests/samples/sample.cfg'
 
         args = ['--file', entity, '--project', 'xyz', '--config', config, '--time', now]

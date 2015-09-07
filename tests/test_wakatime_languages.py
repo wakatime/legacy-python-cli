@@ -37,7 +37,7 @@ class LanguagesTestCase(utils.TestCase):
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
         now = u(int(time.time()))
-        entity = 'tests/samples/codefile.py'
+        entity = 'tests/samples/codefiles/python.py'
         config = 'tests/samples/sample.cfg'
 
         args = ['--file', entity, '--config', config, '--time', now]
@@ -54,8 +54,8 @@ class LanguagesTestCase(utils.TestCase):
         heartbeat = {
             'language': u('Python'),
             'lines': 26,
-            'entity': os.path.abspath(entity),
-            'project': u(os.path.basename(os.path.abspath('.'))),
+            'entity': os.path.realpath(entity),
+            'project': u(os.path.basename(os.path.realpath('.'))),
             'dependencies': ANY,
             'branch': os.environ.get('TRAVIS_COMMIT', ANY),
             'time': float(now),
@@ -76,3 +76,30 @@ class LanguagesTestCase(utils.TestCase):
             self.assertIn(dep, self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['dependencies'])
         self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
+
+    def test_language_detected_for_header_file(self):
+        response = Response()
+        response.status_code = 500
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        now = u(int(time.time()))
+        config = 'tests/samples/sample.cfg'
+
+        entity = 'tests/samples/codefiles/see.h'
+
+        args = ['--file', entity, '--config', config, '--time', now]
+
+        retval = execute(args)
+        self.assertEquals(retval, 102)
+
+        language = u('C')
+        self.assertEqual(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['language'], language)
+
+        entity = 'tests/samples/codefiles/seeplusplus.h'
+        args[1] = entity
+
+        retval = execute(args)
+        self.assertEquals(retval, 102)
+
+        language = u('C++')
+        self.assertEqual(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['language'], language)
