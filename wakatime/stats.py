@@ -132,7 +132,7 @@ def get_language_from_extension(file_name):
     if extension == '.h':
         directory = os.path.dirname(file_name)
         available_files = os.listdir(directory)
-        available_extensions = zip(*map(os.path.splitext, available_files))[1]
+        available_extensions = list(zip(*map(os.path.splitext, available_files)))[1]
         available_extensions = [ext.lower() for ext in available_extensions]
         if '.cpp' in available_extensions:
             return 'C++'
