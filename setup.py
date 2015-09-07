@@ -30,7 +30,7 @@ setup(
     zip_safe=False,
     platforms='any',
     entry_points={
-        'console_scripts': ['wakatime = wakatime.__init__:main'],
+        'console_scripts': ['wakatime = wakatime.__init__:execute'],
     },
     classifiers=(
         'Development Status :: 5 - Production/Stable',
