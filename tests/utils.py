@@ -3,9 +3,9 @@
 import logging
 
 try:
-    from mock import patch
+    import mock
 except ImportError:
-    from unittest.mock import patch
+    import unittest.mock as mock
 try:
     # Python 2.6
     import unittest2 as unittest
@@ -25,7 +25,7 @@ class TestCase(unittest.TestCase):
             for patch_this in self.patch_these:
                 namespace = patch_this[0] if isinstance(patch_this, (list, set)) else patch_this
 
-                patcher = patch(namespace)
+                patcher = mock.patch(namespace)
                 mocked = patcher.start()
                 self.patched[namespace] = mocked
 
@@ -36,4 +36,4 @@ class TestCase(unittest.TestCase):
                     mocked.return_value = retval
 
     def tearDown(self):
-        patch.stopall()
+        mock.patch.stopall()
