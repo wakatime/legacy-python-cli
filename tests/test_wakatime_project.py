@@ -94,3 +94,24 @@ class LanguagesTestCase(utils.TestCase):
                 execute(args)
 
                 self.assertEquals('svn', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
+
+    def test_project_map(self):
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        with tempfile.NamedTemporaryFile() as fh:
+            now = u(int(time.time()))
+            entity = 'tests/samples/projects/project_map/emptyfile.txt'
+
+            fh.write(open('tests/samples/project_map.cfg').read())
+            fh.write('{0} = proj-map'.format(os.path.realpath(os.path.dirname(entity))))
+            fh.flush()
+
+            config = fh.name
+
+            args = ['--file', entity, '--config', config, '--time', now]
+
+            execute(args)
+
+            self.assertEquals('proj-map', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
