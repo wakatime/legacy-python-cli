@@ -77,7 +77,7 @@ class OfflineQueueTestCase(utils.TestCase):
         response.status_code = 500
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
-        with tempfile.NamedTemporaryFile() as fh:
+        with tempfile.NamedTemporaryFile(suffix='.txt') as fh:
 
             now = u(int(time.time()))
             entity = fh.name
