@@ -84,9 +84,7 @@ class LanguagesTestCase(utils.TestCase):
 
         now = u(int(time.time()))
         config = 'tests/samples/sample.cfg'
-
         entity = 'tests/samples/codefiles/see.h'
-
         args = ['--file', entity, '--config', config, '--time', now]
 
         retval = execute(args)
@@ -97,6 +95,38 @@ class LanguagesTestCase(utils.TestCase):
 
         entity = 'tests/samples/codefiles/seeplusplus.h'
         args[1] = entity
+
+        retval = execute(args)
+        self.assertEquals(retval, 102)
+
+        language = u('C++')
+        self.assertEqual(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['language'], language)
+
+    def test_c_language_detected_for_header_with_c_files_in_folder(self):
+        response = Response()
+        response.status_code = 500
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        now = u(int(time.time()))
+        config = 'tests/samples/sample.cfg'
+        entity = 'tests/samples/codefiles/c_only/see.h'
+        args = ['--file', entity, '--config', config, '--time', now]
+
+        retval = execute(args)
+        self.assertEquals(retval, 102)
+
+        language = u('C')
+        self.assertEqual(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['language'], language)
+
+    def test_cpp_language_detected_for_header_with_c_and_cpp_files_in_folder(self):
+        response = Response()
+        response.status_code = 500
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        now = u(int(time.time()))
+        config = 'tests/samples/sample.cfg'
+        entity = 'tests/samples/codefiles/c_and_cpp/empty.h'
+        args = ['--file', entity, '--config', config, '--time', now]
 
         retval = execute(args)
         self.assertEquals(retval, 102)
