@@ -119,6 +119,25 @@ class LanguagesTestCase(utils.TestCase):
 
                     self.assertNotIn('project', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0])
 
+    def test_mercurial_project_detected(self):
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        with utils.mock.patch('wakatime.projects.git.Git.process') as mock_git:
+            mock_git.return_value = False
+
+            now = u(int(time.time()))
+            entity = 'tests/samples/projects/hg/emptyfile.txt'
+            config = 'tests/samples/sample.cfg'
+
+            args = ['--file', entity, '--config', config, '--time', now]
+
+            execute(args)
+
+            self.assertEquals('hg', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
+            self.assertEquals('test-hg-branch', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['branch'])
+
     def test_project_map(self):
         response = Response()
         response.status_code = 0
