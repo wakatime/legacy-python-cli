@@ -95,6 +95,30 @@ class LanguagesTestCase(utils.TestCase):
 
                 self.assertEquals('svn', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
 
+    def test_svn_exception_handled(self):
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        with utils.mock.patch('wakatime.projects.git.Git.process') as mock_git:
+            mock_git.return_value = False
+
+            with utils.mock.patch('wakatime.projects.subversion.Popen') as mock_popen:
+                mock_popen.side_effect = OSError('')
+
+                with utils.mock.patch('wakatime.projects.subversion.Popen.communicate') as mock_communicate:
+                    mock_communicate.side_effect = OSError('')
+
+                    now = u(int(time.time()))
+                    entity = 'tests/samples/projects/svn/emptyfile.txt'
+                    config = 'tests/samples/sample.cfg'
+
+                    args = ['--file', entity, '--config', config, '--time', now]
+
+                    execute(args)
+
+                    self.assertNotIn('project', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0])
+
     def test_project_map(self):
         response = Response()
         response.status_code = 0

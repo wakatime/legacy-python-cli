@@ -19,7 +19,7 @@ from ..compat import u, open
 try:
     from collections import OrderedDict
 except ImportError:
-    from ..packages.ordereddict import OrderedDict
+    from ..packages.ordereddict import OrderedDict  # pragma: nocover
 
 
 log = logging.getLogger('WakaTime')
@@ -69,8 +69,7 @@ class Subversion(BaseProject):
         else:
             if stdout:
                 for line in stdout.splitlines():
-                    if isinstance(line, bytes):
-                        line = bytes.decode(line)
+                    line = u(line)
                     line = line.split(': ', 1)
                     if len(line) == 2:
                         info[line[0]] = line[1]
@@ -78,7 +77,7 @@ class Subversion(BaseProject):
 
     def _find_project_base(self, path, found=False):
         if platform.system() == 'Windows':
-            return False
+            return False  # pragma: nocover
         path = os.path.realpath(path)
         if os.path.isfile(path):
             path = os.path.split(path)[0]
