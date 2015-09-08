@@ -28,7 +28,7 @@ class OfflineQueueTestCase(utils.TestCase):
 
         now = u(int(time.time()))
         entity = 'tests/samples/codefiles/twolinefile.txt'
-        config = 'tests/samples/sample.cfg'
+        config = 'tests/samples/configs/sample.cfg'
 
         args = ['--file', entity, '--config', config, '--time', now]
         execute(args)
@@ -44,7 +44,7 @@ class OfflineQueueTestCase(utils.TestCase):
 
         now = u(int(time.time()))
         entity = 'tests/samples/codefiles/twolinefile.txt'
-        config = 'tests/samples/sample.cfg'
+        config = 'tests/samples/configs/sample.cfg'
 
         args = ['--file', entity, '--config', config, '--time', now]
         execute(args)
@@ -60,7 +60,7 @@ class OfflineQueueTestCase(utils.TestCase):
 
         now = u(int(time.time()))
         entity = 'tests/samples/codefiles/twolinefile.txt'
-        config = 'tests/samples/sample.cfg'
+        config = 'tests/samples/configs/sample.cfg'
 
         args = ['--file', entity, '--config', config, '--time', now]
         execute(args)
@@ -81,7 +81,7 @@ class OfflineQueueTestCase(utils.TestCase):
 
             now = u(int(time.time()))
             entity = fh.name
-            config = 'tests/samples/sample.cfg'
+            config = 'tests/samples/configs/sample.cfg'
 
             args = ['--file', entity, '--config', config, '--time', now]
             execute(args)

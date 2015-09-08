@@ -47,7 +47,9 @@ class BaseTestCase(utils.TestCase):
         response.status_code = 201
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
-        args = ['--file', 'tests/samples/codefiles/twolinefile.txt', '--key', '123', '--config', 'tests/samples/sample.cfg']
+        entity = 'tests/samples/codefiles/twolinefile.txt'
+        config = 'tests/samples/configs/sample.cfg'
+        args = ['--file', entity, '--key', '123', '--config', config]
 
         retval = execute(args)
         self.assertEquals(retval, 0)
@@ -62,7 +64,9 @@ class BaseTestCase(utils.TestCase):
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_called_once_with()
 
     def test_missing_config_file(self):
-        args = ['--file', 'tests/samples/codefiles/emptyfile.txt', '--config', 'foo']
+        config = 'foo'
+        entity = 'tests/samples/codefiles/emptyfile.txt'
+        args = ['--file', entity, '--config', config]
         with self.assertRaises(SystemExit):
             execute(args)
         expected_stdout = u("Error: Could not read from config file foo\n")
@@ -77,7 +81,9 @@ class BaseTestCase(utils.TestCase):
         response.status_code = 201
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
-        args = ['--file', 'tests/samples/codefiles/emptyfile.txt', '--config', 'tests/samples/sample.cfg']
+        entity = 'tests/samples/codefiles/emptyfile.txt'
+        config = 'tests/samples/configs/sample.cfg'
+        args = ['--file', entity, '--config', config]
         retval = execute(args)
         self.assertEquals(retval, 0)
         self.assertEquals(sys.stdout.getvalue(), '')
@@ -91,7 +97,9 @@ class BaseTestCase(utils.TestCase):
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_called_once_with()
 
     def test_bad_config_file(self):
-        args = ['--file', 'tests/samples/codefiles/emptyfile.txt', '--config', 'tests/samples/bad_config.cfg']
+        entity = 'tests/samples/codefiles/emptyfile.txt'
+        config = 'tests/samples/configs/bad_config.cfg'
+        args = ['--file', entity, '--config', config]
         retval = execute(args)
         self.assertEquals(retval, 103)
         self.assertIn('ParsingError', sys.stdout.getvalue())
@@ -108,7 +116,7 @@ class BaseTestCase(utils.TestCase):
 
         now = u(int(time.time()))
         entity = 'tests/samples/codefiles/twolinefile.txt'
-        config = 'tests/samples/sample.cfg'
+        config = 'tests/samples/configs/sample.cfg'
 
         args = ['--file', entity, '--key', '123', '--config', config, '--time', now]
 
@@ -149,7 +157,7 @@ class BaseTestCase(utils.TestCase):
 
         now = u(int(time.time()))
         entity = 'tests/samples/codefiles/twolinefile.txt'
-        config = 'tests/samples/paranoid.cfg'
+        config = 'tests/samples/configs/paranoid.cfg'
 
         args = ['--file', entity, '--key', '123', '--config', config, '--time', now]
 
@@ -191,7 +199,7 @@ class BaseTestCase(utils.TestCase):
         now = u(int(time.time()))
 
         args = ['--file', 'tests/samples/codefiles/twolinefile.txt', '--key', '123',
-                '--config', 'tests/samples/paranoid.cfg', '--time', now]
+                '--config', 'tests/samples/configs/paranoid.cfg', '--time', now]
 
 
         retval = execute(args)
@@ -232,7 +240,7 @@ class BaseTestCase(utils.TestCase):
         now = u(int(time.time()))
 
         args = ['--file', 'tests/samples/codefiles/twolinefile.txt', '--key', '123',
-                '--config', 'tests/samples/paranoid.cfg', '--time', now]
+                '--config', 'tests/samples/configs/paranoid.cfg', '--time', now]
 
 
         retval = execute(args)
@@ -254,7 +262,7 @@ class BaseTestCase(utils.TestCase):
 
         now = u(int(time.time()))
         entity = 'tests/samples/codefiles/twolinefile.txt'
-        config = 'tests/samples/sample.cfg'
+        config = 'tests/samples/configs/sample.cfg'
 
         args = ['--file', entity, '--alternate-project', 'xyz', '--config', config, '--time', now]
 
@@ -295,7 +303,7 @@ class BaseTestCase(utils.TestCase):
 
         now = u(int(time.time()))
         entity = 'tests/samples/codefiles/twolinefile.txt'
-        config = 'tests/samples/sample.cfg'
+        config = 'tests/samples/configs/sample.cfg'
 
         args = ['--file', entity, '--project', 'xyz', '--config', config, '--time', now]
 

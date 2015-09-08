@@ -35,7 +35,7 @@ class LanguagesTestCase(utils.TestCase):
 
         now = u(int(time.time()))
         entity = 'tests/samples/codefiles/python.py'
-        config = 'tests/samples/sample.cfg'
+        config = 'tests/samples/configs/sample.cfg'
         args = ['--file', entity, '--config', config, '--time', now]
 
         retval = execute(args)
@@ -60,7 +60,7 @@ class LanguagesTestCase(utils.TestCase):
         with tempfile.NamedTemporaryFile() as fh:
             now = u(int(time.time()))
             entity = 'tests/samples/codefiles/python.py'
-            config = 'tests/samples/good_config.cfg'
+            config = 'tests/samples/configs/good_config.cfg'
             logfile = os.path.realpath(fh.name)
             args = ['--file', entity, '--config', config, '--time', now, '--logfile', logfile]
 

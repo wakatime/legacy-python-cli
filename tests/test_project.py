@@ -30,7 +30,7 @@ class LanguagesTestCase(utils.TestCase):
 
         now = u(int(time.time()))
         entity = 'tests/samples/projects/git/emptyfile.txt'
-        config = 'tests/samples/sample.cfg'
+        config = 'tests/samples/configs/sample.cfg'
 
         args = ['--project', 'forced-project', '--file', entity, '--config', config, '--time', now]
 
@@ -45,7 +45,7 @@ class LanguagesTestCase(utils.TestCase):
 
         now = u(int(time.time()))
         entity = 'tests/samples/projects/wakatime_project_file/emptyfile.txt'
-        config = 'tests/samples/sample.cfg'
+        config = 'tests/samples/configs/sample.cfg'
 
         args = ['--file', entity, '--config', config, '--time', now]
 
@@ -64,7 +64,7 @@ class LanguagesTestCase(utils.TestCase):
 
         now = u(int(time.time()))
         entity = os.path.join(tempdir, 'git', 'emptyfile.txt')
-        config = 'tests/samples/sample.cfg'
+        config = 'tests/samples/configs/sample.cfg'
 
         args = ['--file', entity, '--config', config, '--time', now]
 
@@ -81,13 +81,13 @@ class LanguagesTestCase(utils.TestCase):
             mock_git.return_value = False
 
             with utils.mock.patch('wakatime.projects.subversion.Popen.communicate') as mock_popen:
-                stdout = open('tests/samples/svn_output').read()
+                stdout = open('tests/samples/output/svn').read()
                 stderr = ''
                 mock_popen.return_value = (stdout, stderr)
 
                 now = u(int(time.time()))
                 entity = 'tests/samples/projects/svn/emptyfile.txt'
-                config = 'tests/samples/sample.cfg'
+                config = 'tests/samples/configs/sample.cfg'
 
                 args = ['--file', entity, '--config', config, '--time', now]
 
@@ -111,7 +111,7 @@ class LanguagesTestCase(utils.TestCase):
 
                     now = u(int(time.time()))
                     entity = 'tests/samples/projects/svn/emptyfile.txt'
-                    config = 'tests/samples/sample.cfg'
+                    config = 'tests/samples/configs/sample.cfg'
 
                     args = ['--file', entity, '--config', config, '--time', now]
 
@@ -129,7 +129,7 @@ class LanguagesTestCase(utils.TestCase):
 
             now = u(int(time.time()))
             entity = 'tests/samples/projects/hg/emptyfile.txt'
-            config = 'tests/samples/sample.cfg'
+            config = 'tests/samples/configs/sample.cfg'
 
             args = ['--file', entity, '--config', config, '--time', now]
 
@@ -147,7 +147,7 @@ class LanguagesTestCase(utils.TestCase):
             now = u(int(time.time()))
             entity = 'tests/samples/projects/project_map/emptyfile.txt'
 
-            fh.write(open('tests/samples/project_map.cfg').read().encode('utf-8'))
+            fh.write(open('tests/samples/configs/project_map.cfg').read().encode('utf-8'))
             fh.write('{0} = proj-map'.format(os.path.realpath(os.path.dirname(os.path.dirname(entity)))).encode('utf-8'))
             fh.flush()
 
