@@ -32,10 +32,14 @@ class Subversion(BaseProject):
         return self._find_project_base(self.path)
 
     def name(self):
-        return u(self.info['Repository Root'].split('/')[-1])
+        if 'Repository Root' not in self.info:
+            return None
+        return u(self.info['Repository Root'].split('/')[-1].split('\\')[-1])
 
     def branch(self):
-        return u(self.info['URL'].split('/')[-1])
+        if 'URL' not in self.info:
+            return None
+        return u(self.info['URL'].split('/')[-1].split('\\')[-1])
 
     def _find_binary(self):
         if self.binary_location:
