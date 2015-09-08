@@ -426,8 +426,7 @@ def execute(argv=None):
         kwargs['stats'] = stats
         kwargs['hostname'] = args.hostname or socket.gethostname()
 
-        rv = send_heartbeat(**kwargs)
-        if rv:
+        if send_heartbeat(**kwargs):
             queue = Queue()
             while True:
                 heartbeat = queue.pop()
