@@ -104,8 +104,8 @@ class LanguagesTestCase(utils.TestCase):
             now = u(int(time.time()))
             entity = 'tests/samples/projects/project_map/emptyfile.txt'
 
-            fh.write(open('tests/samples/project_map.cfg').read())
-            fh.write('{0} = proj-map'.format(os.path.realpath(os.path.dirname(entity))))
+            fh.write(open('tests/samples/project_map.cfg').read().encode('utf-8'))
+            fh.write('{0} = proj-map'.format(os.path.realpath(os.path.dirname(entity))).encode('utf-8'))
             fh.flush()
 
             config = fh.name
