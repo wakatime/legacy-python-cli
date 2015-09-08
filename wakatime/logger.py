@@ -30,9 +30,9 @@ class CustomEncoder(json.JSONEncoder):
         if isinstance(obj, bytes):  # pragma: nocover
             obj = u(obj)
             return json.dumps(obj)
-        try:
+        try:  # pragma: nocover
             encoded = super(CustomEncoder, self).default(obj)
-        except UnicodeDecodeError:
+        except UnicodeDecodeError:  # pragma: nocover
             obj = u(obj)
             encoded = super(CustomEncoder, self).default(obj)
         return encoded
@@ -83,19 +83,9 @@ def set_log_level(logger, args):
 
 def setup_logging(args, version):
     logger = logging.getLogger('WakaTime')
+    for handler in logger.handlers:
+        logger.removeHandler(handler)
     set_log_level(logger, args)
-    if len(logger.handlers) > 0:
-        formatter = JsonFormatter(datefmt='%Y/%m/%d %H:%M:%S %z')
-        formatter.setup(
-            timestamp=args.timestamp,
-            isWrite=args.isWrite,
-            entity=args.entity,
-            version=version,
-            plugin=args.plugin,
-            verbose=args.verbose,
-        )
-        logger.handlers[0].setFormatter(formatter)
-        return logger
     logfile = args.logfile
     if not logfile:
         logfile = '~/.wakatime.log'
