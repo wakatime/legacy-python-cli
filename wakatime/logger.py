@@ -27,8 +27,8 @@ except (ImportError, SyntaxError):  # pragma: nocover
 class CustomEncoder(json.JSONEncoder):
 
     def default(self, obj):
-        if isinstance(obj, bytes):
-            obj = bytes.decode(obj)
+        if isinstance(obj, bytes):  # pragma: nocover
+            obj = u(obj)
             return json.dumps(obj)
         try:
             encoded = super(CustomEncoder, self).default(obj)

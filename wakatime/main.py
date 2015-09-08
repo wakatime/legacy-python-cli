@@ -39,12 +39,12 @@ from .session_cache import SessionCache
 from .stats import get_file_stats
 try:
     from .packages import simplejson as json  # pragma: nocover
-except (ImportError, SyntaxError):
-    import json  # pragma: nocover
+except (ImportError, SyntaxError):  # pragma: nocover
+    import json
 try:
-    from .packages import tzlocal  # pragma: nocover
+    from .packages import tzlocal
 except:  # pragma: nocover
-    from .packages import tzlocal3 as tzlocal  # pragma: nocover
+    from .packages import tzlocal3 as tzlocal
 
 
 log = logging.getLogger('WakaTime')
@@ -56,7 +56,7 @@ class FileAction(argparse.Action):
         try:
             if os.path.isfile(values):
                 values = os.path.realpath(values)
-        except:
+        except:  # pragma: nocover
             pass
         setattr(namespace, self.dest, values)
 
