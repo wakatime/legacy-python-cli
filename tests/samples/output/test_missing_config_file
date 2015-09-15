@@ -4,5 +4,5 @@ usage: wakatime [-h] [--entity FILE] [--key KEY] [--write] [--plugin PLUGIN]
                 [--alternate-project ALTERNATE_PROJECT] [--hostname HOSTNAME]
                 [--disableoffline] [--hidefilenames] [--exclude EXCLUDE]
                 [--include INCLUDE] [--logfile LOGFILE] [--apiurl API_URL]
-                [--config CONFIG] [--verbose] [--version]
+                [--timeout TIMEOUT] [--config CONFIG] [--verbose] [--version]
 wakatime: error: Missing api key

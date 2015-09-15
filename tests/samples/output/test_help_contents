@@ -4,7 +4,7 @@ usage: wakatime [-h] [--entity FILE] [--key KEY] [--write] [--plugin PLUGIN]
                 [--alternate-project ALTERNATE_PROJECT] [--hostname HOSTNAME]
                 [--disableoffline] [--hidefilenames] [--exclude EXCLUDE]
                 [--include INCLUDE] [--logfile LOGFILE] [--apiurl API_URL]
-                [--config CONFIG] [--verbose] [--version]
+                [--timeout TIMEOUT] [--config CONFIG] [--verbose] [--version]
 
 Common interface for the WakaTime api.
 
@@ -43,6 +43,8 @@ optional arguments:
                         logged; POSIX regex syntax; can be used more than once
   --logfile LOGFILE     defaults to ~/.wakatime.log
   --apiurl API_URL      heartbeats api url; for debugging with a local server
+  --timeout TIMEOUT     number of seconds to wait when sending heartbeats to
+                        api
   --config CONFIG       defaults to ~/.wakatime.conf
   --verbose             turns on debug messages in log file
   --version             show program's version number and exit
