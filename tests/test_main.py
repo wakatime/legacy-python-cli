@@ -336,3 +336,23 @@ class BaseTestCase(utils.TestCase):
         self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, ANY, None)
         self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
+
+    def test_missing_entity_file(self):
+        response = Response()
+        response.status_code = 201
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        entity = 'tests/samples/codefiles/missingfile.txt'
+        config = 'tests/samples/configs/sample.cfg'
+        args = ['--file', entity, '--config', config]
+        retval = execute(args)
+        self.assertEquals(retval, 0)
+        self.assertEquals(sys.stdout.getvalue(), '')
+        self.assertEquals(sys.stderr.getvalue(), '')
+
+        self.patched['wakatime.session_cache.SessionCache.get'].assert_not_called()
+        self.patched['wakatime.session_cache.SessionCache.delete'].assert_not_called()
+        self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
+
+        self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
+        self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
