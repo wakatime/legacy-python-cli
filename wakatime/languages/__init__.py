@@ -24,12 +24,10 @@ class TokenParser(object):
     language, inherit from this class and implement the :meth:`parse` method
     to return a list of dependency strings.
     """
-    source_file = None
-    lexer = None
-    dependencies = []
-    tokens = []
 
     def __init__(self, source_file, lexer=None):
+        self.tokens = []
+        self.dependencies = []
         self.source_file = source_file
         self.lexer = lexer
 
@@ -42,8 +40,6 @@ class TokenParser(object):
 
     def append(self, dep, truncate=False, separator=None, truncate_to=None,
                strip_whitespace=True):
-        if dep == 'as':
-            print('***************** as')
         self._save_dependency(
             dep,
             truncate=truncate,
@@ -73,12 +69,14 @@ class TokenParser(object):
                 separator = u('.')
             separator = u(separator)
             dep = dep.split(separator)
-            if truncate_to is None or truncate_to < 0 or truncate_to > len(dep) - 1:
-                truncate_to = len(dep) - 1
-            dep = dep[0] if len(dep) == 1 else separator.join(dep[0:truncate_to])
+            if truncate_to is None or truncate_to < 1:
+                truncate_to = 1
+            if truncate_to > len(dep):
+                truncate_to = len(dep)
+            dep = dep[0] if len(dep) == 1 else separator.join(dep[:truncate_to])
         if strip_whitespace:
             dep = dep.strip()
-        if dep:
+        if dep and (not separator or not dep.startswith(separator)):
             self.dependencies.append(dep)
 
 

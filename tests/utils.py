@@ -27,6 +27,7 @@ class TestCase(unittest.TestCase):
 
                 patcher = mock.patch(namespace)
                 mocked = patcher.start()
+                mocked.reset_mock()
                 self.patched[namespace] = mocked
 
                 if isinstance(patch_this, (list, set)) and len(patch_this) > 0:

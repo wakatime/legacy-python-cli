@@ -2,12 +2,21 @@
 # vim: set filetype=python
 
 
-import os
+import os, sys
 import django
+from app import *
+from flask import session
 import simplejson as json
-from wakatime import utils
-from mypackage.mymodule import myfunction
 from . import privatemodule
+from jinja import tags
+from pygments.lexers import BaseLexer
+from . import LocalClass
+from . import MyClass as MyParser
+from ..compat import u
+from sqlalchemy import (
+    functions as sqlfunctions,
+    orm as sqlorm,
+)
 
 try:
     from mock import ANY

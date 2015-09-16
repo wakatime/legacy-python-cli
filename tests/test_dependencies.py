@@ -31,7 +31,7 @@ class LanguagesTestCase(utils.TestCase):
         ['wakatime.session_cache.SessionCache.get', requests.session],
     ]
 
-    def python_dependencies_detected(self):
+    def test_python_dependencies_detected(self):
         response = Response()
         response.status_code = 0
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
@@ -53,7 +53,7 @@ class LanguagesTestCase(utils.TestCase):
 
         heartbeat = {
             'language': u('Python'),
-            'lines': 27,
+            'lines': 36,
             'entity': os.path.realpath(entity),
             'project': u(os.path.basename(os.path.realpath('.'))),
             'dependencies': ANY,
@@ -66,23 +66,38 @@ class LanguagesTestCase(utils.TestCase):
             u('dependencies'): ANY,
             u('language'): u('Python'),
             u('lineno'): None,
-            u('lines'): 27,
+            u('lines'): 36,
         }
-        expected_dependencies = ['wakatime', 'mock', 'django', 'simplejson', 'os']
+        expected_dependencies = [
+            'app',
+            'django',
+            'flask',
+            'jinja',
+            'mock',
+            'os',
+            'pygments',
+            'simplejson',
+            'sqlalchemy',
+            'sys',
+            'unittest',
+        ]
+
+        def normalize(items):
+            return sorted([u(x) for x in items])
 
         self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, ANY, None)
-        for dep in expected_dependencies:
-            self.assertIn(dep, self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['dependencies'])
+        dependencies = self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['dependencies']
+        self.assertEquals(normalize(dependencies), normalize(expected_dependencies))
         self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
-    def test_bower_dependencies_detected(self):
+    """def test_bower_dependencies_detected(self):
         response = Response()
         response.status_code = 0
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
         now = u(int(time.time()))
-        entity = 'tests/samples/codefiles/bower.json'
+        entity = 'tests/samples/codefiles/js/bower.json'
         config = 'tests/samples/configs/good_config.cfg'
 
         args = ['--file', entity, '--config', config, '--time', now]
@@ -116,3 +131,4 @@ class LanguagesTestCase(utils.TestCase):
             self.assertIn(dep, self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['dependencies'])
         self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
+    """
