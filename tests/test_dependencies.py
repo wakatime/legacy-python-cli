@@ -97,7 +97,7 @@ class LanguagesTestCase(utils.TestCase):
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
         now = u(int(time.time()))
-        entity = 'tests/samples/codefiles/js/bower.json'
+        entity = 'tests/samples/codefiles/bower.json'
         config = 'tests/samples/configs/good_config.cfg'
 
         args = ['--file', entity, '--config', config, '--time', now]
