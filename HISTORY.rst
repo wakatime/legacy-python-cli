@@ -3,6 +3,13 @@ History
 -------
 
 
+4.1.7 (2015-09-16)
+++++++++++++++++++
+
+- default request timeout of 30 seconds
+- new --timeout command line argument to change request timeout in seconds
+
+
 4.1.6 (2015-09-06)
 ++++++++++++++++++
 
