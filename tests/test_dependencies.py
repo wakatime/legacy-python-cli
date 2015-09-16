@@ -91,7 +91,7 @@ class LanguagesTestCase(utils.TestCase):
         self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
-    """def test_bower_dependencies_detected(self):
+    def test_bower_dependencies_detected(self):
         response = Response()
         response.status_code = 0
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
@@ -131,4 +131,3 @@ class LanguagesTestCase(utils.TestCase):
             self.assertIn(dep, self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['dependencies'])
         self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
-    """
