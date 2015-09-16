@@ -10,7 +10,6 @@
 """
 
 from . import TokenParser
-from ..compat import u
 
 
 class CppParser(TokenParser):
@@ -23,7 +22,7 @@ class CppParser(TokenParser):
         return self.dependencies
 
     def _process_token(self, token, content):
-        if u(token).split('.')[-1] == 'Preproc':
+        if self.first(token) == 'Preproc':
             self._process_preproc(token, content)
         else:
             self._process_other(token, content)

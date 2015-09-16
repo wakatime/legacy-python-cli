@@ -10,7 +10,6 @@
 """
 
 from . import TokenParser
-from ..compat import u
 
 
 class PythonParser(TokenParser):
@@ -26,17 +25,17 @@ class PythonParser(TokenParser):
         return self.dependencies
 
     def _process_token(self, token, content):
-        if u(token).split('.')[-1] == 'Namespace':
+        if self.partial(token) == 'Namespace':
             self._process_namespace(token, content)
-        elif u(token).split('.')[-1] == 'Name':
+        elif self.partial(token) == 'Names':
             self._process_name(token, content)
-        elif u(token).split('.')[-1] == 'Word':
+        elif self.partial(token) == 'Word':
             self._process_word(token, content)
-        elif u(token).split('.')[-1] == 'Operator':
+        elif self.partial(token) == 'Operator':
             self._process_operator(token, content)
-        elif u(token).split('.')[-1] == 'Punctuation':
+        elif self.partial(token) == 'Punctuation':
             self._process_punctuation(token, content)
-        elif u(token).split('.')[-1] == 'Text':
+        elif self.partial(token) == 'Text':
             self._process_text(token, content)
         else:
             self._process_other(token, content)

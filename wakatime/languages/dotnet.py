@@ -10,7 +10,6 @@
 """
 
 from . import TokenParser
-from ..compat import u
 
 
 class CSharpParser(TokenParser):
@@ -23,7 +22,7 @@ class CSharpParser(TokenParser):
         return self.dependencies
 
     def _process_token(self, token, content):
-        if u(token).split('.')[-1] == 'Namespace':
+        if self.partial(token) == 'Namespace':
             self._process_namespace(token, content)
         else:
             self._process_other(token, content)

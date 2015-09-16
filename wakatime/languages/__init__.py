@@ -10,6 +10,7 @@
 """
 
 import logging
+import re
 import sys
 import traceback
 
@@ -24,12 +25,14 @@ class TokenParser(object):
     language, inherit from this class and implement the :meth:`parse` method
     to return a list of dependency strings.
     """
+    exclude = []
 
     def __init__(self, source_file, lexer=None):
         self.tokens = []
         self.dependencies = []
         self.source_file = source_file
         self.lexer = lexer
+        self.exclude = [re.compile(x, re.IGNORECASE) for x in self.exclude]
 
     def parse(self, tokens=[]):
         """ Should return a list of dependencies.
@@ -47,6 +50,9 @@ class TokenParser(object):
             separator=separator,
             strip_whitespace=strip_whitespace,
         )
+
+    def partial(self, token):
+        return u(token).split('.')[-1]
 
     def _extract_tokens(self):
         if self.lexer:
@@ -77,7 +83,13 @@ class TokenParser(object):
         if strip_whitespace:
             dep = dep.strip()
         if dep and (not separator or not dep.startswith(separator)):
-            self.dependencies.append(dep)
+            should_exclude = False
+            for compiled in self.exclude:
+                if compiled.search(dep):
+                    should_exclude = True
+                    break
+            if not should_exclude:
+                self.dependencies.append(dep)
 
 
 class DependencyParser(object):
