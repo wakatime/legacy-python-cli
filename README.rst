@@ -45,6 +45,7 @@ format. An example config file looks like::
         .*
     offline = true
     proxy = https://user:pass@localhost:8080
+    timeout = 30
 
 
 Installation
