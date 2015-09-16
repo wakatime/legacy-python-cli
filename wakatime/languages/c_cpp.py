@@ -22,7 +22,7 @@ class CppParser(TokenParser):
         return self.dependencies
 
     def _process_token(self, token, content):
-        if self.first(token) == 'Preproc':
+        if self.partial(token) == 'Preproc':
             self._process_preproc(token, content)
         else:
             self._process_other(token, content)
