@@ -56,13 +56,13 @@ class PythonParser(TokenParser):
                 self.nonpackage = False
             else:
                 if self.state == 'from':
-                    self.append(content, truncate=True, truncate_to=0)
+                    self.append(content, truncate=True, truncate_to=1)
                 if self.state == 'from-2' and content != 'import':
-                    self.append(content, truncate=True, truncate_to=0)
+                    self.append(content, truncate=True, truncate_to=1)
                 elif self.state == 'import':
-                    self.append(content, truncate=True, truncate_to=0)
+                    self.append(content, truncate=True, truncate_to=1)
                 elif self.state == 'import-2':
-                    self.append(content, truncate=True, truncate_to=0)
+                    self.append(content, truncate=True, truncate_to=1)
                 else:
                     self.state = None
 
@@ -72,13 +72,13 @@ class PythonParser(TokenParser):
                 self.nonpackage = False
             else:
                 if self.state == 'from':
-                    self.append(content, truncate=True, truncate_to=0)
+                    self.append(content, truncate=True, truncate_to=1)
                 if self.state == 'from-2' and content != 'import':
-                    self.append(content, truncate=True, truncate_to=0)
+                    self.append(content, truncate=True, truncate_to=1)
                 elif self.state == 'import':
-                    self.append(content, truncate=True, truncate_to=0)
+                    self.append(content, truncate=True, truncate_to=1)
                 elif self.state == 'import-2':
-                    self.append(content, truncate=True, truncate_to=0)
+                    self.append(content, truncate=True, truncate_to=1)
                 else:
                     self.state = None
 
@@ -106,15 +106,15 @@ class PythonParser(TokenParser):
     def _process_import(self, token, content):
         if not self.nonpackage:
             if self.state == 'from':
-                self.append(content, truncate=True, truncate_to=0)
+                self.append(content, truncate=True, truncate_to=1)
                 self.state = 'from-2'
             elif self.state == 'from-2' and content != 'import':
-                self.append(content, truncate=True, truncate_to=0)
+                self.append(content, truncate=True, truncate_to=1)
             elif self.state == 'import':
-                self.append(content, truncate=True, truncate_to=0)
+                self.append(content, truncate=True, truncate_to=1)
                 self.state = 'import-2'
             elif self.state == 'import-2':
-                self.append(content, truncate=True, truncate_to=0)
+                self.append(content, truncate=True, truncate_to=1)
             else:
                 self.state = None
         self.nonpackage = False
