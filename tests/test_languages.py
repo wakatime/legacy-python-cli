@@ -6,6 +6,8 @@ from wakatime.packages import requests
 
 import time
 from wakatime.compat import u
+from wakatime.exceptions import NotYetImplemented
+from wakatime.languages import TokenParser
 from wakatime.packages.requests.models import Response
 from . import utils
 
@@ -19,6 +21,16 @@ class LanguagesTestCase(utils.TestCase):
         'wakatime.session_cache.SessionCache.delete',
         ['wakatime.session_cache.SessionCache.get', requests.session],
     ]
+
+    def test_token_parser(self):
+        with utils.mock.patch('wakatime.languages.TokenParser._extract_tokens') as mock_extract_tokens:
+
+            with self.assertRaises(NotYetImplemented):
+                source_file = 'tests/samples/codefiles/see.h'
+                parser = TokenParser(source_file)
+                parser.parse()
+
+            mock_extract_tokens.assert_called_once_with()
 
     def test_language_detected_for_header_file(self):
         response = Response()

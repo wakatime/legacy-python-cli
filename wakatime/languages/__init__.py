@@ -15,6 +15,7 @@ import sys
 import traceback
 
 from ..compat import u, open, import_module
+from ..exceptions import NotYetImplemented
 
 
 log = logging.getLogger('WakaTime')
@@ -39,7 +40,7 @@ class TokenParser(object):
         """
         if not tokens and not self.tokens:
             self.tokens = self._extract_tokens()
-        raise Exception('Not yet implemented.')
+        raise NotYetImplemented()
 
     def append(self, dep, truncate=False, separator=None, truncate_to=None,
                strip_whitespace=True):
