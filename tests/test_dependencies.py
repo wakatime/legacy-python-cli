@@ -34,13 +34,15 @@ class LanguagesTestCase(utils.TestCase):
     ]
 
     def test_token_parser(self):
+        with self.assertRaises(NotYetImplemented):
+            source_file = 'tests/samples/codefiles/see.h'
+            parser = TokenParser(source_file)
+            parser.parse()
+
         with utils.mock.patch('wakatime.languages.TokenParser._extract_tokens') as mock_extract_tokens:
-
-            with self.assertRaises(NotYetImplemented):
-                source_file = 'tests/samples/codefiles/see.h'
-                parser = TokenParser(source_file)
-                parser.parse()
-
+            source_file = 'tests/samples/codefiles/see.h'
+            parser = TokenParser(source_file)
+            parser.tokens
             mock_extract_tokens.assert_called_once_with()
 
     def test_python_dependencies_detected(self):
@@ -86,7 +88,6 @@ class LanguagesTestCase(utils.TestCase):
             'flask',
             'jinja',
             'mock',
-            'os',
             'pygments',
             'simplejson',
             'sqlalchemy',
@@ -185,6 +186,112 @@ class LanguagesTestCase(utils.TestCase):
             'googlecode.javacv',
             'colorfulwolf.webcamapplet',
             'foobar',
+        ]
+
+        def normalize(items):
+            return sorted([u(x) for x in items])
+
+        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, ANY, None)
+        dependencies = self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['dependencies']
+        self.assertEquals(normalize(dependencies), normalize(expected_dependencies))
+        self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
+        self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
+
+    def test_c_dependencies_detected(self):
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        now = u(int(time.time()))
+        entity = 'tests/samples/codefiles/see.c'
+        config = 'tests/samples/configs/good_config.cfg'
+
+        args = ['--file', entity, '--config', config, '--time', now]
+
+        retval = execute(args)
+        self.assertEquals(retval, 102)
+        self.assertEquals(sys.stdout.getvalue(), '')
+        self.assertEquals(sys.stderr.getvalue(), '')
+
+        self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
+        self.patched['wakatime.session_cache.SessionCache.delete'].assert_called_once_with()
+        self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
+
+        {'project': 'wakatime-cli', 'language': 'C', 'time': 1443295423.0, 'type': 'file', 'lines': 7, 'entity': '/Users/alanhamlett/git/wakatime-cli/tests/samples/codefiles/see.c'}
+        {'language': 'C', 'lines': 7, 'entity': '/Users/alanhamlett/git/wakatime-cli/tests/samples/codefiles/see.c', 'project': u'wakatime-cli', 'time': 1443295423.0, 'type': 'file'}
+
+        heartbeat = {
+            'language': u('C'),
+            'lines': 8,
+            'entity': os.path.realpath(entity),
+            'project': u(os.path.basename(os.path.realpath('.'))),
+            'dependencies': ANY,
+            'branch': os.environ.get('TRAVIS_COMMIT', ANY),
+            'time': float(now),
+            'type': 'file',
+        }
+        stats = {
+            u('cursorpos'): None,
+            u('dependencies'): ANY,
+            u('language'): u('C'),
+            u('lineno'): None,
+            u('lines'): 8,
+        }
+        expected_dependencies = [
+            'openssl',
+        ]
+
+        def normalize(items):
+            return sorted([u(x) for x in items])
+
+        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, ANY, None)
+        dependencies = self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['dependencies']
+        self.assertEquals(normalize(dependencies), normalize(expected_dependencies))
+        self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
+        self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
+
+    def test_cpp_dependencies_detected(self):
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        now = u(int(time.time()))
+        entity = 'tests/samples/codefiles/seeplusplus.cpp'
+        config = 'tests/samples/configs/good_config.cfg'
+
+        args = ['--file', entity, '--config', config, '--time', now]
+
+        retval = execute(args)
+        self.assertEquals(retval, 102)
+        self.assertEquals(sys.stdout.getvalue(), '')
+        self.assertEquals(sys.stderr.getvalue(), '')
+
+        self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
+        self.patched['wakatime.session_cache.SessionCache.delete'].assert_called_once_with()
+        self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
+
+        {'project': 'wakatime-cli', 'language': 'C', 'time': 1443295423.0, 'type': 'file', 'lines': 7, 'entity': '/Users/alanhamlett/git/wakatime-cli/tests/samples/codefiles/see.c'}
+        {'language': 'C', 'lines': 7, 'entity': '/Users/alanhamlett/git/wakatime-cli/tests/samples/codefiles/see.c', 'project': u'wakatime-cli', 'time': 1443295423.0, 'type': 'file'}
+
+        heartbeat = {
+            'language': u('C++'),
+            'lines': 8,
+            'entity': os.path.realpath(entity),
+            'project': u(os.path.basename(os.path.realpath('.'))),
+            'dependencies': ANY,
+            'branch': os.environ.get('TRAVIS_COMMIT', ANY),
+            'time': float(now),
+            'type': 'file',
+        }
+        stats = {
+            u('cursorpos'): None,
+            u('dependencies'): ANY,
+            u('language'): u('C++'),
+            u('lineno'): None,
+            u('lines'): 8,
+        }
+        expected_dependencies = [
+            'openssl',
         ]
 
         def normalize(items):

@@ -29,17 +29,21 @@ class TokenParser(object):
     exclude = []
 
     def __init__(self, source_file, lexer=None):
-        self.tokens = []
+        self._tokens = None
         self.dependencies = []
         self.source_file = source_file
         self.lexer = lexer
         self.exclude = [re.compile(x, re.IGNORECASE) for x in self.exclude]
 
+    @property
+    def tokens(self):
+        if self._tokens is None:
+            self._tokens = self._extract_tokens()
+        return self._tokens
+
     def parse(self, tokens=[]):
         """ Should return a list of dependencies.
         """
-        if not tokens and not self.tokens:
-            self.tokens = self._extract_tokens()
         raise NotYetImplemented()
 
     def append(self, dep, truncate=False, separator=None, truncate_to=None,

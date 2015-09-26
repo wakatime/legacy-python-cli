@@ -25,9 +25,7 @@ class JavaParser(TokenParser):
     state = None
     buffer = u('')
 
-    def parse(self, tokens=[]):
-        if not tokens and not self.tokens:
-            self.tokens = self._extract_tokens()
+    def parse(self):
         for index, token, content in self.tokens:
             self._process_token(token, content)
         return self.dependencies
