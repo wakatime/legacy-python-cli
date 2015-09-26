@@ -29,8 +29,6 @@ class PythonParser(TokenParser):
     def _process_token(self, token, content):
         if self.partial(token) == 'Namespace':
             self._process_namespace(token, content)
-        elif self.partial(token) == 'Names':
-            self._process_name(token, content)
         elif self.partial(token) == 'Word':
             self._process_word(token, content)
         elif self.partial(token) == 'Operator':
@@ -50,22 +48,6 @@ class PythonParser(TokenParser):
                 self.nonpackage = True
             else:
                 self._process_import(token, content)
-
-    def _process_name(self, token, content):
-        if self.state is not None:
-            if self.nonpackage:
-                self.nonpackage = False
-            else:
-                if self.state == 'from':
-                    self.append(content, truncate=True, truncate_to=1)
-                if self.state == 'from-2' and content != 'import':
-                    self.append(content, truncate=True, truncate_to=1)
-                elif self.state == 'import':
-                    self.append(content, truncate=True, truncate_to=1)
-                elif self.state == 'import-2':
-                    self.append(content, truncate=True, truncate_to=1)
-                else:
-                    self.state = None
 
     def _process_word(self, token, content):
         if self.state is not None:
