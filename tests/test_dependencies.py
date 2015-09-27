@@ -9,7 +9,7 @@ import time
 import sys
 from wakatime.compat import u
 from wakatime.exceptions import NotYetImplemented
-from wakatime.languages import TokenParser
+from wakatime.dependencies import TokenParser
 from wakatime.packages.requests.models import Response
 from . import utils
 
@@ -23,7 +23,7 @@ except ImportError:
     from unittest.mock import ANY
 
 
-class LanguagesTestCase(utils.TestCase):
+class DependenciesTestCase(utils.TestCase):
     patch_these = [
         'wakatime.packages.requests.adapters.HTTPAdapter.send',
         'wakatime.offlinequeue.Queue.push',
@@ -39,7 +39,7 @@ class LanguagesTestCase(utils.TestCase):
             parser = TokenParser(source_file)
             parser.parse()
 
-        with utils.mock.patch('wakatime.languages.TokenParser._extract_tokens') as mock_extract_tokens:
+        with utils.mock.patch('wakatime.dependencies.TokenParser._extract_tokens') as mock_extract_tokens:
             source_file = 'tests/samples/codefiles/see.h'
             parser = TokenParser(source_file)
             parser.tokens

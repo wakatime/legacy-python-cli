@@ -14,7 +14,7 @@ import os
 import sys
 
 from .compat import u, open
-from .languages import DependencyParser
+from .dependencies import DependencyParser
 
 if sys.version_info[0] == 2:
     sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'packages', 'pygments_py2'))

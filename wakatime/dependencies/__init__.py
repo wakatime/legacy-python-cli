@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-    wakatime.languages
-    ~~~~~~~~~~~~~~~~~~
+    wakatime.dependencies
+    ~~~~~~~~~~~~~~~~~~~~~
 
     Parse dependencies from a source code file.
 
