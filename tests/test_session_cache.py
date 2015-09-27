@@ -8,9 +8,7 @@ from . import utils
 
 class SessionCacheTestCase(utils.TestCase):
 
-    def test_can_connect(self):
-
-        db_file = None
+    def test_can_crud_session(self):
         with tempfile.NamedTemporaryFile() as fh:
             db_file = fh.name
 
@@ -19,5 +17,8 @@ class SessionCacheTestCase(utils.TestCase):
         session = cache.get()
         session.headers.update({'x-test': 'abc'})
         cache.save(session)
-        cached_session = cache.get()
-        self.assertEquals(cached_session.headers.get('x-test'), 'abc')
+        session = cache.get()
+        self.assertEquals(session.headers.get('x-test'), 'abc')
+        cache.delete()
+        session = cache.get()
+        self.assertEquals(session.headers.get('x-test'), None)
