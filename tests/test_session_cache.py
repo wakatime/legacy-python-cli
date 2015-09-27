@@ -7,6 +7,12 @@ from . import utils
 
 
 class SessionCacheTestCase(utils.TestCase):
+    patch_these = [
+        'wakatime.packages.requests.adapters.HTTPAdapter.send',
+        'wakatime.offlinequeue.Queue.push',
+        ['wakatime.offlinequeue.Queue.pop', None],
+        ['wakatime.offlinequeue.Queue.connect', None],
+    ]
 
     def test_can_crud_session(self):
         with tempfile.NamedTemporaryFile() as fh:
@@ -22,7 +28,7 @@ class SessionCacheTestCase(utils.TestCase):
             session = cache.get()
             self.assertEquals(session.headers.get('x-test'), None)
 
-    def test_get_handles_connection_error(self):
+    def test_handles_connection_exception(self):
         with tempfile.NamedTemporaryFile() as fh:
             cache = SessionCache()
             cache.DB_FILE = fh.name

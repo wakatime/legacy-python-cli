@@ -20,9 +20,11 @@ class LanguagesTestCase(utils.TestCase):
         'wakatime.packages.requests.adapters.HTTPAdapter.send',
         'wakatime.offlinequeue.Queue.push',
         ['wakatime.offlinequeue.Queue.pop', None],
+        ['wakatime.offlinequeue.Queue.connect', None],
         'wakatime.session_cache.SessionCache.save',
         'wakatime.session_cache.SessionCache.delete',
         ['wakatime.session_cache.SessionCache.get', requests.session],
+        ['wakatime.session_cache.SessionCache.connect', None],
     ]
 
     def test_project_base(self):

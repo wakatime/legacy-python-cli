@@ -83,12 +83,12 @@ class SessionCache(object):
             row = c.fetchone()
             if row is not None:
                 session = pickle.loads(row[0])
-        except:
+        except:  # pragma: nocover
             log.error(traceback.format_exc())
 
         try:
             conn.close()
-        except:
+        except:  # pragma: nocover
             log.error(traceback.format_exc())
 
         return session if session is not None else requests.session()

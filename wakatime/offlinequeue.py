@@ -31,8 +31,11 @@ class Queue(object):
     db_file = os.path.join(os.path.expanduser('~'), '.wakatime.db')
     table_name = 'heartbeat_1'
 
+    def get_db_file(self):
+        return self.db_file
+
     def connect(self):
-        conn = sqlite3.connect(self.db_file)
+        conn = sqlite3.connect(self.get_db_file())
         c = conn.cursor()
         c.execute('''CREATE TABLE IF NOT EXISTS {0} (
             entity text,
@@ -47,9 +50,8 @@ class Queue(object):
         '''.format(self.table_name))
         return (conn, c)
 
-
     def push(self, data, stats, plugin, misc=None):
-        if not HAS_SQL:
+        if not HAS_SQL:  # pragma: nocover
             return
         try:
             conn, c = self.connect()
@@ -70,9 +72,8 @@ class Queue(object):
         except sqlite3.Error:
             log.error(traceback.format_exc())
 
-
     def pop(self):
-        if not HAS_SQL:
+        if not HAS_SQL:  # pragma: nocover
             return None
         tries = 3
         wait = 0.1
