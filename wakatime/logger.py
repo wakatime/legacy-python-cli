@@ -16,8 +16,8 @@ import sys
 from .compat import u
 try:
     from collections import OrderedDict  # pragma: nocover
-except ImportError:
-    from .packages.ordereddict import OrderedDict  # pragma: nocover
+except ImportError:  # pragma: nocover
+    from .packages.ordereddict import OrderedDict
 try:
     from .packages import simplejson as json  # pragma: nocover
 except (ImportError, SyntaxError):  # pragma: nocover
