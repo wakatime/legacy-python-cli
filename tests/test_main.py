@@ -116,6 +116,26 @@ class BaseTestCase(utils.TestCase):
         self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_called_once_with()
 
+    def test_api_key_without_underscore_accepted(self):
+        response = Response()
+        response.status_code = 201
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        entity = 'tests/samples/codefiles/emptyfile.txt'
+        config = 'tests/samples/configs/sample_alternate_apikey.cfg'
+        args = ['--file', entity, '--config', config]
+        retval = execute(args)
+        self.assertEquals(retval, 0)
+        self.assertEquals(sys.stdout.getvalue(), '')
+        self.assertEquals(sys.stderr.getvalue(), '')
+
+        self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
+        self.patched['wakatime.session_cache.SessionCache.delete'].assert_not_called()
+        self.patched['wakatime.session_cache.SessionCache.save'].assert_called_once_with(ANY)
+
+        self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
+        self.patched['wakatime.offlinequeue.Queue.pop'].assert_called_once_with()
+
     def test_bad_config_file(self):
         entity = 'tests/samples/codefiles/emptyfile.txt'
         config = 'tests/samples/configs/bad_config.cfg'
