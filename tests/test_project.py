@@ -10,6 +10,8 @@ import shutil
 import tempfile
 import time
 from wakatime.compat import u
+from wakatime.exceptions import NotYetImplemented
+from wakatime.projects.base import BaseProject
 from . import utils
 
 
@@ -22,6 +24,19 @@ class LanguagesTestCase(utils.TestCase):
         'wakatime.session_cache.SessionCache.delete',
         ['wakatime.session_cache.SessionCache.get', requests.session],
     ]
+
+    def test_project_base(self):
+        path = 'tests/samples/codefiles/see.h'
+        project = BaseProject(path)
+
+        with self.assertRaises(NotYetImplemented):
+            project.process()
+
+        with self.assertRaises(NotYetImplemented):
+            project.name()
+
+        with self.assertRaises(NotYetImplemented):
+            project.branch()
 
     def test_project_argument_overrides_detected_project(self):
         response = Response()
