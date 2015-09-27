@@ -191,14 +191,14 @@ def parseArguments():
             for pattern in configs.get('settings', 'ignore').split("\n"):
                 if pattern.strip() != '':
                     args.exclude.append(pattern)
-        except TypeError:
+        except TypeError:  # pragma: nocover
             pass
     if configs.has_option('settings', 'exclude'):
         try:
             for pattern in configs.get('settings', 'exclude').split("\n"):
                 if pattern.strip() != '':
                     args.exclude.append(pattern)
-        except TypeError:
+        except TypeError:  # pragma: nocover
             pass
     if not args.include:
         args.include = []
@@ -207,7 +207,7 @@ def parseArguments():
             for pattern in configs.get('settings', 'include').split("\n"):
                 if pattern.strip() != '':
                     args.include.append(pattern)
-        except TypeError:
+        except TypeError:  # pragma: nocover
             pass
     if args.offline and configs.has_option('settings', 'offline'):
         args.offline = configs.getboolean('settings', 'offline')
