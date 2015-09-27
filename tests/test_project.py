@@ -101,7 +101,7 @@ class LanguagesTestCase(utils.TestCase):
                 mock_popen.return_value = (stdout, stderr)
 
                 now = u(int(time.time()))
-                entity = 'tests/samples/projects/svn/emptyfile.txt'
+                entity = 'tests/samples/projects/svn/afolder/emptyfile.txt'
                 config = 'tests/samples/configs/sample.cfg'
 
                 args = ['--file', entity, '--config', config, '--time', now]
@@ -125,7 +125,7 @@ class LanguagesTestCase(utils.TestCase):
                     mock_communicate.side_effect = OSError('')
 
                     now = u(int(time.time()))
-                    entity = 'tests/samples/projects/svn/emptyfile.txt'
+                    entity = 'tests/samples/projects/svn/afolder/emptyfile.txt'
                     config = 'tests/samples/configs/sample.cfg'
 
                     args = ['--file', entity, '--config', config, '--time', now]
