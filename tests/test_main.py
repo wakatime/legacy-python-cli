@@ -63,6 +63,26 @@ class BaseTestCase(utils.TestCase):
         self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_called_once_with()
 
+    def test_config_file_not_passed_in_command_line_args(self):
+        response = Response()
+        response.status_code = 201
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        with utils.mock.patch('wakatime.main.open') as mock_open:
+            mock_open.side_effect = IOError('')
+
+            config = os.path.join(os.path.expanduser('~'), '.wakatime.cfg')
+            entity = 'tests/samples/codefiles/emptyfile.txt'
+            args = ['--file', entity]
+
+            with self.assertRaises(SystemExit):
+                execute(args)
+            expected_stdout = u("Error: Could not read from config file {0}\n").format(u(config))
+            expected_stderr = open('tests/samples/output/test_missing_config_file').read()
+            self.assertEquals(sys.stdout.getvalue(), expected_stdout)
+            self.assertEquals(sys.stderr.getvalue(), expected_stderr)
+            self.patched['wakatime.session_cache.SessionCache.get'].assert_not_called()
+
     def test_missing_config_file(self):
         config = 'foo'
         entity = 'tests/samples/codefiles/emptyfile.txt'

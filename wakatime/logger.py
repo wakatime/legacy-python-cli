@@ -117,7 +117,7 @@ def setup_logging(args, version):
     logging.getLogger('py.warnings').addHandler(warnings_handler)
     try:
         logging.captureWarnings(True)
-    except AttributeError:
+    except AttributeError:  # pragma: nocover
         pass  # Python >= 2.7 is needed to capture warnings
 
     return logger
