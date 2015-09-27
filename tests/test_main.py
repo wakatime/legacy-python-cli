@@ -418,3 +418,77 @@ class BaseTestCase(utils.TestCase):
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_called_once_with()
 
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_called_once_with(ANY, cert=None, proxies={'https': 'localhost:1234'}, stream=False, timeout=30, verify=True)
+
+    def test_domain_heartbeat(self):
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        entity = 'google.com'
+        config = 'tests/samples/configs/sample.cfg'
+        now = u(int(time.time()))
+
+        args = ['--entity', entity, '--entitytype', 'domain', '--config', config, '--time', now]
+        retval = execute(args)
+
+        self.assertEquals(retval, 102)
+        self.assertEquals(sys.stdout.getvalue(), '')
+        self.assertEquals(sys.stderr.getvalue(), '')
+
+        self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
+        self.patched['wakatime.session_cache.SessionCache.delete'].assert_called_once_with()
+        self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
+
+        heartbeat = {
+            'entity': u(entity),
+            'time': float(now),
+            'type': 'domain',
+        }
+        stats = {
+            u('cursorpos'): None,
+            u('dependencies'): [],
+            u('language'): None,
+            u('lineno'): None,
+            u('lines'): None,
+        }
+
+        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, ANY, None)
+        self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
+        self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
+
+    def test_app_heartbeat(self):
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        entity = 'Firefox'
+        config = 'tests/samples/configs/sample.cfg'
+        now = u(int(time.time()))
+
+        args = ['--entity', entity, '--entitytype', 'app', '--config', config, '--time', now]
+        retval = execute(args)
+
+        self.assertEquals(retval, 102)
+        self.assertEquals(sys.stdout.getvalue(), '')
+        self.assertEquals(sys.stderr.getvalue(), '')
+
+        self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
+        self.patched['wakatime.session_cache.SessionCache.delete'].assert_called_once_with()
+        self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
+
+        heartbeat = {
+            'entity': u(entity),
+            'time': float(now),
+            'type': 'app',
+        }
+        stats = {
+            u('cursorpos'): None,
+            u('dependencies'): [],
+            u('language'): None,
+            u('lineno'): None,
+            u('lines'): None,
+        }
+
+        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, ANY, None)
+        self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
+        self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
