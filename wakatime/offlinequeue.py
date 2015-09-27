@@ -97,12 +97,12 @@ class Queue(object):
                         if row[index] is not None:
                             clauses.append('{0}=?'.format(row_name))
                             values.append(row[index])
-                        else:
+                        else:  # pragma: nocover
                             clauses.append('{0} IS NULL'.format(row_name))
                         index += 1
                     if len(values) > 0:
                         c.execute('DELETE FROM {0} WHERE {1}'.format(self.table_name, ' AND '.join(clauses)), values)
-                    else:
+                    else:  # pragma: nocover
                         c.execute('DELETE FROM {0} WHERE {1}'.format(self.table_name, ' AND '.join(clauses)))
                 conn.commit()
                 if row is not None:
