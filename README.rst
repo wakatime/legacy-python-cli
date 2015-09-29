@@ -7,17 +7,17 @@ WakaTime
 .. image:: https://coveralls.io/repos/wakatime/wakatime/badge.svg?branch=master&service=github
     :target: https://coveralls.io/github/wakatime/wakatime?branch=master
 
-Fully automatic time tracking for programmers.
+Command line interface to the `WakaTime <https://wakatime.com/>`_ used by all WakaTime `text editor plugins <https://wakatime.com/editors>`_.
 
-This is the common interface for the WakaTime api. You shouldn't need to directly use this package unless you are creating a new plugin or your text editor's plugin asks you to install the wakatime cli interface.
+Note: You shouldn't need to directly use this package unless you are `building your own plugin <https://wakatime.com/help/misc/creating-plugin>`_ or your text editor's plugin asks you to install the wakatime cli interface manually.
 
-Go to http://wakatime.com to install the plugin for your text editor.
+Go to http://wakatime.com/editors to install the plugin for your text editor or IDE.
 
 
 Usage
 -----
 
-Install the plugin for your IDE/editor at https://wakatime.com/plugins
+Install the plugin for your IDE/editor at https://wakatime.com/editors
 
 If you are building a plugin using the `WakaTime API <https://wakatime.com/developers/>`_
 then follow the `Creating a Plugin <https://wakatime.com/help/misc/creating-plugin>`_
@@ -51,7 +51,7 @@ format. An example config file looks like::
 Installation
 ------------
 
-Each `plugin <https://wakatime.com/plugins>`_ should install wakatime for you, except for the `Emacs WakaTime plugin <https://github.com/wakatime/wakatime-mode>`_.
+Each `plugin <https://wakatime.com/editors>`_ should install wakatime for you, except for the `Emacs WakaTime plugin <https://github.com/wakatime/wakatime-mode>`_.
 If your plugin does not install wakatime cli(this package), install it with::
 
     pip install wakatime
