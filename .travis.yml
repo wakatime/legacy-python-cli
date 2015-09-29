@@ -6,12 +6,13 @@ python:
     - "3.4"
 # command to install dependencies
 install: 
-    - if [[ $TRAVIS_PYTHON_VERSION == '2.6' ]]; then travis_retry pip install --use-mirrors unittest2; fi
-    - travis_retry pip install --use-mirrors -r dev-requirements.txt
-    - travis_retry pip install --use-mirrors coveralls
-# command to run tests
-script: nosetests
+    - if [[ $TRAVIS_PYTHON_VERSION == '2.6' ]]; then travis_retry pip install unittest2; fi
+    - travis_retry pip install -r dev-requirements.txt
+    - travis_retry pip install coveralls
 # use new travis-ci container-based infrastructure
 sudo: false
+# command to run tests
+script: nosetests --with-coverage --cover-package=wakatime
+# command to run after tests
 after_success:
     - coveralls
