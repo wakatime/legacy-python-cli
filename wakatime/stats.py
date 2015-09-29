@@ -36,7 +36,7 @@ def guess_language(file_name):
 
     language = get_language_from_extension(file_name)
     lexer = smart_guess_lexer(file_name)
-    if language is None:
+    if language is None and lexer is not None:
         language = u(lexer.name)
 
     return language, lexer
