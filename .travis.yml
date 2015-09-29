@@ -12,7 +12,7 @@ install:
 # use new travis-ci container-based infrastructure
 sudo: false
 # command to run tests
-script: nosetests --with-coverage --cover-package=wakatime
+script: nosetests
 # command to run after tests
 after_success:
     - coveralls
