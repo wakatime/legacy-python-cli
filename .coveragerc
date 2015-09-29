@@ -1,6 +1,8 @@
 [run]
 branch = false
 omit =
-    */wakatime/packages/*
+    wakatime/packages/*
+[report]
+omit =
     */python?.?/*
     */site-packages/nose/*
