@@ -3,6 +3,13 @@ History
 -------
 
 
+4.1.8 (2015-09-29)
+++++++++++++++++++
+
+- fix bug in guess_language function
+- improve dependency detection
+
+
 4.1.7 (2015-09-16)
 ++++++++++++++++++
 
