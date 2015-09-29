@@ -7,6 +7,7 @@ from wakatime.packages import requests
 import time
 from wakatime.compat import u
 from wakatime.packages.requests.models import Response
+from wakatime.stats import guess_language
 from . import utils
 
 
@@ -78,3 +79,11 @@ class LanguagesTestCase(utils.TestCase):
 
         language = u('C++')
         self.assertEqual(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['language'], language)
+
+    def test_guess_language(self):
+        with utils.mock.patch('wakatime.stats.smart_guess_lexer') as mock_guess_lexer:
+            mock_guess_lexer.return_value = None
+            source_file = 'tests/samples/codefiles/python.py'
+            result = guess_language(source_file)
+            mock_guess_lexer.assert_called_once_with(source_file)
+            self.assertEquals(result, (None, None))
