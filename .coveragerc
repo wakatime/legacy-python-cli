@@ -4,5 +4,6 @@ omit =
     wakatime/packages/*
 [report]
 omit =
+    wakatime/packages/*
     */python?.?/*
     */site-packages/nose/*
