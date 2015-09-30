@@ -1,0 +1,8 @@
+usage: wakatime [-h] [--entity FILE] [--key KEY] [--write] [--plugin PLUGIN]
+                [--time time] [--lineno LINENO] [--cursorpos CURSORPOS]
+                [--entitytype ENTITY_TYPE] [--proxy PROXY] [--project PROJECT]
+                [--alternate-project ALTERNATE_PROJECT] [--hostname HOSTNAME]
+                [--disableoffline] [--hidefilenames] [--exclude EXCLUDE]
+                [--include INCLUDE] [--logfile LOGFILE] [--apiurl API_URL]
+                [--timeout TIMEOUT] [--config CONFIG] [--verbose] [--version]
+wakatime: error: argument --timeout: invalid int value: 'abc'

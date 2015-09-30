@@ -235,6 +235,25 @@ class BaseTestCase(utils.TestCase):
         self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
+    def test_timeout_passed_via_command_line(self):
+        response = Response()
+        response.status_code = 201
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        entity = 'tests/samples/codefiles/twolinefile.txt'
+        config = 'tests/samples/configs/good_config.cfg'
+        args = ['--file', entity, '--key', '123', '--config', config, '--timeout', 'abc']
+
+        with self.assertRaises(SystemExit):
+            execute(args)
+        self.assertEquals(sys.stdout.getvalue(), '')
+        expected_stderr = open('tests/samples/output/main_test_timeout_passed_via_command_line').read()
+        self.assertEquals(sys.stderr.getvalue(), expected_stderr)
+
+        self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
+        self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
+        self.patched['wakatime.session_cache.SessionCache.get'].assert_not_called()
+
     def test_500_response(self):
         response = Response()
         response.status_code = 500
