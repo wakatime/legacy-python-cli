@@ -50,7 +50,7 @@ class BaseTestCase(utils.TestCase):
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
         entity = 'tests/samples/codefiles/twolinefile.txt'
-        config = 'tests/samples/configs/sample.cfg'
+        config = 'tests/samples/configs/good_config.cfg'
         args = ['--file', entity, '--key', '123', '--config', config]
 
         retval = execute(args)
@@ -98,13 +98,13 @@ class BaseTestCase(utils.TestCase):
 
         self.patched['wakatime.session_cache.SessionCache.get'].assert_not_called()
 
-    def test_config_file(self):
+    def test_good_config_file(self):
         response = Response()
         response.status_code = 201
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
         entity = 'tests/samples/codefiles/emptyfile.txt'
-        config = 'tests/samples/configs/sample.cfg'
+        config = 'tests/samples/configs/has_everything.cfg'
         args = ['--file', entity, '--config', config]
         retval = execute(args)
         self.assertEquals(retval, 0)
@@ -158,7 +158,7 @@ class BaseTestCase(utils.TestCase):
 
         now = u(int(time.time()))
         entity = 'tests/samples/codefiles/twolinefile.txt'
-        config = 'tests/samples/configs/sample.cfg'
+        config = 'tests/samples/configs/good_config.cfg'
 
         args = ['--file', entity, '--key', '123', '--config', config, '--time', now]
 
@@ -304,7 +304,7 @@ class BaseTestCase(utils.TestCase):
 
         now = u(int(time.time()))
         entity = 'tests/samples/codefiles/twolinefile.txt'
-        config = 'tests/samples/configs/sample.cfg'
+        config = 'tests/samples/configs/good_config.cfg'
 
         args = ['--file', entity, '--alternate-project', 'xyz', '--config', config, '--time', now]
 
@@ -345,7 +345,7 @@ class BaseTestCase(utils.TestCase):
 
         now = u(int(time.time()))
         entity = 'tests/samples/codefiles/twolinefile.txt'
-        config = 'tests/samples/configs/sample.cfg'
+        config = 'tests/samples/configs/good_config.cfg'
 
         args = ['--file', entity, '--project', 'xyz', '--config', config, '--time', now]
 
@@ -385,7 +385,7 @@ class BaseTestCase(utils.TestCase):
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
         entity = 'tests/samples/codefiles/missingfile.txt'
-        config = 'tests/samples/configs/sample.cfg'
+        config = 'tests/samples/configs/good_config.cfg'
         args = ['--file', entity, '--config', config]
         retval = execute(args)
         self.assertEquals(retval, 0)
@@ -405,7 +405,7 @@ class BaseTestCase(utils.TestCase):
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
         entity = 'tests/samples/codefiles/emptyfile.txt'
-        config = 'tests/samples/configs/sample.cfg'
+        config = 'tests/samples/configs/good_config.cfg'
         args = ['--file', entity, '--config', config, '--proxy', 'localhost:1234']
         retval = execute(args)
         self.assertEquals(retval, 0)
@@ -427,7 +427,7 @@ class BaseTestCase(utils.TestCase):
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
         entity = 'google.com'
-        config = 'tests/samples/configs/sample.cfg'
+        config = 'tests/samples/configs/good_config.cfg'
         now = u(int(time.time()))
 
         args = ['--entity', entity, '--entitytype', 'domain', '--config', config, '--time', now]
@@ -464,7 +464,7 @@ class BaseTestCase(utils.TestCase):
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
         entity = 'Firefox'
-        config = 'tests/samples/configs/sample.cfg'
+        config = 'tests/samples/configs/good_config.cfg'
         now = u(int(time.time()))
 
         args = ['--entity', entity, '--entitytype', 'app', '--config', config, '--time', now]

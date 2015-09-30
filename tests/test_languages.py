@@ -29,7 +29,7 @@ class LanguagesTestCase(utils.TestCase):
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
         now = u(int(time.time()))
-        config = 'tests/samples/configs/sample.cfg'
+        config = 'tests/samples/configs/good_config.cfg'
         entity = 'tests/samples/codefiles/see.h'
         args = ['--file', entity, '--config', config, '--time', now]
 
@@ -54,7 +54,7 @@ class LanguagesTestCase(utils.TestCase):
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
         now = u(int(time.time()))
-        config = 'tests/samples/configs/sample.cfg'
+        config = 'tests/samples/configs/good_config.cfg'
         entity = 'tests/samples/codefiles/c_only/see.h'
         args = ['--file', entity, '--config', config, '--time', now]
 
@@ -70,7 +70,7 @@ class LanguagesTestCase(utils.TestCase):
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
         now = u(int(time.time()))
-        config = 'tests/samples/configs/sample.cfg'
+        config = 'tests/samples/configs/good_config.cfg'
         entity = 'tests/samples/codefiles/c_and_cpp/empty.h'
         args = ['--file', entity, '--config', config, '--time', now]
 

@@ -47,7 +47,7 @@ class LanguagesTestCase(utils.TestCase):
 
         now = u(int(time.time()))
         entity = 'tests/samples/projects/git/emptyfile.txt'
-        config = 'tests/samples/configs/sample.cfg'
+        config = 'tests/samples/configs/good_config.cfg'
 
         args = ['--project', 'forced-project', '--file', entity, '--config', config, '--time', now]
 
@@ -62,7 +62,7 @@ class LanguagesTestCase(utils.TestCase):
 
         now = u(int(time.time()))
         entity = 'tests/samples/projects/wakatime_project_file/emptyfile.txt'
-        config = 'tests/samples/configs/sample.cfg'
+        config = 'tests/samples/configs/good_config.cfg'
 
         args = ['--file', entity, '--config', config, '--time', now]
 
@@ -81,7 +81,7 @@ class LanguagesTestCase(utils.TestCase):
 
         now = u(int(time.time()))
         entity = os.path.join(tempdir, 'git', 'emptyfile.txt')
-        config = 'tests/samples/configs/sample.cfg'
+        config = 'tests/samples/configs/good_config.cfg'
 
         args = ['--file', entity, '--config', config, '--time', now]
 
@@ -104,7 +104,7 @@ class LanguagesTestCase(utils.TestCase):
 
                 now = u(int(time.time()))
                 entity = 'tests/samples/projects/svn/afolder/emptyfile.txt'
-                config = 'tests/samples/configs/sample.cfg'
+                config = 'tests/samples/configs/good_config.cfg'
 
                 args = ['--file', entity, '--config', config, '--time', now]
 
@@ -128,7 +128,7 @@ class LanguagesTestCase(utils.TestCase):
 
                     now = u(int(time.time()))
                     entity = 'tests/samples/projects/svn/afolder/emptyfile.txt'
-                    config = 'tests/samples/configs/sample.cfg'
+                    config = 'tests/samples/configs/good_config.cfg'
 
                     args = ['--file', entity, '--config', config, '--time', now]
 
@@ -146,7 +146,7 @@ class LanguagesTestCase(utils.TestCase):
 
             now = u(int(time.time()))
             entity = 'tests/samples/projects/hg/emptyfile.txt'
-            config = 'tests/samples/configs/sample.cfg'
+            config = 'tests/samples/configs/good_config.cfg'
 
             args = ['--file', entity, '--config', config, '--time', now]
 

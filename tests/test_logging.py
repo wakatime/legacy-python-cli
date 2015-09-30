@@ -15,7 +15,7 @@ from wakatime.packages.requests.models import Response
 from . import utils
 
 
-class LanguagesTestCase(utils.TestCase):
+class LoggingTestCase(utils.TestCase):
     patch_these = [
         'wakatime.packages.requests.adapters.HTTPAdapter.send',
         'wakatime.offlinequeue.Queue.push',
@@ -37,7 +37,7 @@ class LanguagesTestCase(utils.TestCase):
 
         now = u(int(time.time()))
         entity = 'tests/samples/codefiles/python.py'
-        config = 'tests/samples/configs/sample.cfg'
+        config = 'tests/samples/configs/has_regex_errors.cfg'
         args = ['--file', entity, '--config', config, '--time', now]
 
         retval = execute(args)
@@ -87,7 +87,7 @@ class LanguagesTestCase(utils.TestCase):
 
         now = u(int(time.time()))
         entity = 'tests/samples/codefiles/python.py'
-        config = 'tests/samples/configs/sample.cfg'
+        config = 'tests/samples/configs/has_regex_errors.cfg'
         args = ['--file', entity, '--config', config, '--time', now, '--verbose']
 
         retval = execute(args)

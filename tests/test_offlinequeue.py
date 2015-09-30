@@ -35,7 +35,7 @@ class OfflineQueueTestCase(utils.TestCase):
 
                 now = u(int(time.time()))
                 entity = 'tests/samples/codefiles/twolinefile.txt'
-                config = 'tests/samples/configs/sample.cfg'
+                config = 'tests/samples/configs/good_config.cfg'
 
                 args = ['--file', entity, '--config', config, '--time', now]
                 execute(args)
@@ -55,7 +55,7 @@ class OfflineQueueTestCase(utils.TestCase):
 
                 now = u(int(time.time()))
                 entity = 'tests/samples/codefiles/twolinefile.txt'
-                config = 'tests/samples/configs/sample.cfg'
+                config = 'tests/samples/configs/good_config.cfg'
 
                 args = ['--file', entity, '--config', config, '--time', now]
                 execute(args)
@@ -75,7 +75,7 @@ class OfflineQueueTestCase(utils.TestCase):
 
                 now = u(int(time.time()))
                 entity = 'tests/samples/codefiles/twolinefile.txt'
-                config = 'tests/samples/configs/sample.cfg'
+                config = 'tests/samples/configs/good_config.cfg'
 
                 args = ['--file', entity, '--config', config, '--time', now]
                 execute(args)
@@ -98,7 +98,7 @@ class OfflineQueueTestCase(utils.TestCase):
 
                 now = u(int(time.time()))
                 entity = 'tests/samples/codefiles/emptyfile.txt'
-                config = 'tests/samples/configs/sample.cfg'
+                config = 'tests/samples/configs/good_config.cfg'
 
                 args = ['--file', entity, '--config', config, '--time', now]
                 execute(args)
@@ -120,7 +120,7 @@ class OfflineQueueTestCase(utils.TestCase):
 
                 now = u(int(time.time()))
                 entity = 'tests/samples/codefiles/twolinefile.txt'
-                config = 'tests/samples/configs/sample.cfg'
+                config = 'tests/samples/configs/good_config.cfg'
 
                 args = ['--file', entity, '--config', config, '--time', now]
                 execute(args)
@@ -150,7 +150,7 @@ class OfflineQueueTestCase(utils.TestCase):
 
                 now = u(int(time.time()))
                 entity = 'tests/samples/codefiles/twolinefile.txt'
-                config = 'tests/samples/configs/sample.cfg'
+                config = 'tests/samples/configs/good_config.cfg'
 
                 with utils.mock.patch('wakatime.offlinequeue.Queue.connect') as mock_connect:
                     mock_connect.side_effect = sqlite3.Error('')
