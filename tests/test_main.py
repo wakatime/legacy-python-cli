@@ -108,7 +108,9 @@ class BaseTestCase(utils.TestCase):
         args = ['--file', entity, '--config', config]
         retval = execute(args)
         self.assertEquals(retval, 0)
-        self.assertEquals(sys.stdout.getvalue(), '')
+        expected_stdout = open('tests/samples/output/main_test_good_config_file').read()
+        traceback_file = os.path.realpath('wakatime/main.py')
+        self.assertEquals(sys.stdout.getvalue(), expected_stdout.format(file=traceback_file))
         self.assertEquals(sys.stderr.getvalue(), '')
 
         self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
