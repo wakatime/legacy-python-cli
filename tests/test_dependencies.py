@@ -336,3 +336,106 @@ class DependenciesTestCase(utils.TestCase):
         dependencies = self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['dependencies']
         self.assertListsEqual(dependencies, expected_dependencies)
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
+
+    def test_php_dependencies_detected(self):
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        now = u(int(time.time()))
+        entity = 'tests/samples/codefiles/php.php'
+        config = 'tests/samples/configs/good_config.cfg'
+
+        args = ['--file', entity, '--config', config, '--time', now]
+
+        retval = execute(args)
+        self.assertEquals(retval, 102)
+        self.assertEquals(sys.stdout.getvalue(), '')
+        self.assertEquals(sys.stderr.getvalue(), '')
+
+        self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
+        self.patched['wakatime.session_cache.SessionCache.delete'].assert_called_once_with()
+        self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
+
+        heartbeat = {
+            'language': u('PHP'),
+            'lines': ANY,
+            'entity': os.path.realpath(entity),
+            'dependencies': ANY,
+            'project': u(os.path.basename(os.path.realpath('.'))),
+            'branch': os.environ.get('TRAVIS_COMMIT', ANY),
+            'time': float(now),
+            'type': 'file',
+        }
+        stats = {
+            u('cursorpos'): None,
+            u('dependencies'): ANY,
+            u('language'): u('PHP'),
+            u('lineno'): None,
+            u('lines'): ANY,
+        }
+        expected_dependencies = [
+            'Interop',
+            'FooBarOne',
+            'FooBarTwo',
+            'FooBarThree',
+            'FooBarFour',
+            'FooBarSeven',
+            'FooBarEight',
+            'ArrayObject',
+            "'ServiceLocator.php'",
+            "'ServiceLocatorTwo.php'",
+        ]
+
+        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, ANY, None)
+        self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
+        dependencies = self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['dependencies']
+        self.assertListsEqual(dependencies, expected_dependencies)
+        self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
+
+    def test_php_in_html_dependencies_detected(self):
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        now = u(int(time.time()))
+        entity = 'tests/samples/codefiles/html-with-php.html'
+        config = 'tests/samples/configs/good_config.cfg'
+
+        args = ['--file', entity, '--config', config, '--time', now]
+
+        retval = execute(args)
+        self.assertEquals(retval, 102)
+        self.assertEquals(sys.stdout.getvalue(), '')
+        self.assertEquals(sys.stderr.getvalue(), '')
+
+        self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
+        self.patched['wakatime.session_cache.SessionCache.delete'].assert_called_once_with()
+        self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
+
+        heartbeat = {
+            'language': u('HTML+PHP'),
+            'lines': ANY,
+            'dependencies': ANY,
+            'entity': os.path.realpath(entity),
+            'project': u(os.path.basename(os.path.realpath('.'))),
+            'branch': os.environ.get('TRAVIS_COMMIT', ANY),
+            'time': float(now),
+            'type': 'file',
+        }
+        stats = {
+            u('cursorpos'): None,
+            u('dependencies'): ANY,
+            u('language'): u('HTML+PHP'),
+            u('lineno'): None,
+            u('lines'): ANY,
+        }
+        expected_dependencies = [
+            '"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"',
+        ]
+
+        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, ANY, None)
+        self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
+        dependencies = self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['dependencies']
+        self.assertListsEqual(dependencies, expected_dependencies)
+        self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()

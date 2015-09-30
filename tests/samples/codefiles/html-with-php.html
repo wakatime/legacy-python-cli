@@ -1,0 +1,22 @@
+Name: <input type="text" name="name" value="<?php echo $name;?>">
+
+E-mail: <input type="text" name="email" value="<?php echo $email;?>">
+
+Website: <input type="text" name="website" value="<?php echo $website;?>">
+
+Comment: <textarea name="comment" rows="5" cols="40"><?php echo $comment;?></textarea>
+<?php
+
+use One\Full\Classname as Another, Two\Full\NSname;
+
+?>
+
+Gender:
+<input type="radio" name="gender"
+<?php if (isset($gender) && $gender=="female") echo "checked";?>
+value="female">Female
+<input type="radio" name="gender"
+<?php if (isset($gender) && $gender=="male") echo "checked";?>
+value="male">Male
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
