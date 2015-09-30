@@ -97,12 +97,9 @@ class DependenciesTestCase(utils.TestCase):
             'unittest',
         ]
 
-        def normalize(items):
-            return sorted([u(x) for x in items])
-
         self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, ANY, None)
         dependencies = self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['dependencies']
-        self.assertEquals(normalize(dependencies), normalize(expected_dependencies))
+        self.assertListsEqual(dependencies, expected_dependencies)
         self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
@@ -190,12 +187,9 @@ class DependenciesTestCase(utils.TestCase):
             'foobar',
         ]
 
-        def normalize(items):
-            return sorted([u(x) for x in items])
-
         self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, ANY, None)
         dependencies = self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['dependencies']
-        self.assertEquals(normalize(dependencies), normalize(expected_dependencies))
+        self.assertListsEqual(dependencies, expected_dependencies)
         self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
@@ -240,12 +234,9 @@ class DependenciesTestCase(utils.TestCase):
             'openssl',
         ]
 
-        def normalize(items):
-            return sorted([u(x) for x in items])
-
         self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, ANY, None)
         dependencies = self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['dependencies']
-        self.assertEquals(normalize(dependencies), normalize(expected_dependencies))
+        self.assertListsEqual(dependencies, expected_dependencies)
         self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
@@ -290,12 +281,9 @@ class DependenciesTestCase(utils.TestCase):
             'openssl',
         ]
 
-        def normalize(items):
-            return sorted([u(x) for x in items])
-
         self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, ANY, None)
         dependencies = self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['dependencies']
-        self.assertEquals(normalize(dependencies), normalize(expected_dependencies))
+        self.assertListsEqual(dependencies, expected_dependencies)
         self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
@@ -321,8 +309,9 @@ class DependenciesTestCase(utils.TestCase):
 
         heartbeat = {
             'language': u('C#'),
-            'lines': 10,
+            'lines': 18,
             'entity': os.path.realpath(entity),
+            'dependencies': ANY,
             'project': u(os.path.basename(os.path.realpath('.'))),
             'branch': os.environ.get('TRAVIS_COMMIT', ANY),
             'time': float(now),
@@ -333,12 +322,17 @@ class DependenciesTestCase(utils.TestCase):
             u('dependencies'): ANY,
             u('language'): u('C#'),
             u('lineno'): None,
-            u('lines'): 10,
+            u('lines'): 18,
         }
-
-        def normalize(items):
-            return sorted([u(x) for x in items])
+        expected_dependencies = [
+            'Proper',
+            'Fart',
+            'Math',
+            'WakaTime',
+        ]
 
         self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, ANY, None)
         self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
+        dependencies = self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['dependencies']
+        self.assertListsEqual(dependencies, expected_dependencies)
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()

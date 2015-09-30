@@ -2,6 +2,9 @@
 
 import logging
 
+from wakatime.compat import u
+
+
 try:
     import mock
 except ImportError:
@@ -38,3 +41,9 @@ class TestCase(unittest.TestCase):
 
     def tearDown(self):
         mock.patch.stopall()
+
+    def normalize_list(self, items):
+        return sorted([u(x) for x in items])
+
+    def assertListsEqual(self, first_list, second_list):
+        self.assertEquals(self.normalize_list(first_list), self.normalize_list(second_list))
