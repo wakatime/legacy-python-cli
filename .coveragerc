@@ -1,9 +1,11 @@
 [run]
 branch = false
 omit =
+    wakatime/cli.py
     wakatime/packages/*
 [report]
 omit =
+    wakatime/cli.py
     wakatime/packages/*
     */python?.?/*
     */site-packages/nose/*
