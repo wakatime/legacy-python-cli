@@ -13,6 +13,9 @@ from . import TokenParser
 
 
 class CSharpParser(TokenParser):
+    exclude = [
+        r'^system$',
+    ]
 
     def parse(self):
         for index, token, content in self.tokens:
