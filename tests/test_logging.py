@@ -104,3 +104,28 @@ class LoggingTestCase(utils.TestCase):
         self.assertEquals(output[2], u('WakaTime DEBUG Sending heartbeat to api at https://wakatime.com/api/v1/heartbeats'))
         self.assertIn('Python', output[3])
         self.assertIn('response_code', output[4])
+
+    @log_capture()
+    def test_exception_traceback(self, logs):
+        logging.disable(logging.NOTSET)
+
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        now = u(int(time.time()))
+        entity = 'tests/samples/codefiles/python.py'
+        config = 'tests/samples/configs/good_config.cfg'
+        args = ['--file', entity, '--config', config, '--time', now]
+
+        with utils.mock.patch('wakatime.stats.open') as mock_open:
+            mock_open.side_effect = IOError('FooBar')
+
+            retval = execute(args)
+            self.assertEquals(retval, 102)
+            self.assertEquals(sys.stdout.getvalue(), '')
+            self.assertEquals(sys.stderr.getvalue(), '')
+
+            output = u("\n").join([u(' ').join(x) for x in logs.actual()])
+            self.assertIn(u('WakaTime ERROR Traceback (most recent call last):'), output)
+            self.assertIn(u('IOError: FooBar'), output)

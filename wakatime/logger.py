@@ -11,7 +11,7 @@
 
 import logging
 import os
-import sys
+import traceback
 
 from .compat import u
 try:
@@ -70,8 +70,9 @@ class JsonFormatter(logging.Formatter):
             del data['plugin']
         return CustomEncoder().encode(data)
 
-    def formatException(self, exc_info):
-        return sys.exec_info[2].format_exc()
+
+def traceback_formatter(*args, **kwargs):
+    logging.getLogger('WakaTime').error(traceback.format_exc())
 
 
 def set_log_level(logger, args):
@@ -101,6 +102,9 @@ def setup_logging(args, version):
     )
     handler.setFormatter(formatter)
     logger.addHandler(handler)
+
+    # add custom traceback logging method
+    logger.traceback = traceback_formatter
 
     warnings_formatter = JsonFormatter(datefmt='%Y/%m/%d %H:%M:%S %z')
     warnings_formatter.setup(
