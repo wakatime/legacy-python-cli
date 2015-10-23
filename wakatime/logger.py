@@ -14,6 +14,7 @@ import os
 import traceback
 
 from .compat import u
+from .packages.requests.packages import urllib3
 try:
     from collections import OrderedDict  # pragma: nocover
 except ImportError:  # pragma: nocover
@@ -83,6 +84,7 @@ def set_log_level(logger, args):
 
 
 def setup_logging(args, version):
+    urllib3.disable_warnings()
     logger = logging.getLogger('WakaTime')
     for handler in logger.handlers:
         logger.removeHandler(handler)
