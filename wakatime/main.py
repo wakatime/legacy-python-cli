@@ -422,8 +422,10 @@ def execute(argv=None):
 
         if args.entity_type != 'file' or os.path.isfile(args.entity):
 
-            stats = get_file_stats(args.entity, entity_type=args.entity_type,
-                                lineno=args.lineno, cursorpos=args.cursorpos)
+            stats = get_file_stats(args.entity,
+                                   entity_type=args.entity_type,
+                                   lineno=args.lineno,
+                                   cursorpos=args.cursorpos)
 
             project = args.project or args.alternate_project
             branch = None
