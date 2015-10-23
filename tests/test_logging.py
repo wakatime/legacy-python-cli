@@ -119,7 +119,7 @@ class LoggingTestCase(utils.TestCase):
         args = ['--file', entity, '--config', config, '--time', now]
 
         with utils.mock.patch('wakatime.stats.open') as mock_open:
-            mock_open.side_effect = IOError('FooBar')
+            mock_open.side_effect = Exception('FooBar')
 
             retval = execute(args)
             self.assertEquals(retval, 102)
@@ -128,4 +128,4 @@ class LoggingTestCase(utils.TestCase):
 
             output = u("\n").join([u(' ').join(x) for x in logs.actual()])
             self.assertIn(u('WakaTime ERROR Traceback (most recent call last):'), output)
-            self.assertIn(u('IOError: FooBar'), output)
+            self.assertIn(u('Exception: FooBar'), output)
