@@ -49,5 +49,6 @@ class TestCase(unittest.TestCase):
     def assertListsEqual(self, first_list, second_list):
         self.assertEquals(self.normalize_list(first_list), self.normalize_list(second_list))
 
+    @property
     def isPy35(self):
         return (sys.version_info[0] == 3 and sys.version_info[1] == 5)
