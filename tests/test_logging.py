@@ -48,8 +48,15 @@ class LoggingTestCase(utils.TestCase):
         self.assertEquals(logging.WARNING, logging.getLogger('WakaTime').level)
         logfile = os.path.realpath(os.path.expanduser('~/.wakatime.log'))
         self.assertEquals(logfile, logging.getLogger('WakaTime').handlers[0].baseFilename)
-        output = u("\n").join([u(' ').join(x) for x in logs.actual()])
-        self.assertEquals(output, u("WakaTime WARNING Regex error (unbalanced parenthesis) for include pattern: \\(invalid regex)\nWakaTime WARNING Regex error (unbalanced parenthesis) for exclude pattern: \\(invalid regex)"))
+        output = [u(' ').join(x) for x in logs.actual()]
+        expected = u('WakaTime WARNING Regex error (unbalanced parenthesis) for include pattern: \\(invalid regex)')
+        if self.isPy35:
+            expected = u('WakaTime WARNING Regex error (unbalanced parenthesis) for include pattern: \\(invalid regex)')
+        self.assertEquals(output[0], expected)
+        expected = u('WakaTime WARNING Regex error (unbalanced parenthesis) for exclude pattern: \\(invalid regex)')
+        if self.isPy35:
+            expected = u('WakaTime WARNING Regex error (unbalanced parenthesis) for exclude pattern: \\(invalid regex)')
+        self.assertEquals(output[1], expected)
 
     @log_capture()
     def test_log_file_location_can_be_changed(self, logs):
@@ -99,8 +106,14 @@ class LoggingTestCase(utils.TestCase):
         logfile = os.path.realpath(os.path.expanduser('~/.wakatime.log'))
         self.assertEquals(logfile, logging.getLogger('WakaTime').handlers[0].baseFilename)
         output = [u(' ').join(x) for x in logs.actual()]
-        self.assertEquals(output[0], u('WakaTime WARNING Regex error (unbalanced parenthesis) for include pattern: \\(invalid regex)'))
-        self.assertEquals(output[1], u('WakaTime WARNING Regex error (unbalanced parenthesis) for exclude pattern: \\(invalid regex)'))
+        expected = u('WakaTime WARNING Regex error (unbalanced parenthesis) for include pattern: \\(invalid regex)')
+        if self.isPy35:
+            expected = u('WakaTime WARNING Regex error (unbalanced parenthesis) for include pattern: \\(invalid regex)')
+        self.assertEquals(output[0], expected)
+        expected = u('WakaTime WARNING Regex error (unbalanced parenthesis) for exclude pattern: \\(invalid regex)')
+        if self.isPy35:
+            expected = u('WakaTime WARNING Regex error (unbalanced parenthesis) for exclude pattern: \\(invalid regex)')
+        self.assertEquals(output[1], expected)
         self.assertEquals(output[2], u('WakaTime DEBUG Sending heartbeat to api at https://wakatime.com/api/v1/heartbeats'))
         self.assertIn('Python', output[3])
         self.assertIn('response_code', output[4])
