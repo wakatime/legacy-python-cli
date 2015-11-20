@@ -51,11 +51,11 @@ class LoggingTestCase(utils.TestCase):
         output = [u(' ').join(x) for x in logs.actual()]
         expected = u('WakaTime WARNING Regex error (unbalanced parenthesis) for include pattern: \\(invalid regex)')
         if self.isPy35:
-            expected = u('WakaTime WARNING Regex error (unbalanced parenthesis) for include pattern: \\(invalid regex)')
+            expected = u('WakaTime WARNING Regex error (unbalanced parenthesis at position 15) for include pattern: \\(invalid regex)')
         self.assertEquals(output[0], expected)
         expected = u('WakaTime WARNING Regex error (unbalanced parenthesis) for exclude pattern: \\(invalid regex)')
         if self.isPy35:
-            expected = u('WakaTime WARNING Regex error (unbalanced parenthesis) for exclude pattern: \\(invalid regex)')
+            expected = u('WakaTime WARNING Regex error (unbalanced parenthesis at position 15) for exclude pattern: \\(invalid regex)')
         self.assertEquals(output[1], expected)
 
     @log_capture()
@@ -108,11 +108,11 @@ class LoggingTestCase(utils.TestCase):
         output = [u(' ').join(x) for x in logs.actual()]
         expected = u('WakaTime WARNING Regex error (unbalanced parenthesis) for include pattern: \\(invalid regex)')
         if self.isPy35:
-            expected = u('WakaTime WARNING Regex error (unbalanced parenthesis) for include pattern: \\(invalid regex)')
+            expected = u('WakaTime WARNING Regex error (unbalanced parenthesis at position 15) for include pattern: \\(invalid regex)')
         self.assertEquals(output[0], expected)
         expected = u('WakaTime WARNING Regex error (unbalanced parenthesis) for exclude pattern: \\(invalid regex)')
         if self.isPy35:
-            expected = u('WakaTime WARNING Regex error (unbalanced parenthesis) for exclude pattern: \\(invalid regex)')
+            expected = u('WakaTime WARNING Regex error (unbalanced parenthesis at position 15) for exclude pattern: \\(invalid regex)')
         self.assertEquals(output[1], expected)
         self.assertEquals(output[2], u('WakaTime DEBUG Sending heartbeat to api at https://wakatime.com/api/v1/heartbeats'))
         self.assertIn('Python', output[3])
