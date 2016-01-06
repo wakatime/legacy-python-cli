@@ -3,6 +3,17 @@ History
 -------
 
 
+4.1.9 (2016-01-06)
+++++++++++++++++++
+
+- improve C# dependency detection
+- correctly log exception tracebacks
+- log all unknown exceptions to wakatime.log file
+- disable urllib3 SSL warning from every request
+- detect dependencies from golang files
+- use api.wakatime.com for sending heartbeats
+
+
 4.1.8 (2015-09-29)
 ++++++++++++++++++
 
