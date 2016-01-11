@@ -3,6 +3,13 @@ History
 -------
 
 
+4.1.10 (2016-01-11)
+++++++++++++++++++
+
+- accept 201 or 202 response codes as success from api
+- upgrade requests package to v2.9.1
+
+
 4.1.9 (2016-01-06)
 ++++++++++++++++++
 
