@@ -3,6 +3,24 @@ History
 -------
 
 
+4.1.10 (2016-01-11)
+++++++++++++++++++
+
+- accept 201 or 202 response codes as success from api
+- upgrade requests package to v2.9.1
+
+
+4.1.9 (2016-01-06)
+++++++++++++++++++
+
+- improve C# dependency detection
+- correctly log exception tracebacks
+- log all unknown exceptions to wakatime.log file
+- disable urllib3 SSL warning from every request
+- detect dependencies from golang files
+- use api.wakatime.com for sending heartbeats
+
+
 4.1.8 (2015-09-29)
 ++++++++++++++++++
 

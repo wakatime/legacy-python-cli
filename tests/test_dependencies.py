@@ -439,3 +439,59 @@ class DependenciesTestCase(utils.TestCase):
         dependencies = self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['dependencies']
         self.assertListsEqual(dependencies, expected_dependencies)
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
+
+    def test_go_dependencies_detected(self):
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        now = u(int(time.time()))
+        entity = 'tests/samples/codefiles/go.go'
+        config = 'tests/samples/configs/good_config.cfg'
+
+        args = ['--file', entity, '--config', config, '--time', now]
+
+        retval = execute(args)
+        self.assertEquals(retval, 102)
+        self.assertEquals(sys.stdout.getvalue(), '')
+        self.assertEquals(sys.stderr.getvalue(), '')
+
+        self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
+        self.patched['wakatime.session_cache.SessionCache.delete'].assert_called_once_with()
+        self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
+
+        heartbeat = {
+            'language': u('Go'),
+            'lines': 24,
+            'entity': os.path.realpath(entity),
+            'project': u(os.path.basename(os.path.realpath('.'))),
+            'dependencies': ANY,
+            'branch': os.environ.get('TRAVIS_COMMIT', ANY),
+            'time': float(now),
+            'type': 'file',
+        }
+        stats = {
+            u('cursorpos'): None,
+            u('dependencies'): ANY,
+            u('language'): u('Go'),
+            u('lineno'): None,
+            u('lines'): 24,
+        }
+        expected_dependencies = [
+            '"compress/gzip"',
+            '"direct"',
+            '"foobar"',
+            '"github.com/golang/example/stringutil"',
+            '"image/gif"',
+            '"log"',
+            '"math"',
+            '"oldname"',
+            '"os"',
+            '"supress"',
+        ]
+
+        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, ANY, None)
+        dependencies = self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['dependencies']
+        self.assertListsEqual(dependencies, expected_dependencies)
+        self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
+        self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
