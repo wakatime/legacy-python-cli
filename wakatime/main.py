@@ -30,7 +30,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'pac
 
 from .__about__ import __version__
 from .compat import u, open, is_py3
-from .constants import SUCCESS, API_ERROR, CONFIG_FILE_PARSE_ERROR
+from .constants import SUCCESS, API_ERROR, CONFIG_FILE_PARSE_ERROR, NO_INTERNET
 from .logger import setup_logging
 from .offlinequeue import Queue
 from .packages import argparse
@@ -403,7 +403,6 @@ def send_heartbeat(project=None, branch=None, hostname=None, stats={}, key=None,
     session_cache.delete()
     return False
 
-
 def execute(argv=None):
     if argv:
         sys.argv = ['wakatime'] + argv
@@ -469,7 +468,7 @@ def execute(argv=None):
                 return SUCCESS
 
             return API_ERROR
-
+# Somewhere around here we return NO_INTERNET depending on some other control flow we have to write?
         else:
             log.debug('File does not exist; ignoring this heartbeat.')
             return SUCCESS
