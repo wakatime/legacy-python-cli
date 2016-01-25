@@ -30,7 +30,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'pac
 
 from .__about__ import __version__
 from .compat import u, open, is_py3
-from .constants import SUCCESS, API_ERROR, CONFIG_FILE_PARSE_ERROR, NO_INTERNET
+from .constants import SUCCESS, API_ERROR, CONFIG_FILE_PARSE_ERROR, UNAUTHORIZED_ERROR
 from .logger import setup_logging
 from .offlinequeue import Queue
 from .packages import argparse
@@ -375,7 +375,7 @@ def send_heartbeat(project=None, branch=None, hostname=None, stats={}, key=None,
                 'response_code': response_code,
             })
             session_cache.save(session)
-            return True
+            return SUCCESS
         if offline:
             if response_code != 400:
                 queue = Queue()
@@ -385,6 +385,7 @@ def send_heartbeat(project=None, branch=None, hostname=None, stats={}, key=None,
                         'response_code': response_code,
                         'response_content': response_content,
                     })
+                    return UNAUTHORIZED_ERROR
                 elif log.isEnabledFor(logging.DEBUG):
                     log.warn({
                         'response_code': response_code,
@@ -401,7 +402,7 @@ def send_heartbeat(project=None, branch=None, hostname=None, stats={}, key=None,
                 'response_content': response_content,
             })
     session_cache.delete()
-    return False
+    return API_ERROR
 
 def execute(argv=None):
     if argv:
@@ -440,13 +441,14 @@ def execute(argv=None):
             kwargs['hostname'] = args.hostname or socket.gethostname()
             kwargs['timeout'] = args.timeout
 
-            if send_heartbeat(**kwargs):
+            status = send_heartbeat(**kwargs)
+            if status == SUCCESS:
                 queue = Queue()
                 while True:
                     heartbeat = queue.pop()
                     if heartbeat is None:
                         break
-                    sent = send_heartbeat(
+                    status = send_heartbeat(
                         project=heartbeat['project'],
                         entity=heartbeat['entity'],
                         timestamp=heartbeat['time'],
@@ -463,12 +465,11 @@ def execute(argv=None):
                         api_url=args.api_url,
                         timeout=args.timeout,
                     )
-                    if not sent:
+                    if status != SUCCESS:
                         break
                 return SUCCESS
 
-            return API_ERROR
-# Somewhere around here we return NO_INTERNET depending on some other control flow we have to write?
+            return status
         else:
             log.debug('File does not exist; ignoring this heartbeat.')
             return SUCCESS
