@@ -6,8 +6,15 @@ from wakatime.packages import requests
 
 import os
 import time
+import re
 import sys
 from wakatime.compat import u
+from wakatime.constants import (
+    API_ERROR,
+    AUTH_ERROR,
+    CONFIG_FILE_PARSE_ERROR,
+    SUCCESS,
+)
 from wakatime.packages.requests.models import Response
 from . import utils
 
@@ -54,7 +61,7 @@ class BaseTestCase(utils.TestCase):
         args = ['--file', entity, '--key', '123', '--config', config]
 
         retval = execute(args)
-        self.assertEquals(retval, 0)
+        self.assertEquals(retval, SUCCESS)
         self.assertEquals(sys.stdout.getvalue(), '')
         self.assertEquals(sys.stderr.getvalue(), '')
 
@@ -107,10 +114,11 @@ class BaseTestCase(utils.TestCase):
         config = 'tests/samples/configs/has_everything.cfg'
         args = ['--file', entity, '--config', config]
         retval = execute(args)
-        self.assertEquals(retval, 0)
+        self.assertEquals(retval, SUCCESS)
         expected_stdout = open('tests/samples/output/main_test_good_config_file').read()
         traceback_file = os.path.realpath('wakatime/main.py')
-        self.assertEquals(sys.stdout.getvalue(), expected_stdout.format(file=traceback_file))
+        lineno = int(re.search(r' line (\d+),', sys.stdout.getvalue()).group(1))
+        self.assertEquals(sys.stdout.getvalue(), expected_stdout.format(file=traceback_file, lineno=lineno))
         self.assertEquals(sys.stderr.getvalue(), '')
 
         self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
@@ -129,7 +137,7 @@ class BaseTestCase(utils.TestCase):
         config = 'tests/samples/configs/sample_alternate_apikey.cfg'
         args = ['--file', entity, '--config', config]
         retval = execute(args)
-        self.assertEquals(retval, 0)
+        self.assertEquals(retval, SUCCESS)
         self.assertEquals(sys.stdout.getvalue(), '')
         self.assertEquals(sys.stderr.getvalue(), '')
 
@@ -145,7 +153,7 @@ class BaseTestCase(utils.TestCase):
         config = 'tests/samples/configs/bad_config.cfg'
         args = ['--file', entity, '--config', config]
         retval = execute(args)
-        self.assertEquals(retval, 103)
+        self.assertEquals(retval, CONFIG_FILE_PARSE_ERROR)
         self.assertIn('ParsingError', sys.stdout.getvalue())
         self.assertEquals(sys.stderr.getvalue(), '')
         self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
@@ -165,7 +173,7 @@ class BaseTestCase(utils.TestCase):
         args = ['--file', entity, '--key', '123', '--config', config, '--time', now]
 
         retval = execute(args)
-        self.assertEquals(retval, 102)
+        self.assertEquals(retval, API_ERROR)
         self.assertEquals(sys.stdout.getvalue(), '')
         self.assertEquals(sys.stderr.getvalue(), '')
 
@@ -206,7 +214,7 @@ class BaseTestCase(utils.TestCase):
         args = ['--file', entity, '--key', '123', '--config', config, '--time', now]
 
         retval = execute(args)
-        self.assertEquals(retval, 102)
+        self.assertEquals(retval, API_ERROR)
         self.assertEquals(sys.stdout.getvalue(), '')
         self.assertEquals(sys.stderr.getvalue(), '')
 
@@ -266,7 +274,7 @@ class BaseTestCase(utils.TestCase):
 
 
         retval = execute(args)
-        self.assertEquals(retval, 102)
+        self.assertEquals(retval, API_ERROR)
         self.assertEquals(sys.stdout.getvalue(), '')
         self.assertEquals(sys.stderr.getvalue(), '')
 
@@ -307,7 +315,7 @@ class BaseTestCase(utils.TestCase):
 
 
         retval = execute(args)
-        self.assertEquals(retval, 102)
+        self.assertEquals(retval, API_ERROR)
         self.assertEquals(sys.stdout.getvalue(), '')
         self.assertEquals(sys.stderr.getvalue(), '')
 
@@ -316,6 +324,47 @@ class BaseTestCase(utils.TestCase):
         self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
 
         self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
+        self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
+
+    def test_401_response(self):
+        response = Response()
+        response.status_code = 401
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        now = u(int(time.time()))
+
+        args = ['--file', 'tests/samples/codefiles/twolinefile.txt', '--key', '123',
+                '--config', 'tests/samples/configs/paranoid.cfg', '--time', now]
+
+
+        retval = execute(args)
+        self.assertEquals(retval, AUTH_ERROR)
+        self.assertEquals(sys.stdout.getvalue(), '')
+        self.assertEquals(sys.stderr.getvalue(), '')
+
+        self.patched['wakatime.session_cache.SessionCache.delete'].assert_called_once_with()
+        self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
+        self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
+
+        heartbeat = {
+            'language': 'Text only',
+            'lines': 2,
+            'entity': 'HIDDEN.txt',
+            'project': os.path.basename(os.path.abspath('.')),
+            'branch': os.environ.get('TRAVIS_COMMIT', ANY),
+            'time': float(now),
+            'type': 'file',
+        }
+        stats = {
+            u('cursorpos'): None,
+            u('dependencies'): [],
+            u('language'): u('Text only'),
+            u('lineno'): None,
+            u('lines'): 2,
+        }
+
+        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, ANY, None)
+        self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
     def test_alternate_project(self):
@@ -330,7 +379,7 @@ class BaseTestCase(utils.TestCase):
         args = ['--file', entity, '--alternate-project', 'xyz', '--config', config, '--time', now]
 
         retval = execute(args)
-        self.assertEquals(retval, 102)
+        self.assertEquals(retval, API_ERROR)
         self.assertEquals(sys.stdout.getvalue(), '')
         self.assertEquals(sys.stderr.getvalue(), '')
 
@@ -371,7 +420,7 @@ class BaseTestCase(utils.TestCase):
         args = ['--file', entity, '--project', 'xyz', '--config', config, '--time', now]
 
         retval = execute(args)
-        self.assertEquals(retval, 102)
+        self.assertEquals(retval, API_ERROR)
         self.assertEquals(sys.stdout.getvalue(), '')
         self.assertEquals(sys.stderr.getvalue(), '')
 
@@ -409,7 +458,7 @@ class BaseTestCase(utils.TestCase):
         config = 'tests/samples/configs/good_config.cfg'
         args = ['--file', entity, '--config', config]
         retval = execute(args)
-        self.assertEquals(retval, 0)
+        self.assertEquals(retval, SUCCESS)
         self.assertEquals(sys.stdout.getvalue(), '')
         self.assertEquals(sys.stderr.getvalue(), '')
 
@@ -429,7 +478,7 @@ class BaseTestCase(utils.TestCase):
         config = 'tests/samples/configs/good_config.cfg'
         args = ['--file', entity, '--config', config, '--proxy', 'localhost:1234']
         retval = execute(args)
-        self.assertEquals(retval, 0)
+        self.assertEquals(retval, SUCCESS)
         self.assertEquals(sys.stdout.getvalue(), '')
         self.assertEquals(sys.stderr.getvalue(), '')
 
@@ -454,7 +503,7 @@ class BaseTestCase(utils.TestCase):
         args = ['--entity', entity, '--entitytype', 'domain', '--config', config, '--time', now]
         retval = execute(args)
 
-        self.assertEquals(retval, 102)
+        self.assertEquals(retval, API_ERROR)
         self.assertEquals(sys.stdout.getvalue(), '')
         self.assertEquals(sys.stderr.getvalue(), '')
 
@@ -491,7 +540,7 @@ class BaseTestCase(utils.TestCase):
         args = ['--entity', entity, '--entitytype', 'app', '--config', config, '--time', now]
         retval = execute(args)
 
-        self.assertEquals(retval, 102)
+        self.assertEquals(retval, API_ERROR)
         self.assertEquals(sys.stdout.getvalue(), '')
         self.assertEquals(sys.stderr.getvalue(), '')
 

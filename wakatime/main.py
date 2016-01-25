@@ -30,7 +30,12 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'pac
 
 from .__about__ import __version__
 from .compat import u, open, is_py3
-from .constants import SUCCESS, API_ERROR, CONFIG_FILE_PARSE_ERROR
+from .constants import (
+    API_ERROR,
+    AUTH_ERROR,
+    CONFIG_FILE_PARSE_ERROR,
+    SUCCESS,
+)
 from .logger import setup_logging
 from .offlinequeue import Queue
 from .packages import argparse
@@ -289,6 +294,9 @@ def send_heartbeat(project=None, branch=None, hostname=None, stats={}, key=None,
         timestamp=None, isWrite=None, plugin=None, offline=None, entity_type='file',
         hidefilenames=None, proxy=None, api_url=None, timeout=None, **kwargs):
     """Sends heartbeat as POST request to WakaTime api server.
+
+    Returns `SUCCESS` when heartbeat was sent, otherwise returns an
+    error code constant.
     """
 
     if not api_url:
@@ -375,7 +383,7 @@ def send_heartbeat(project=None, branch=None, hostname=None, stats={}, key=None,
                 'response_code': response_code,
             })
             session_cache.save(session)
-            return True
+            return SUCCESS
         if offline:
             if response_code != 400:
                 queue = Queue()
@@ -385,6 +393,8 @@ def send_heartbeat(project=None, branch=None, hostname=None, stats={}, key=None,
                         'response_code': response_code,
                         'response_content': response_content,
                     })
+                    session_cache.delete()
+                    return AUTH_ERROR
                 elif log.isEnabledFor(logging.DEBUG):
                     log.warn({
                         'response_code': response_code,
@@ -401,7 +411,39 @@ def send_heartbeat(project=None, branch=None, hostname=None, stats={}, key=None,
                 'response_content': response_content,
             })
     session_cache.delete()
-    return False
+    return API_ERROR
+
+
+def sync_offline_heartbeats(args, hostname):
+    """Sends all heartbeats which were cached in the offline Queue."""
+
+    queue = Queue()
+    while True:
+        heartbeat = queue.pop()
+        if heartbeat is None:
+            break
+        status = send_heartbeat(
+            project=heartbeat['project'],
+            entity=heartbeat['entity'],
+            timestamp=heartbeat['time'],
+            branch=heartbeat['branch'],
+            hostname=hostname,
+            stats=json.loads(heartbeat['stats']),
+            key=args.key,
+            isWrite=heartbeat['is_write'],
+            plugin=heartbeat['plugin'],
+            offline=args.offline,
+            hidefilenames=args.hidefilenames,
+            entity_type=heartbeat['type'],
+            proxy=args.proxy,
+            api_url=args.api_url,
+            timeout=args.timeout,
+        )
+        if status != SUCCESS:
+            if status == AUTH_ERROR:
+                return AUTH_ERROR
+            break
+    return SUCCESS
 
 
 def execute(argv=None):
@@ -438,37 +480,15 @@ def execute(argv=None):
             kwargs['project'] = project
             kwargs['branch'] = branch
             kwargs['stats'] = stats
-            kwargs['hostname'] = args.hostname or socket.gethostname()
+            hostname = args.hostname or socket.gethostname()
+            kwargs['hostname'] = hostname
             kwargs['timeout'] = args.timeout
 
-            if send_heartbeat(**kwargs):
-                queue = Queue()
-                while True:
-                    heartbeat = queue.pop()
-                    if heartbeat is None:
-                        break
-                    sent = send_heartbeat(
-                        project=heartbeat['project'],
-                        entity=heartbeat['entity'],
-                        timestamp=heartbeat['time'],
-                        branch=heartbeat['branch'],
-                        hostname=kwargs['hostname'],
-                        stats=json.loads(heartbeat['stats']),
-                        key=args.key,
-                        isWrite=heartbeat['is_write'],
-                        plugin=heartbeat['plugin'],
-                        offline=args.offline,
-                        hidefilenames=args.hidefilenames,
-                        entity_type=heartbeat['type'],
-                        proxy=args.proxy,
-                        api_url=args.api_url,
-                        timeout=args.timeout,
-                    )
-                    if not sent:
-                        break
-                return SUCCESS
-
-            return API_ERROR
+            status = send_heartbeat(**kwargs)
+            if status == SUCCESS:
+                return sync_offline_heartbeats(args, hostname)
+            else:
+                return status
 
         else:
             log.debug('File does not exist; ignoring this heartbeat.')
