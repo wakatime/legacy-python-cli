@@ -6,6 +6,9 @@ WakaTime
 
 .. image:: https://coveralls.io/repos/wakatime/wakatime/badge.svg?branch=master&service=github
     :target: https://coveralls.io/github/wakatime/wakatime?branch=master
+    
+.. image:: https://wakaslack.herokuapp.com/badge.svg
+    :target: https://wakaslack.herokuapp.com
 
 Command line interface to `WakaTime <https://wakatime.com/>`_ used by all WakaTime `text editor plugins <https://wakatime.com/editors>`_.
 
