@@ -6,4 +6,4 @@ __version__ = '.'.join(__version_info__)
 __author__ = 'Alan Hamlett'
 __author_email__ = 'alan@wakatime.com'
 __license__ = 'BSD'
-__copyright__ = 'Copyright 2014 Alan Hamlett'
+__copyright__ = 'Copyright 2016 Alan Hamlett'
