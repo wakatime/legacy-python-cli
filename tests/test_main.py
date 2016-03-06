@@ -8,7 +8,7 @@ import os
 import time
 import re
 import sys
-from wakatime.compat import u
+from wakatime.compat import u, is_py3
 from wakatime.constants import (
     API_ERROR,
     AUTH_ERROR,
@@ -26,6 +26,10 @@ try:
     from mock import ANY
 except ImportError:
     from unittest.mock import ANY
+try:
+    from wakatime.packages import tzlocal
+except:
+    from wakatime.packages import tzlocal3 as tzlocal
 
 
 class BaseTestCase(utils.TestCase):
@@ -491,7 +495,7 @@ class BaseTestCase(utils.TestCase):
 
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_called_once_with(ANY, cert=None, proxies={'https': 'localhost:1234'}, stream=False, timeout=30, verify=True)
 
-    def test_domain_heartbeat(self):
+    def test_entity_type_domain(self):
         response = Response()
         response.status_code = 0
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
@@ -528,7 +532,7 @@ class BaseTestCase(utils.TestCase):
         self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
-    def test_app_heartbeat(self):
+    def test_entity_type_app(self):
         response = Response()
         response.status_code = 0
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
@@ -564,3 +568,61 @@ class BaseTestCase(utils.TestCase):
         self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, ANY, None)
         self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
+
+    def test_nonascii_hostname(self):
+        response = Response()
+        response.status_code = 201
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        hostname = 'test汉语' if is_py3 else 'test\xe6\xb1\x89\xe8\xaf\xad'
+        with utils.mock.patch('socket.gethostname') as mock_gethostname:
+            mock_gethostname.return_value = hostname
+            self.assertEquals(type(hostname).__name__, 'str')
+
+            entity = 'tests/samples/codefiles/emptyfile.txt'
+            config = 'tests/samples/configs/has_everything.cfg'
+            args = ['--file', entity, '--config', config]
+            retval = execute(args)
+            self.assertEquals(retval, SUCCESS)
+            expected_stdout = open('tests/samples/output/main_test_good_config_file').read()
+            traceback_file = os.path.realpath('wakatime/main.py')
+            lineno = int(re.search(r' line (\d+),', sys.stdout.getvalue()).group(1))
+            self.assertEquals(sys.stdout.getvalue(), expected_stdout.format(file=traceback_file, lineno=lineno))
+            self.assertEquals(sys.stderr.getvalue(), '')
+
+            self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
+            self.patched['wakatime.session_cache.SessionCache.delete'].assert_not_called()
+            self.patched['wakatime.session_cache.SessionCache.save'].assert_called_once_with(ANY)
+
+            self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
+            self.patched['wakatime.offlinequeue.Queue.pop'].assert_called_once_with()
+
+            headers = self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].call_args[0][0].headers
+            self.assertEquals(headers.get('X-Machine-Name'), hostname.encode('utf-8') if is_py3 else hostname)
+
+    def test_nonascii_timezone(self):
+        response = Response()
+        response.status_code = 201
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        package_path = 'wakatime.packages.tzlocal3.get_localzone' if is_py3 else 'wakatime.packages.tzlocal.get_localzone'
+        timezone = tzlocal.get_localzone()
+        timezone.zone = 'tz汉语' if is_py3 else 'tz\xe6\xb1\x89\xe8\xaf\xad'
+        with utils.mock.patch(package_path) as mock_getlocalzone:
+            mock_getlocalzone.return_value = timezone
+
+            entity = 'tests/samples/codefiles/emptyfile.txt'
+            config = 'tests/samples/configs/has_everything.cfg'
+            args = ['--file', entity, '--config', config, '--timeout', '15']
+            retval = execute(args)
+            self.assertEquals(retval, SUCCESS)
+
+            self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
+            self.patched['wakatime.session_cache.SessionCache.delete'].assert_not_called()
+            self.patched['wakatime.session_cache.SessionCache.save'].assert_called_once_with(ANY)
+
+            self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
+            self.patched['wakatime.offlinequeue.Queue.pop'].assert_called_once_with()
+
+            headers = self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].call_args[0][0].headers
+            self.assertEquals(headers.get('TimeZone'), u(timezone.zone).encode('utf-8') if is_py3 else timezone.zone)
