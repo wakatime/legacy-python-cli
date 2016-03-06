@@ -25,8 +25,9 @@ try:
 except ImportError:  # pragma: nocover
     import configparser
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'packages'))
+pwd = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.dirname(pwd))
+sys.path.insert(0, os.path.join(pwd, 'packages'))
 
 from .__about__ import __version__
 from .compat import u, open, is_py3
@@ -128,12 +129,14 @@ def parseArguments():
                  '"url", "domain", or "app"; defaults to file.')
     parser.add_argument('--proxy', dest='proxy',
                         help='optional https proxy url; for example: '+
-                        'https://user:pass@localhost:8080')
+                             'https://user:pass@localhost:8080')
     parser.add_argument('--project', dest='project',
             help='optional project name')
     parser.add_argument('--alternate-project', dest='alternate_project',
-            help='optional alternate project name; auto-discovered project takes priority')
-    parser.add_argument('--hostname', dest='hostname', help='hostname of current machine.')
+            help='optional alternate project name; auto-discovered project '+
+                 'takes priority')
+    parser.add_argument('--hostname', dest='hostname', help='hostname of '+
+                        'current machine.')
     parser.add_argument('--disableoffline', dest='offline',
             action='store_false',
             help='disables offline time logging instead of queuing logged time')
@@ -290,9 +293,10 @@ def get_user_agent(plugin):
     return user_agent
 
 
-def send_heartbeat(project=None, branch=None, hostname=None, stats={}, key=None, entity=None,
-        timestamp=None, isWrite=None, plugin=None, offline=None, entity_type='file',
-        hidefilenames=None, proxy=None, api_url=None, timeout=None, **kwargs):
+def send_heartbeat(project=None, branch=None, hostname=None, stats={}, key=None,
+                   entity=None, timestamp=None, isWrite=None, plugin=None,
+                   offline=None, entity_type='file', hidefilenames=None,
+                   proxy=None, api_url=None, timeout=None, **kwargs):
     """Sends heartbeat as POST request to WakaTime api server.
 
     Returns `SUCCESS` when heartbeat was sent, otherwise returns an
@@ -361,7 +365,7 @@ def send_heartbeat(project=None, branch=None, hostname=None, stats={}, key=None,
     response = None
     try:
         response = session.post(api_url, data=request_body, headers=headers,
-                                 proxies=proxies, timeout=timeout)
+                                proxies=proxies, timeout=timeout)
     except RequestException:
         exception_data = {
             sys.exc_info()[0].__name__: u(sys.exc_info()[1]),
@@ -376,39 +380,39 @@ def send_heartbeat(project=None, branch=None, hostname=None, stats={}, key=None,
         else:
             log.error(exception_data)
     else:
-        response_code = response.status_code if response is not None else None
-        response_content = response.text if response is not None else None
-        if response_code == requests.codes.created or response_code == requests.codes.accepted:
+        code = response.status_code if response is not None else None
+        content = response.text if response is not None else None
+        if code == requests.codes.created or code == requests.codes.accepted:
             log.debug({
-                'response_code': response_code,
+                'response_code': code,
             })
             session_cache.save(session)
             return SUCCESS
         if offline:
-            if response_code != 400:
+            if code != 400:
                 queue = Queue()
                 queue.push(data, json.dumps(stats), plugin)
-                if response_code == 401:
+                if code == 401:
                     log.error({
-                        'response_code': response_code,
-                        'response_content': response_content,
+                        'response_code': code,
+                        'response_content': content,
                     })
                     session_cache.delete()
                     return AUTH_ERROR
                 elif log.isEnabledFor(logging.DEBUG):
                     log.warn({
-                        'response_code': response_code,
-                        'response_content': response_content,
+                        'response_code': code,
+                        'response_content': content,
                     })
             else:
                 log.error({
-                    'response_code': response_code,
-                    'response_content': response_content,
+                    'response_code': code,
+                    'response_content': content,
                 })
         else:
             log.error({
-                'response_code': response_code,
-                'response_content': response_content,
+                'response_code': code,
+                'response_content': content,
             })
     session_cache.delete()
     return API_ERROR
