@@ -345,7 +345,7 @@ def send_heartbeat(project=None, branch=None, hostname=None, stats={}, key=None,
         'Authorization': auth,
     }
     if hostname:
-        headers['X-Machine-Name'] = u(hostname)
+        headers['X-Machine-Name'] = u(hostname).encode('utf-8')
     proxies = {}
     if proxy:
         proxies['https'] = proxy
