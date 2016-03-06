@@ -3,6 +3,12 @@ History
 -------
 
 
+4.1.12 (2016-03-06)
+++++++++++++++++++
+
+- encode hostname as utf-8 basestring before adding to X-Machine-Name header
+
+
 4.1.11 (2016-03-06)
 ++++++++++++++++++
 
