@@ -73,6 +73,8 @@ Each plugin also has it's own log file for things outside of the common wakatime
 
 * **Atom** writes errors to the developer console (View -> Developer -> Toggle Developer Tools)
 * **Brackets** errors go to the developer console (Debug -> Show Developer Tools)
+* **Cloud9** logs to the browser console (View -> Developer -> JavaScript Console)
+* **Coda** logs to `/var/log/system.log` so use `sudo tail -f /var/log/system.log` in Terminal to watch Coda 2 logs
 * **Eclipse** logs can be found in the Eclipse ``Error Log`` (Window -> Show View -> Error Log)
 * **Emacs** messages go to the *messages* buffer window
 * **Jetbrains IDEs (IntelliJ IDEA, PyCharm, RubyMine, PhpStorm, AppCode, AndroidStudio, WebStorm)** log to ``idea.log`` (`locating IDE log files <https://intellij-support.jetbrains.com/entries/23352446-Locating-IDE-log-files>`_)
@@ -83,6 +85,7 @@ Each plugin also has it's own log file for things outside of the common wakatime
 * **TextMate** logs to stderr so run TextMate from Terminal to see any errors (`enable logging <https://github.com/textmate/textmate/wiki/Enable-Logging>`_)
 * **Vim** errors get displayed in the status line or inline (use ``:redraw!`` to clear inline errors)
 * **Visual Studio** logs to the Output window, but uncaught exceptions go to ActivityLog.xml (`more info... <http://blogs.msdn.com/b/visualstudio/archive/2010/02/24/troubleshooting-with-the-activity-log.aspx>`_)
+* **Vscode** logs to the developer console (Help -> Toggle Developer Tools)
 * **Xcode** type ``sudo tail -f /var/log/system.log`` in a Terminal to view Xcode errors
 
 Check that heartbeats are received by the WakaTime api with the ``last_heartbeat`` and ``last_plugin`` attributes from the `current user <https://wakatime.com/api/v1/users/current>`_ api resource. Saving a file forces a heartbeat to be sent.
