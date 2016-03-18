@@ -74,7 +74,7 @@ Each plugin also has it's own log file for things outside of the common wakatime
 * **Atom** writes errors to the developer console (View -> Developer -> Toggle Developer Tools)
 * **Brackets** errors go to the developer console (Debug -> Show Developer Tools)
 * **Cloud9** logs to the browser console (View -> Developer -> JavaScript Console)
-* **Coda** logs to `/var/log/system.log` so use `sudo tail -f /var/log/system.log` in Terminal to watch Coda 2 logs
+* **Coda** logs to ``/var/log/system.log`` so use ``sudo tail -f /var/log/system.log`` in Terminal to watch Coda 2 logs
 * **Eclipse** logs can be found in the Eclipse ``Error Log`` (Window -> Show View -> Error Log)
 * **Emacs** messages go to the *messages* buffer window
 * **Jetbrains IDEs (IntelliJ IDEA, PyCharm, RubyMine, PhpStorm, AppCode, AndroidStudio, WebStorm)** log to ``idea.log`` (`locating IDE log files <https://intellij-support.jetbrains.com/entries/23352446-Locating-IDE-log-files>`_)
