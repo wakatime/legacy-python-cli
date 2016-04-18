@@ -36,7 +36,7 @@ Each `plugin <https://wakatime.com/editors>`_ should install wakatime for you, e
 
 Install the plugin for your IDE/editor at https://wakatime.com/editors, which will install wakatime-cli(this package) for you.
 
-If your plugin does not install wakatime cli(this package), install it with::
+If your plugin does not install wakatime cli, install it with::
 
     sudo pip install wakatime
 
