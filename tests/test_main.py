@@ -26,10 +26,7 @@ try:
     from mock import ANY
 except ImportError:
     from unittest.mock import ANY
-try:
-    from wakatime.packages import tzlocal
-except:
-    from wakatime.packages import tzlocal3 as tzlocal
+from wakatime.packages import tzlocal
 
 
 class BaseTestCase(utils.TestCase):
@@ -605,7 +602,7 @@ class BaseTestCase(utils.TestCase):
         response.status_code = 201
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
-        package_path = 'wakatime.packages.tzlocal3.get_localzone' if is_py3 else 'wakatime.packages.tzlocal.get_localzone'
+        package_path = 'wakatime.packages.py3.tzlocal.get_localzone' if is_py3 else 'wakatime.packages.py2.tzlocal.get_localzone'
         timezone = tzlocal.get_localzone()
         timezone.zone = 'tz汉语' if is_py3 else 'tz\xe6\xb1\x89\xe8\xaf\xad'
         with utils.mock.patch(package_path) as mock_getlocalzone:
