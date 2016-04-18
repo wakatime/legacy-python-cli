@@ -29,6 +29,15 @@ Note: You shouldn't need to directly use this package unless you are `building y
 Go to http://wakatime.com/editors to install the plugin for your text editor or IDE.
 
 
+Installation
+------------
+
+Each `plugin <https://wakatime.com/editors>`_ should install wakatime for you, except for the `Emacs WakaTime plugin <https://github.com/wakatime/wakatime-mode>`_.
+If your plugin does not install wakatime cli(this package), install it with::
+
+    sudo pip install wakatime
+
+
 Usage
 -----
 
@@ -63,15 +72,6 @@ format. An example config file looks like::
     offline = true
     proxy = https://user:pass@localhost:8080
     timeout = 30
-
-
-Installation
-------------
-
-Each `plugin <https://wakatime.com/editors>`_ should install wakatime for you, except for the `Emacs WakaTime plugin <https://github.com/wakatime/wakatime-mode>`_.
-If your plugin does not install wakatime cli(this package), install it with::
-
-    sudo pip install wakatime
 
 
 Troubleshooting
