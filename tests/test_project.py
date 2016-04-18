@@ -160,18 +160,27 @@ class LanguagesTestCase(utils.TestCase):
         response.status_code = 0
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
-        with tempfile.NamedTemporaryFile() as fh:
-            now = u(int(time.time()))
-            entity = 'tests/samples/projects/project_map/emptyfile.txt'
+        now = u(int(time.time()))
+        entity = 'tests/samples/projects/project_map/emptyfile.txt'
+        config = 'tests/samples/configs/project_map.cfg'
 
-            fh.write(open('tests/samples/configs/project_map.cfg').read().encode('utf-8'))
-            fh.write('{0} = proj-map'.format(os.path.realpath(os.path.dirname(os.path.dirname(entity)))).encode('utf-8'))
-            fh.flush()
+        args = ['--file', entity, '--config', config, '--time', now]
 
-            config = fh.name
+        execute(args)
 
-            args = ['--file', entity, '--config', config, '--time', now]
+        self.assertEquals('proj-map', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
 
-            execute(args)
+    def test_project_map_group_usage(self):
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
-            self.assertEquals('proj-map', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
+        now = u(int(time.time()))
+        entity = 'tests/samples/projects/project_map42/emptyfile.txt'
+        config = 'tests/samples/configs/project_map.cfg'
+
+        args = ['--file', entity, '--config', config, '--time', now]
+
+        execute(args)
+
+        self.assertEquals('proj-map42', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
