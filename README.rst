@@ -3,18 +3,23 @@ WakaTime
 
 .. image:: https://travis-ci.org/wakatime/wakatime.svg
     :target: https://travis-ci.org/wakatime/wakatime
+    :alt: Tests
 
 .. image:: https://coveralls.io/repos/wakatime/wakatime/badge.svg?branch=master&service=github
     :target: https://coveralls.io/github/wakatime/wakatime?branch=master
+    :alt: Coverage
 
 .. image:: https://gemnasium.com/badges/github.com/wakatime/wakatime.svg
     :target: https://gemnasium.com/github.com/wakatime/wakatime
+    :alt: Dependencies
 
 .. image:: https://badge.fury.io/py/wakatime.svg
     :target: https://pypi.python.org/pypi/wakatime
+    :alt: Version
 
 .. image:: https://wakaslack.herokuapp.com/badge.svg
     :target: https://wakaslack.herokuapp.com
+    :alt: Slack
 
 
 Command line interface to `WakaTime <https://wakatime.com/>`_ used by all WakaTime `text editor plugins <https://wakatime.com/editors>`_.
