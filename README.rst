@@ -105,7 +105,10 @@ Each plugin also has it's own log file for things outside of the common wakatime
 
 Check that heartbeats are received by the WakaTime api with the ``last_heartbeat`` and ``last_plugin`` attributes from the `current user <https://wakatime.com/api/v1/users/current>`_ api resource.
 You can also see a list of all your plugins and when they were last seen by the api with the `user_agents <https://wakatime.com/api/v1/users/current/user_agents>`_ api endpoint.
-Saving a file forces a heartbeat to be sent.
+
+Note: Saving a file forces a heartbeat to be sent.
+
+`Official API Docs <https://wakatime.com/api>`_
 
 
 Contributing
