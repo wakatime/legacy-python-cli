@@ -13,9 +13,6 @@ WakaTime
 .. image:: https://badge.fury.io/py/wakatime.svg
     :target: https://pypi.python.org/pypi/wakatime
 
-.. image:: https://img.shields.io/pypi/pyversions/wakatime.svg
-    :target: https://pypi.python.org/pypi/wakatime
-
 .. image:: https://wakaslack.herokuapp.com/badge.svg
     :target: https://wakaslack.herokuapp.com
 
