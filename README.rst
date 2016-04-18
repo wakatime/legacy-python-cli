@@ -73,6 +73,9 @@ format. An example config file looks like::
     offline = true
     proxy = https://user:pass@localhost:8080
     timeout = 30
+    [projectmap]
+    projects/foo = new project name
+    ^/home/user/projects/bar(\d+)/ = project{0}
 
 
 Troubleshooting
