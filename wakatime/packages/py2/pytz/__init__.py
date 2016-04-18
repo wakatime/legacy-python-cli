@@ -8,12 +8,10 @@ See the datetime section of the Python Library Reference for information
 on how to use these modules.
 '''
 
-# The Olson database is updated several times a year.
-OLSON_VERSION = '2013d'
-VERSION = OLSON_VERSION
-# Version format for a patch release - only one so far.
-#VERSION = OLSON_VERSION + '.2'
-__version__ = OLSON_VERSION
+# The IANA (nee Olson) database is updated several times a year.
+OLSON_VERSION = '2016c'
+VERSION = '2016.3'  # Switching to pip compatible version numbering.
+__version__ = VERSION
 
 OLSEN_VERSION = OLSON_VERSION # Old releases had this misspelling
 
@@ -112,7 +110,7 @@ def resource_exists(name):
 # module, as well as the Zope3 i18n package. Perhaps we should just provide
 # the POT file and translations, and leave it up to callers to make use
 # of them.
-# 
+#
 # t = gettext.translation(
 #         'pytz', os.path.join(os.path.dirname(__file__), 'locales'),
 #         fallback=True
@@ -125,7 +123,7 @@ def resource_exists(name):
 _tzinfo_cache = {}
 
 def timezone(zone):
-    r''' Return a datetime.tzinfo implementation for the given timezone 
+    r''' Return a datetime.tzinfo implementation for the given timezone
 
     >>> from datetime import datetime, timedelta
     >>> utc = timezone('UTC')
@@ -243,13 +241,13 @@ class UTC(datetime.tzinfo):
         return "UTC"
 
 
-UTC = utc = UTC() # UTC is a singleton
+UTC = utc = UTC()  # UTC is a singleton
 
 
 def _UTC():
     """Factory function for utc unpickling.
 
-    Makes sure that unpickling a utc instance always returns the same 
+    Makes sure that unpickling a utc instance always returns the same
     module global.
 
     These examples belong in the UTC class above, but it is obscured; or in
@@ -331,7 +329,7 @@ class _CountryTimezoneDict(LazyDict):
         zone_tab = open_resource('zone.tab')
         try:
             for line in zone_tab:
-                line = line.decode('US-ASCII')
+                line = line.decode('UTF-8')
                 if line.startswith('#'):
                     continue
                 code, coordinates, zone = line.split(None, 4)[:3]
@@ -359,7 +357,7 @@ class _CountryNameDict(LazyDict):
         zone_tab = open_resource('iso3166.tab')
         try:
             for line in zone_tab.readlines():
-                line = line.decode('US-ASCII')
+                line = line.decode('UTF-8')
                 if line.startswith('#'):
                     continue
                 code, name = line.split(None, 1)
@@ -601,6 +599,7 @@ all_timezones = \
  'America/Eirunepe',
  'America/El_Salvador',
  'America/Ensenada',
+ 'America/Fort_Nelson',
  'America/Fort_Wayne',
  'America/Fortaleza',
  'America/Glace_Bay',
@@ -718,6 +717,7 @@ all_timezones = \
  'Antarctica/Rothera',
  'Antarctica/South_Pole',
  'Antarctica/Syowa',
+ 'Antarctica/Troll',
  'Antarctica/Vostok',
  'Arctic/Longyearbyen',
  'Asia/Aden',
@@ -732,10 +732,12 @@ all_timezones = \
  'Asia/Bahrain',
  'Asia/Baku',
  'Asia/Bangkok',
+ 'Asia/Barnaul',
  'Asia/Beirut',
  'Asia/Bishkek',
  'Asia/Brunei',
  'Asia/Calcutta',
+ 'Asia/Chita',
  'Asia/Choibalsan',
  'Asia/Chongqing',
  'Asia/Chungking',
@@ -793,6 +795,7 @@ all_timezones = \
  'Asia/Seoul',
  'Asia/Shanghai',
  'Asia/Singapore',
+ 'Asia/Srednekolymsk',
  'Asia/Taipei',
  'Asia/Tashkent',
  'Asia/Tbilisi',
@@ -906,6 +909,7 @@ all_timezones = \
  'Etc/Zulu',
  'Europe/Amsterdam',
  'Europe/Andorra',
+ 'Europe/Astrakhan',
  'Europe/Athens',
  'Europe/Belfast',
  'Europe/Belgrade',
@@ -953,6 +957,7 @@ all_timezones = \
  'Europe/Tallinn',
  'Europe/Tirane',
  'Europe/Tiraspol',
+ 'Europe/Ulyanovsk',
  'Europe/Uzhgorod',
  'Europe/Vaduz',
  'Europe/Vatican',
@@ -1003,6 +1008,7 @@ all_timezones = \
  'PST8PDT',
  'Pacific/Apia',
  'Pacific/Auckland',
+ 'Pacific/Bougainville',
  'Pacific/Chatham',
  'Pacific/Chuuk',
  'Pacific/Easter',
@@ -1175,6 +1181,7 @@ common_timezones = \
  'America/Edmonton',
  'America/Eirunepe',
  'America/El_Salvador',
+ 'America/Fort_Nelson',
  'America/Fortaleza',
  'America/Glace_Bay',
  'America/Godthab',
@@ -1222,7 +1229,6 @@ common_timezones = \
  'America/Moncton',
  'America/Monterrey',
  'America/Montevideo',
- 'America/Montreal',
  'America/Montserrat',
  'America/Nassau',
  'America/New_York',
@@ -1247,13 +1253,11 @@ common_timezones = \
  'America/Regina',
  'America/Resolute',
  'America/Rio_Branco',
- 'America/Santa_Isabel',
  'America/Santarem',
  'America/Santiago',
  'America/Santo_Domingo',
  'America/Sao_Paulo',
  'America/Scoresbysund',
- 'America/Shiprock',
  'America/Sitka',
  'America/St_Barthelemy',
  'America/St_Johns',
@@ -1281,8 +1285,8 @@ common_timezones = \
  'Antarctica/McMurdo',
  'Antarctica/Palmer',
  'Antarctica/Rothera',
- 'Antarctica/South_Pole',
  'Antarctica/Syowa',
+ 'Antarctica/Troll',
  'Antarctica/Vostok',
  'Arctic/Longyearbyen',
  'Asia/Aden',
@@ -1296,11 +1300,12 @@ common_timezones = \
  'Asia/Bahrain',
  'Asia/Baku',
  'Asia/Bangkok',
+ 'Asia/Barnaul',
  'Asia/Beirut',
  'Asia/Bishkek',
  'Asia/Brunei',
+ 'Asia/Chita',
  'Asia/Choibalsan',
- 'Asia/Chongqing',
  'Asia/Colombo',
  'Asia/Damascus',
  'Asia/Dhaka',
@@ -1308,7 +1313,6 @@ common_timezones = \
  'Asia/Dubai',
  'Asia/Dushanbe',
  'Asia/Gaza',
- 'Asia/Harbin',
  'Asia/Hebron',
  'Asia/Ho_Chi_Minh',
  'Asia/Hong_Kong',
@@ -1320,7 +1324,6 @@ common_timezones = \
  'Asia/Kabul',
  'Asia/Kamchatka',
  'Asia/Karachi',
- 'Asia/Kashgar',
  'Asia/Kathmandu',
  'Asia/Khandyga',
  'Asia/Kolkata',
@@ -1350,6 +1353,7 @@ common_timezones = \
  'Asia/Seoul',
  'Asia/Shanghai',
  'Asia/Singapore',
+ 'Asia/Srednekolymsk',
  'Asia/Taipei',
  'Asia/Tashkent',
  'Asia/Tbilisi',
@@ -1394,6 +1398,7 @@ common_timezones = \
  'Canada/Pacific',
  'Europe/Amsterdam',
  'Europe/Andorra',
+ 'Europe/Astrakhan',
  'Europe/Athens',
  'Europe/Belgrade',
  'Europe/Berlin',
@@ -1438,6 +1443,7 @@ common_timezones = \
  'Europe/Stockholm',
  'Europe/Tallinn',
  'Europe/Tirane',
+ 'Europe/Ulyanovsk',
  'Europe/Uzhgorod',
  'Europe/Vaduz',
  'Europe/Vatican',
@@ -1462,6 +1468,7 @@ common_timezones = \
  'Indian/Reunion',
  'Pacific/Apia',
  'Pacific/Auckland',
+ 'Pacific/Bougainville',
  'Pacific/Chatham',
  'Pacific/Chuuk',
  'Pacific/Easter',
