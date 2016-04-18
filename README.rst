@@ -10,6 +10,13 @@ WakaTime
 .. image:: https://wakaslack.herokuapp.com/badge.svg
     :target: https://wakaslack.herokuapp.com
 
+.. image:: https://gemnasium.com/badges/github.com/wakatime/wakatime.svg
+    :target: https://gemnasium.com/github.com/wakatime/wakatime
+
+.. image:: https://badge.fury.io/py/wakatime.svg
+    :target: https://badge.fury.io/py/wakatime
+
+
 Command line interface to `WakaTime <https://wakatime.com/>`_ used by all WakaTime `text editor plugins <https://wakatime.com/editors>`_.
 
 Note: You shouldn't need to directly use this package unless you are `building your own plugin <https://wakatime.com/help/misc/creating-plugin>`_ or your text editor's plugin asks you to install the wakatime cli interface manually.
