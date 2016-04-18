@@ -1,10 +1,10 @@
 try:
-    import winreg as winreg
+    import _winreg as winreg
 except ImportError:
     import winreg
 
-from tzlocal.windows_tz import tz_names
-import pytz3 as pytz
+from tzlocal.windows_tz import win_tz
+import pytz
 
 _cache_tz = None
 
@@ -53,9 +53,14 @@ def get_localzone_name():
             sub = winreg.OpenKey(tzkey, subkey)
             data = valuestodict(sub)
             sub.Close()
-            if data['Std'] == tzwin:
-                tzkeyname = subkey
-                break
+            try:
+                if data['Std'] == tzwin:
+                    tzkeyname = subkey
+                    break
+            except KeyError:
+                # This timezone didn't have proper configuration.
+                # Ignore it.
+                pass
 
         tzkey.Close()
         handle.Close()
@@ -63,11 +68,11 @@ def get_localzone_name():
     if tzkeyname is None:
         raise LookupError('Can not find Windows timezone configuration')
 
-    timezone = tz_names.get(tzkeyname)
+    timezone = win_tz.get(tzkeyname)
     if timezone is None:
         # Nope, that didn't work. Try adding "Standard Time",
         # it seems to work a lot of times:
-        timezone = tz_names.get(tzkeyname + " Standard Time")
+        timezone = win_tz.get(tzkeyname + " Standard Time")
 
     # Return what we have.
     if timezone is None:

@@ -1,7 +1,7 @@
-
+from __future__ import with_statement
 import os
 import re
-import pytz3 as pytz
+import pytz
 
 _cache_tz = None
 
@@ -37,7 +37,10 @@ def _get_localzone(_root='/'):
 
     tzenv = os.environ.get('TZ')
     if tzenv:
-        return _tz_from_env(tzenv)
+        try:
+            return _tz_from_env(tzenv)
+        except pytz.UnknownTimeZoneError:
+            pass
 
     # Now look for distribution specific configuration files
     # that contain the timezone name.
@@ -87,6 +90,20 @@ def _get_localzone(_root='/'):
                 # We found a timezone
                 return pytz.timezone(etctz.replace(' ', '_'))
 
+    # systemd distributions use symlinks that include the zone name, 
+    # see manpage of localtime(5) and timedatectl(1)
+    tzpath = os.path.join(_root, 'etc/localtime')
+    if os.path.exists(tzpath) and os.path.islink(tzpath):
+        tzpath = os.path.realpath(tzpath)
+        start = tzpath.find("/")+1
+        while start is not 0:
+            tzpath = tzpath[start:]
+            try:
+                return pytz.timezone(tzpath)
+            except pytz.UnknownTimeZoneError:
+                pass
+            start = tzpath.find("/")+1
+
     # No explicit setting existed. Use localtime
     for filename in ('etc/localtime', 'usr/local/etc/localtime'):
         tzpath = os.path.join(_root, filename)
@@ -110,4 +127,3 @@ def reload_localzone():
     global _cache_tz
     _cache_tz = _get_localzone()
     return _cache_tz
-
