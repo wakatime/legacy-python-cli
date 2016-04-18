@@ -38,6 +38,8 @@ If you are building a plugin using the `WakaTime API <https://wakatime.com/devel
 then follow the `Creating a Plugin <https://wakatime.com/help/misc/creating-plugin>`_
 guide.
 
+For command line options, run ``wakatime --help``.
+
 
 Configuring
 -----------
@@ -69,7 +71,7 @@ Installation
 Each `plugin <https://wakatime.com/editors>`_ should install wakatime for you, except for the `Emacs WakaTime plugin <https://github.com/wakatime/wakatime-mode>`_.
 If your plugin does not install wakatime cli(this package), install it with::
 
-    pip install wakatime
+    sudo pip install wakatime
 
 
 Troubleshooting
