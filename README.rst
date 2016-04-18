@@ -33,6 +33,9 @@ Installation
 ------------
 
 Each `plugin <https://wakatime.com/editors>`_ should install wakatime for you, except for the `Emacs WakaTime plugin <https://github.com/wakatime/wakatime-mode>`_.
+
+Install the plugin for your IDE/editor at https://wakatime.com/editors, which will install wakatime-cli(this package) for you.
+
 If your plugin does not install wakatime cli(this package), install it with::
 
     sudo pip install wakatime
@@ -40,8 +43,6 @@ If your plugin does not install wakatime cli(this package), install it with::
 
 Usage
 -----
-
-Install the plugin for your IDE/editor at https://wakatime.com/editors
 
 If you are building a plugin using the `WakaTime API <https://wakatime.com/developers/>`_
 then follow the `Creating a Plugin <https://wakatime.com/help/misc/creating-plugin>`_
