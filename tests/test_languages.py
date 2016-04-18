@@ -87,3 +87,19 @@ class LanguagesTestCase(utils.TestCase):
             result = guess_language(source_file)
             mock_guess_lexer.assert_called_once_with(source_file)
             self.assertEquals(result, (None, None))
+
+    def test_guess_language_from_vim_modeline(self):
+        response = Response()
+        response.status_code = 500
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        now = u(int(time.time()))
+        config = 'tests/samples/configs/good_config.cfg'
+        entity = 'tests/samples/codefiles/python_without_extension'
+        args = ['--file', entity, '--config', config, '--time', now]
+
+        retval = execute(args)
+        self.assertEquals(retval, 102)
+
+        language = u('Python')
+        self.assertEqual(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['language'], language)
