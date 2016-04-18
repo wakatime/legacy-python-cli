@@ -3,6 +3,14 @@ History
 -------
 
 
+5.0.0 (2016-04-18)
+++++++++++++++++++
+
+- Support regex patterns in projectmap config section for renaming projects.
+- Upgrade pytz to v2016.3.
+- Upgrade tzlocal to v1.2.2.
+
+
 4.1.13 (2016-03-06)
 ++++++++++++++++++
 
