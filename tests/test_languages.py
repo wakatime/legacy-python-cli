@@ -37,7 +37,7 @@ class LanguagesTestCase(utils.TestCase):
         self.assertEquals(retval, 102)
 
         language = u('C')
-        self.assertEqual(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['language'], language)
+        self.assertEqual(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].get('language'), language)
 
         entity = 'tests/samples/codefiles/seeplusplus.h'
         args[1] = entity
@@ -46,7 +46,7 @@ class LanguagesTestCase(utils.TestCase):
         self.assertEquals(retval, 102)
 
         language = u('C++')
-        self.assertEqual(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['language'], language)
+        self.assertEqual(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].get('language'), language)
 
     def test_c_language_detected_for_header_with_c_files_in_folder(self):
         response = Response()
@@ -62,7 +62,7 @@ class LanguagesTestCase(utils.TestCase):
         self.assertEquals(retval, 102)
 
         language = u('C')
-        self.assertEqual(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['language'], language)
+        self.assertEqual(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].get('language'), language)
 
     def test_cpp_language_detected_for_header_with_c_and_cpp_files_in_folder(self):
         response = Response()
@@ -78,7 +78,7 @@ class LanguagesTestCase(utils.TestCase):
         self.assertEquals(retval, 102)
 
         language = u('C++')
-        self.assertEqual(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['language'], language)
+        self.assertEqual(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].get('language'), language)
 
     def test_guess_language(self):
         with utils.mock.patch('wakatime.stats.smart_guess_lexer') as mock_guess_lexer:
@@ -102,4 +102,58 @@ class LanguagesTestCase(utils.TestCase):
         self.assertEquals(retval, 102)
 
         language = u('Python')
-        self.assertEqual(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['language'], language)
+        self.assertEqual(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].get('language'), language)
+
+    def test_alternate_language_not_used_when_guessed(self):
+        response = Response()
+        response.status_code = 500
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        now = u(int(time.time()))
+        config = 'tests/samples/configs/good_config.cfg'
+        entity = 'tests/samples/codefiles/python.py'
+        args = ['--file', entity, '--config', config, '--time', now, '--alternate-language', 'java']
+
+        retval = execute(args)
+        self.assertEquals(retval, 102)
+
+        language = u('Python')
+        self.assertEqual(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].get('language'), language)
+
+    def test_alternate_language_is_used_when_not_guessed(self):
+        response = Response()
+        response.status_code = 500
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        with utils.mock.patch('wakatime.stats.smart_guess_lexer') as mock_guess_lexer:
+            mock_guess_lexer.return_value = None
+
+            now = u(int(time.time()))
+            config = 'tests/samples/configs/good_config.cfg'
+            entity = 'tests/samples/codefiles/python.py'
+            args = ['--file', entity, '--config', config, '--time', now, '--alternate-language', 'Java']
+
+            retval = execute(args)
+            self.assertEquals(retval, 102)
+
+            language = u('Java')
+            self.assertEqual(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].get('language'), language)
+
+    def test_vim_alternate_language_is_used_when_not_guessed(self):
+        response = Response()
+        response.status_code = 500
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        with utils.mock.patch('wakatime.stats.smart_guess_lexer') as mock_guess_lexer:
+            mock_guess_lexer.return_value = None
+
+            now = u(int(time.time()))
+            config = 'tests/samples/configs/good_config.cfg'
+            entity = 'tests/samples/codefiles/python.py'
+            args = ['--file', entity, '--config', config, '--time', now, '--alternate-language', 'java', '--plugin', 'NeoVim/703 vim-wakatime/4.0.9']
+
+            retval = execute(args)
+            self.assertEquals(retval, 102)
+
+            language = u('Java')
+            self.assertEqual(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].get('language'), language)
