@@ -3,6 +3,13 @@ History
 -------
 
 
+5.0.1 (2016-04-19)
+++++++++++++++++++
+
+- Support passing an alternate language to cli to be used when a language can
+  not be guessed from the code file.
+
+
 5.0.0 (2016-04-18)
 ++++++++++++++++++
 
