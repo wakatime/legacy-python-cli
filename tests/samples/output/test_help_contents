@@ -49,7 +49,7 @@ optional arguments:
   --logfile LOGFILE     defaults to ~/.wakatime.log
   --apiurl API_URL      heartbeats api url; for debugging with a local server
   --timeout TIMEOUT     number of seconds to wait when sending heartbeats to
-                        api
+                        api; defaults to 60 seconds
   --config CONFIG       defaults to ~/.wakatime.conf
   --verbose             turns on debug messages in log file
   --version             show program's version number and exit

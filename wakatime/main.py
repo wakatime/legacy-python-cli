@@ -158,7 +158,8 @@ def parseArguments():
     parser.add_argument('--apiurl', dest='api_url',
             help='heartbeats api url; for debugging with a local server')
     parser.add_argument('--timeout', dest='timeout', type=int,
-            help='number of seconds to wait when sending heartbeats to api')
+            help='number of seconds to wait when sending heartbeats to api; '+
+                 'defaults to 60 seconds')
     parser.add_argument('--config', dest='config',
             help='defaults to ~/.wakatime.conf')
     parser.add_argument('--verbose', dest='verbose', action='store_true',
@@ -307,7 +308,7 @@ def send_heartbeat(project=None, branch=None, hostname=None, stats={}, key=None,
     if not api_url:
         api_url = 'https://api.wakatime.com/api/v1/heartbeats'
     if not timeout:
-        timeout = 30
+        timeout = 60
     log.debug('Sending heartbeat to api at %s' % api_url)
     data = {
         'time': timestamp,
