@@ -4,9 +4,9 @@ usage: wakatime [-h] [--entity FILE] [--key KEY] [--write] [--plugin PLUGIN]
                 [--alternate-project ALTERNATE_PROJECT]
                 [--alternate-language ALTERNATE_LANGUAGE]
                 [--hostname HOSTNAME] [--disableoffline] [--hidefilenames]
-                [--exclude EXCLUDE] [--include INCLUDE] [--logfile LOGFILE]
-                [--apiurl API_URL] [--timeout TIMEOUT] [--config CONFIG]
-                [--verbose] [--version]
+                [--exclude EXCLUDE] [--include INCLUDE] [--extra-heartbeats]
+                [--logfile LOGFILE] [--apiurl API_URL] [--timeout TIMEOUT]
+                [--config CONFIG] [--verbose] [--version]
 
 Common interface for the WakaTime api.
 
@@ -46,6 +46,8 @@ optional arguments:
   --include INCLUDE     filename patterns to log; when used in combination
                         with --exclude, files matching include will still be
                         logged; POSIX regex syntax; can be used more than once
+  --extra-heartbeats    reads extra heartbeats from STDIN as a JSON array
+                        until EOF
   --logfile LOGFILE     defaults to ~/.wakatime.log
   --apiurl API_URL      heartbeats api url; for debugging with a local server
   --timeout TIMEOUT     number of seconds to wait when sending heartbeats to

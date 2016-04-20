@@ -23,9 +23,9 @@ try:
 except (ImportError, SyntaxError):
     import json
 try:
-    from mock import ANY
+    from mock import ANY, call
 except ImportError:
-    from unittest.mock import ANY
+    from unittest.mock import ANY, call
 from wakatime.packages import tzlocal
 
 
@@ -647,3 +647,35 @@ class BaseTestCase(utils.TestCase):
         timezone = tzlocal.get_localzone()
         headers = self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].call_args[0][0].headers
         self.assertEquals(headers.get('TimeZone'), u(timezone.zone).encode('utf-8') if is_py3 else timezone.zone)
+
+    def test_extra_heartbeats_argument(self):
+        response = Response()
+        response.status_code = 201
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        entity = 'tests/samples/codefiles/emptyfile.txt'
+        config = 'tests/samples/configs/good_config.cfg'
+        args = ['--file', entity, '--config', config, '--extra-heartbeats']
+
+        with utils.mock.patch('wakatime.main.sys.stdin') as mock_stdin:
+            now = int(time.time())
+            heartbeats = json.dumps([{
+                'timestamp': now,
+                'entity': entity,
+                'entity_type': 'file',
+                'is_write': True,
+            }])
+            mock_stdin.read.return_value = heartbeats
+
+            retval = execute(args)
+
+            self.assertEquals(retval, SUCCESS)
+            self.assertEquals(sys.stdout.getvalue(), '')
+            self.assertEquals(sys.stderr.getvalue(), '')
+
+            self.patched['wakatime.session_cache.SessionCache.get'].assert_has_calls([call(), call()])
+            self.patched['wakatime.session_cache.SessionCache.delete'].assert_not_called()
+            self.patched['wakatime.session_cache.SessionCache.save'].assert_has_calls([call(ANY), call(ANY)])
+
+            self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
+            self.patched['wakatime.offlinequeue.Queue.pop'].assert_has_calls([call(), call()])

@@ -153,6 +153,9 @@ def parseArguments():
                  'POSIX regex syntax; can be used more than once')
     parser.add_argument('--ignore', dest='ignore', action='append',
             help=argparse.SUPPRESS)
+    parser.add_argument('--extra-heartbeats', dest='extra_heartbeats',
+            action='store_true',
+            help='reads extra heartbeats from STDIN as a JSON array until EOF')
     parser.add_argument('--logfile', dest='logfile',
             help='defaults to ~/.wakatime.log')
     parser.add_argument('--apiurl', dest='api_url',
@@ -452,6 +455,47 @@ def sync_offline_heartbeats(args, hostname):
     return SUCCESS
 
 
+def process_heartbeat(args, configs, heartbeat):
+    exclude = should_exclude(args.entity, args.include, args.exclude)
+    if exclude is not False:
+        log.debug(u('Skipping because matches exclude pattern: {pattern}').format(
+            pattern=u(exclude),
+        ))
+        return SUCCESS
+
+    if args.entity_type != 'file' or os.path.isfile(args.entity):
+
+        stats = get_file_stats(args.entity,
+                                entity_type=args.entity_type,
+                                lineno=args.lineno,
+                                cursorpos=args.cursorpos,
+                                plugin=args.plugin,
+                                alternate_language=args.alternate_language)
+
+        project = args.project or args.alternate_project
+        branch = None
+        if args.entity_type == 'file':
+            project, branch = get_project_info(configs, args)
+
+        kwargs = vars(args)
+        kwargs['project'] = project
+        kwargs['branch'] = branch
+        kwargs['stats'] = stats
+        hostname = args.hostname or socket.gethostname()
+        kwargs['hostname'] = hostname
+        kwargs['timeout'] = args.timeout
+
+        status = send_heartbeat(**kwargs)
+        if status == SUCCESS:
+            return sync_offline_heartbeats(args, hostname)
+        else:
+            return status
+
+    else:
+        log.debug('File does not exist; ignoring this heartbeat.')
+        return SUCCESS
+
+
 def execute(argv=None):
     if argv:
         sys.argv = ['wakatime'] + argv
@@ -463,44 +507,28 @@ def execute(argv=None):
     setup_logging(args, __version__)
 
     try:
-        exclude = should_exclude(args.entity, args.include, args.exclude)
-        if exclude is not False:
-            log.debug(u('Skipping because matches exclude pattern: {pattern}').format(
-                pattern=u(exclude),
-            ))
-            return SUCCESS
 
-        if args.entity_type != 'file' or os.path.isfile(args.entity):
+        heartbeat = {
+            'timestamp': args.timestamp,
+            'entity': args.entity,
+            'entity_type': args.entity_type,
+            'project': args.project,
+            'is_write': args.isWrite,
+            'lineno': args.lineno,
+            'cursorpos': args.cursorpos,
+            'alternate_project': args.alternate_project,
+            'alternate_language': args.alternate_language,
+        }
+        retval = process_heartbeat(args, configs, heartbeat)
 
-            stats = get_file_stats(args.entity,
-                                   entity_type=args.entity_type,
-                                   lineno=args.lineno,
-                                   cursorpos=args.cursorpos,
-                                   plugin=args.plugin,
-                                   alternate_language=args.alternate_language)
+        if args.extra_heartbeats:
+            heartbeats = json.loads(sys.stdin.read())
+            for heartbeat in heartbeats:
+                retval = process_heartbeat(args, configs, heartbeat)
 
-            project = args.project or args.alternate_project
-            branch = None
-            if args.entity_type == 'file':
-                project, branch = get_project_info(configs, args)
+        return retval
 
-            kwargs = vars(args)
-            kwargs['project'] = project
-            kwargs['branch'] = branch
-            kwargs['stats'] = stats
-            hostname = args.hostname or socket.gethostname()
-            kwargs['hostname'] = hostname
-            kwargs['timeout'] = args.timeout
-
-            status = send_heartbeat(**kwargs)
-            if status == SUCCESS:
-                return sync_offline_heartbeats(args, hostname)
-            else:
-                return status
-
-        else:
-            log.debug('File does not exist; ignoring this heartbeat.')
-            return SUCCESS
     except:
         log.traceback()
+        print(traceback.format_exc())
         return UNKNOWN_ERROR
