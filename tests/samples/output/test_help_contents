@@ -15,7 +15,7 @@ optional arguments:
   --entity FILE         absolute path to file for the heartbeat; can also be a
                         url, domain, or app when --entitytype is not file
   --key KEY             your wakatime api key; uses api_key from
-                        ~/.wakatime.conf by default
+                        ~/.wakatime.cfg by default
   --write               when set, tells api this heartbeat was triggered from
                         writing to a file
   --plugin PLUGIN       optional text editor plugin name and version for User-
@@ -52,6 +52,6 @@ optional arguments:
   --apiurl API_URL      heartbeats api url; for debugging with a local server
   --timeout TIMEOUT     number of seconds to wait when sending heartbeats to
                         api; defaults to 60 seconds
-  --config CONFIG       defaults to ~/.wakatime.conf
+  --config CONFIG       defaults to ~/.wakatime.cfg
   --verbose             turns on debug messages in log file
   --version             show program's version number and exit

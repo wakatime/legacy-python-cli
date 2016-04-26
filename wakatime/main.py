@@ -106,7 +106,7 @@ def parseArguments():
             help=argparse.SUPPRESS)
     parser.add_argument('--key', dest='key',
             help='your wakatime api key; uses api_key from '+
-                '~/.wakatime.conf by default')
+                '~/.wakatime.cfg by default')
     parser.add_argument('--write', dest='isWrite',
             action='store_true',
             help='when set, tells api this heartbeat was triggered from '+
@@ -164,7 +164,7 @@ def parseArguments():
             help='number of seconds to wait when sending heartbeats to api; '+
                  'defaults to 60 seconds')
     parser.add_argument('--config', dest='config',
-            help='defaults to ~/.wakatime.conf')
+            help='defaults to ~/.wakatime.cfg')
     parser.add_argument('--verbose', dest='verbose', action='store_true',
             help='turns on debug messages in log file')
     parser.add_argument('--version', action='version', version=__version__)
