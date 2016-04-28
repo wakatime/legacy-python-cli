@@ -3,6 +3,15 @@ History
 -------
 
 
+5.0.2 (unreleased)
+++++++++++++++++++
+
+- Increase default network timeout to 60 seconds when sending heartbeats to
+  the api.
+- New --extra-heartbeats command line argument for sending a JSON array of
+  extra queued heartbeats to STDIN.
+
+
 5.0.1 (2016-04-19)
 ++++++++++++++++++
 
