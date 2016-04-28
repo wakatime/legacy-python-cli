@@ -123,9 +123,9 @@ def parseArguments():
             help='optional line number; current line being edited')
     parser.add_argument('--cursorpos', dest='cursorpos',
             help='optional cursor position in the current file')
-    parser.add_argument('--entitytype', dest='entity_type',
+    parser.add_argument('--entity-type', dest='entity_type',
             help='entity type for this heartbeat. can be one of "file", '+
-                 '"url", "domain", or "app"; defaults to file.')
+                 '"domain", or "app"; defaults to file.')
     parser.add_argument('--proxy', dest='proxy',
                         help='optional https proxy url; for example: '+
                              'https://user:pass@localhost:8080')
@@ -193,8 +193,6 @@ def parseArguments():
             args.key = default_key
         else:
             parser.error('Missing api key')
-    if not args.entity_type:
-        args.entity_type = 'file'
     if not args.entity:
         if args.file:
             args.entity = args.file
@@ -463,6 +461,9 @@ def process_heartbeat(args, configs, hostname, heartbeat):
             pattern=u(exclude),
         ))
         return SUCCESS
+
+    if heartbeat.get('entity_type') not in ['file', 'domain', 'app']:
+        heartbeat['entity_type'] = 'file'
 
     if heartbeat['entity_type'] != 'file' or os.path.isfile(heartbeat['entity']):
 

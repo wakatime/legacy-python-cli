@@ -1,7 +1,7 @@
 usage: wakatime [-h] [--entity FILE] [--key KEY] [--write] [--plugin PLUGIN]
                 [--time time] [--lineno LINENO] [--cursorpos CURSORPOS]
-                [--entitytype ENTITY_TYPE] [--proxy PROXY] [--project PROJECT]
-                [--alternate-project ALTERNATE_PROJECT]
+                [--entity-type ENTITY_TYPE] [--proxy PROXY]
+                [--project PROJECT] [--alternate-project ALTERNATE_PROJECT]
                 [--alternate-language ALTERNATE_LANGUAGE]
                 [--hostname HOSTNAME] [--disableoffline] [--hidefilenames]
                 [--exclude EXCLUDE] [--include INCLUDE] [--extra-heartbeats]
@@ -25,9 +25,9 @@ optional arguments:
   --lineno LINENO       optional line number; current line being edited
   --cursorpos CURSORPOS
                         optional cursor position in the current file
-  --entitytype ENTITY_TYPE
+  --entity-type ENTITY_TYPE
                         entity type for this heartbeat. can be one of "file",
-                        "url", "domain", or "app"; defaults to file.
+                        "domain", or "app"; defaults to file.
   --proxy PROXY         optional https proxy url; for example:
                         https://user:pass@localhost:8080
   --project PROJECT     optional project name

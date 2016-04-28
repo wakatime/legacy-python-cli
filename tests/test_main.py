@@ -419,7 +419,7 @@ class BaseTestCase(utils.TestCase):
         config = 'tests/samples/configs/good_config.cfg'
         now = u(int(time.time()))
 
-        args = ['--entity', entity, '--entitytype', 'domain', '--config', config, '--time', now]
+        args = ['--entity', entity, '--entity-type', 'domain', '--config', config, '--time', now]
         retval = execute(args)
 
         self.assertEquals(retval, API_ERROR)
@@ -456,7 +456,7 @@ class BaseTestCase(utils.TestCase):
         config = 'tests/samples/configs/good_config.cfg'
         now = u(int(time.time()))
 
-        args = ['--entity', entity, '--entitytype', 'app', '--config', config, '--time', now]
+        args = ['--entity', entity, '--entity-type', 'app', '--config', config, '--time', now]
         retval = execute(args)
 
         self.assertEquals(retval, API_ERROR)
