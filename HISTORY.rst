@@ -3,6 +3,12 @@ History
 -------
 
 
+6.0.1 (2016-04-28)
+++++++++++++++++++
+
+- Fix bug which prevented plugin from being sent with extra heartbeats.
+
+
 6.0.0 (2016-04-28)
 ++++++++++++++++++
 
