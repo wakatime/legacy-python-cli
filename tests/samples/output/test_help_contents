@@ -13,7 +13,7 @@ Common interface for the WakaTime api.
 optional arguments:
   -h, --help            show this help message and exit
   --entity FILE         absolute path to file for the heartbeat; can also be a
-                        url, domain, or app when --entitytype is not file
+                        url, domain, or app when --entity-type is not file
   --key KEY             your wakatime api key; uses api_key from
                         ~/.wakatime.cfg by default
   --write               when set, tells api this heartbeat was triggered from

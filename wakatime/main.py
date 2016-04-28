@@ -102,7 +102,7 @@ def parseArguments():
     parser.add_argument('--entity', dest='entity', metavar='FILE',
             action=FileAction,
             help='absolute path to file for the heartbeat; can also be a '+
-                 'url, domain, or app when --entitytype is not file')
+                 'url, domain, or app when --entity-type is not file')
     parser.add_argument('--file', dest='file', action=FileAction,
             help=argparse.SUPPRESS)
     parser.add_argument('--key', dest='key',
