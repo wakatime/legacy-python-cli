@@ -37,6 +37,7 @@ from .constants import (
     CONFIG_FILE_PARSE_ERROR,
     SUCCESS,
     UNKNOWN_ERROR,
+    MALFORMED_HEARTBEAT_ERROR,
 )
 from .logger import setup_logging
 from .offlinequeue import Queue
@@ -107,7 +108,7 @@ def parseArguments():
     parser.add_argument('--key', dest='key',
             help='your wakatime api key; uses api_key from '+
                 '~/.wakatime.cfg by default')
-    parser.add_argument('--write', dest='isWrite',
+    parser.add_argument('--write', dest='is_write',
             action='store_true',
             help='when set, tells api this heartbeat was triggered from '+
                  'writing to a file')
@@ -299,7 +300,7 @@ def get_user_agent(plugin):
 
 
 def send_heartbeat(project=None, branch=None, hostname=None, stats={}, key=None,
-                   entity=None, timestamp=None, isWrite=None, plugin=None,
+                   entity=None, timestamp=None, is_write=None, plugin=None,
                    offline=None, entity_type='file', hidefilenames=None,
                    proxy=None, api_url=None, timeout=None, **kwargs):
     """Sends heartbeat as POST request to WakaTime api server.
@@ -331,8 +332,8 @@ def send_heartbeat(project=None, branch=None, hostname=None, stats={}, key=None,
         data['lineno'] = stats['lineno']
     if stats.get('cursorpos'):
         data['cursorpos'] = stats['cursorpos']
-    if isWrite:
-        data['is_write'] = isWrite
+    if is_write:
+        data['is_write'] = is_write
     if project:
         data['project'] = project
     if branch:
@@ -439,7 +440,7 @@ def sync_offline_heartbeats(args, hostname):
             hostname=hostname,
             stats=json.loads(heartbeat['stats']),
             key=args.key,
-            isWrite=heartbeat['is_write'],
+            is_write=heartbeat['is_write'],
             plugin=heartbeat['plugin'],
             offline=args.offline,
             hidefilenames=args.hidefilenames,
@@ -455,41 +456,36 @@ def sync_offline_heartbeats(args, hostname):
     return SUCCESS
 
 
-def process_heartbeat(args, configs, heartbeat):
-    exclude = should_exclude(args.entity, args.include, args.exclude)
+def process_heartbeat(args, configs, hostname, heartbeat):
+    exclude = should_exclude(heartbeat['entity'], args.include, args.exclude)
     if exclude is not False:
         log.debug(u('Skipping because matches exclude pattern: {pattern}').format(
             pattern=u(exclude),
         ))
         return SUCCESS
 
-    if args.entity_type != 'file' or os.path.isfile(args.entity):
+    if heartbeat['entity_type'] != 'file' or os.path.isfile(heartbeat['entity']):
 
-        stats = get_file_stats(args.entity,
-                                entity_type=args.entity_type,
-                                lineno=args.lineno,
-                                cursorpos=args.cursorpos,
+        stats = get_file_stats(heartbeat['entity'],
+                                entity_type=heartbeat['entity_type'],
+                                lineno=heartbeat.get('lineno'),
+                                cursorpos=heartbeat.get('cursorpos'),
                                 plugin=args.plugin,
-                                alternate_language=args.alternate_language)
+                                alternate_language=heartbeat.get('alternate_language'))
 
-        project = args.project or args.alternate_project
+        project = heartbeat.get('project') or heartbeat.get('alternate_project')
         branch = None
-        if args.entity_type == 'file':
-            project, branch = get_project_info(configs, args)
+        if heartbeat['entity_type'] == 'file':
+            project, branch = get_project_info(configs, heartbeat)
 
-        kwargs = vars(args)
-        kwargs['project'] = project
-        kwargs['branch'] = branch
-        kwargs['stats'] = stats
-        hostname = args.hostname or socket.gethostname()
-        kwargs['hostname'] = hostname
-        kwargs['timeout'] = args.timeout
+        heartbeat['project'] = project
+        heartbeat['branch'] = branch
+        heartbeat['stats'] = stats
+        heartbeat['hostname'] = hostname
+        heartbeat['timeout'] = args.timeout
+        heartbeat['key'] = args.key
 
-        status = send_heartbeat(**kwargs)
-        if status == SUCCESS:
-            return sync_offline_heartbeats(args, hostname)
-        else:
-            return status
+        return send_heartbeat(**heartbeat)
 
     else:
         log.debug('File does not exist; ignoring this heartbeat.')
@@ -508,23 +504,20 @@ def execute(argv=None):
 
     try:
 
-        heartbeat = {
-            'timestamp': args.timestamp,
-            'entity': args.entity,
-            'entity_type': args.entity_type,
-            'project': args.project,
-            'is_write': args.isWrite,
-            'lineno': args.lineno,
-            'cursorpos': args.cursorpos,
-            'alternate_project': args.alternate_project,
-            'alternate_language': args.alternate_language,
-        }
-        retval = process_heartbeat(args, configs, heartbeat)
+        hostname = args.hostname or socket.gethostname()
+
+        heartbeat = vars(args)
+        retval = process_heartbeat(args, configs, hostname, heartbeat)
 
         if args.extra_heartbeats:
-            heartbeats = json.loads(sys.stdin.read())
-            for heartbeat in heartbeats:
-                retval = process_heartbeat(args, configs, heartbeat)
+            try:
+                for heartbeat in json.loads(sys.stdin.readline()):
+                    retval = process_heartbeat(args, configs, hostname, heartbeat)
+            except json.JSONDecodeError:
+                retval = MALFORMED_HEARTBEAT_ERROR
+
+        if retval == SUCCESS:
+            retval = sync_offline_heartbeats(args, hostname)
 
         return retval
 

@@ -157,3 +157,44 @@ class LanguagesTestCase(utils.TestCase):
 
             language = u('Java')
             self.assertEqual(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].get('language'), language)
+
+    def test_alternate_language_not_used_when_invalid(self):
+        response = Response()
+        response.status_code = 500
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        with utils.mock.patch('wakatime.stats.smart_guess_lexer') as mock_guess_lexer:
+            mock_guess_lexer.return_value = None
+
+            now = u(int(time.time()))
+            config = 'tests/samples/configs/good_config.cfg'
+            entity = 'tests/samples/codefiles/python.py'
+            args = ['--file', entity, '--config', config, '--time', now, '--alternate-language', 'foo', '--plugin', 'NeoVim/703 vim-wakatime/4.0.9']
+
+            retval = execute(args)
+            self.assertEquals(retval, 102)
+
+            language = None
+            self.assertEqual(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].get('language'), language)
+
+    def test_error_reading_alternate_language_json_map_file(self):
+        response = Response()
+        response.status_code = 500
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        with utils.mock.patch('wakatime.stats.smart_guess_lexer') as mock_guess_lexer:
+            mock_guess_lexer.return_value = None
+
+            with utils.mock.patch('wakatime.stats.open') as mock_open:
+                mock_open.side_effect = IOError('')
+
+                now = u(int(time.time()))
+                config = 'tests/samples/configs/good_config.cfg'
+                entity = 'tests/samples/codefiles/python.py'
+                args = ['--file', entity, '--config', config, '--time', now, '--alternate-language', 'foo', '--plugin', 'NeoVim/703 vim-wakatime/4.0.9']
+
+                retval = execute(args)
+                self.assertEquals(retval, 102)
+
+                language = None
+                self.assertEqual(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].get('language'), language)

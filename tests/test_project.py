@@ -55,6 +55,60 @@ class LanguagesTestCase(utils.TestCase):
 
         self.assertEquals('forced-project', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
 
+    def test_alternate_project_argument_does_not_override_detected_project(self):
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        now = u(int(time.time()))
+        entity = 'tests/samples/projects/git/emptyfile.txt'
+        config = 'tests/samples/configs/good_config.cfg'
+        project = os.path.basename(os.path.abspath('.'))
+
+        args = ['--alternate-project', 'alt-project', '--file', entity, '--config', config, '--time', now]
+
+        execute(args)
+
+        self.assertEquals(project, self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
+
+    def test_alternate_project_argument_does_not_override_project_argument(self):
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        now = u(int(time.time()))
+        entity = 'tests/samples/projects/git/emptyfile.txt'
+        config = 'tests/samples/configs/good_config.cfg'
+
+        args = ['--project', 'forced-project', '--alternate-project', 'alt-project', '--file', entity, '--config', config, '--time', now]
+
+        execute(args)
+
+        self.assertEquals('forced-project', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
+
+    def test_alternate_project_argument_used_when_project_not_detected(self):
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        tempdir = tempfile.mkdtemp()
+        entity = 'tests/samples/projects/git/emptyfile.txt'
+        shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
+
+        now = u(int(time.time()))
+        entity = os.path.join(tempdir, 'emptyfile.txt')
+        config = 'tests/samples/configs/good_config.cfg'
+
+        args = ['--file', entity, '--config', config, '--time', now]
+        execute(args)
+
+        args = ['--file', entity, '--config', config, '--time', now, '--alternate-project', 'alt-project']
+        execute(args)
+
+        calls = self.patched['wakatime.offlinequeue.Queue.push'].call_args_list
+        self.assertEquals(None, calls[0][0][0].get('project'))
+        self.assertEquals('alt-project', calls[1][0][0]['project'])
+
     def test_wakatime_project_file(self):
         response = Response()
         response.status_code = 0

@@ -368,88 +368,6 @@ class BaseTestCase(utils.TestCase):
         self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
-    def test_alternate_project(self):
-        response = Response()
-        response.status_code = 0
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
-
-        now = u(int(time.time()))
-        entity = 'tests/samples/codefiles/twolinefile.txt'
-        config = 'tests/samples/configs/good_config.cfg'
-
-        args = ['--file', entity, '--alternate-project', 'xyz', '--config', config, '--time', now]
-
-        retval = execute(args)
-        self.assertEquals(retval, API_ERROR)
-        self.assertEquals(sys.stdout.getvalue(), '')
-        self.assertEquals(sys.stderr.getvalue(), '')
-
-        self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
-        self.patched['wakatime.session_cache.SessionCache.delete'].assert_called_once_with()
-        self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
-
-        heartbeat = {
-            'language': 'Text only',
-            'lines': 2,
-            'entity': os.path.abspath(entity),
-            'project': os.path.basename(os.path.abspath('.')),
-            'branch': os.environ.get('TRAVIS_COMMIT', ANY),
-            'time': float(now),
-            'type': 'file',
-        }
-        stats = {
-            u('cursorpos'): None,
-            u('dependencies'): [],
-            u('language'): u('Text only'),
-            u('lineno'): None,
-            u('lines'): 2,
-        }
-
-        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, ANY, None)
-        self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
-        self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
-
-    def test_set_project_from_command_line(self):
-        response = Response()
-        response.status_code = 0
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
-
-        now = u(int(time.time()))
-        entity = 'tests/samples/codefiles/twolinefile.txt'
-        config = 'tests/samples/configs/good_config.cfg'
-
-        args = ['--file', entity, '--project', 'xyz', '--config', config, '--time', now]
-
-        retval = execute(args)
-        self.assertEquals(retval, API_ERROR)
-        self.assertEquals(sys.stdout.getvalue(), '')
-        self.assertEquals(sys.stderr.getvalue(), '')
-
-        self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
-        self.patched['wakatime.session_cache.SessionCache.delete'].assert_called_once_with()
-        self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
-
-        heartbeat = {
-            'language': 'Text only',
-            'lines': 2,
-            'entity': os.path.abspath(entity),
-            'project': 'xyz',
-            'branch': os.environ.get('TRAVIS_COMMIT', ANY),
-            'time': float(now),
-            'type': 'file',
-        }
-        stats = {
-            u('cursorpos'): None,
-            u('dependencies'): [],
-            u('language'): u('Text only'),
-            u('lineno'): None,
-            u('lines'): 2,
-        }
-
-        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, ANY, None)
-        self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
-        self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
-
     def test_missing_entity_file(self):
         response = Response()
         response.status_code = 201
@@ -468,7 +386,7 @@ class BaseTestCase(utils.TestCase):
         self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
 
         self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
-        self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
+        self.patched['wakatime.offlinequeue.Queue.pop'].assert_called_once_with()
 
     def test_proxy_argument(self):
         response = Response()
@@ -653,19 +571,23 @@ class BaseTestCase(utils.TestCase):
         response.status_code = 201
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
-        entity = 'tests/samples/codefiles/emptyfile.txt'
+        project1 = os.path.basename(os.path.abspath('.'))
+        project2 = 'xyz'
+        entity1 = os.path.abspath('tests/samples/codefiles/emptyfile.txt')
+        entity2 = os.path.abspath('tests/samples/codefiles/twolinefile.txt')
         config = 'tests/samples/configs/good_config.cfg'
-        args = ['--file', entity, '--config', config, '--extra-heartbeats']
+        args = ['--file', entity1, '--config', config, '--extra-heartbeats']
 
         with utils.mock.patch('wakatime.main.sys.stdin') as mock_stdin:
             now = int(time.time())
             heartbeats = json.dumps([{
                 'timestamp': now,
-                'entity': entity,
+                'entity': entity2,
                 'entity_type': 'file',
+                'project': project2,
                 'is_write': True,
             }])
-            mock_stdin.read.return_value = heartbeats
+            mock_stdin.readline.return_value = heartbeats
 
             retval = execute(args)
 
@@ -678,4 +600,16 @@ class BaseTestCase(utils.TestCase):
             self.patched['wakatime.session_cache.SessionCache.save'].assert_has_calls([call(ANY), call(ANY)])
 
             self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
-            self.patched['wakatime.offlinequeue.Queue.pop'].assert_has_calls([call(), call()])
+            self.patched['wakatime.offlinequeue.Queue.pop'].assert_called_once_with()
+
+            calls = self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].call_args_list
+
+            body = calls[0][0][0].body
+            data = json.loads(body)
+            self.assertEquals(data.get('entity'), entity1)
+            self.assertEquals(data.get('project'), project1)
+
+            body = calls[1][0][0].body
+            data = json.loads(body)
+            self.assertEquals(data.get('entity'), entity2)
+            self.assertEquals(data.get('project'), project2)
