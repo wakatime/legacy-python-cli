@@ -3,6 +3,12 @@ History
 -------
 
 
+6.0.2 (2016-05-16)
+++++++++++++++++++
+
+- Prevent popup on Mac when xcode-tools is not installed.
+
+
 6.0.1 (2016-04-28)
 ++++++++++++++++++
 
