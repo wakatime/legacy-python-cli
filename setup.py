@@ -38,7 +38,6 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
         'Natural Language :: English',
-        'Programming Language :: Python',
         'Topic :: Text Editors',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
