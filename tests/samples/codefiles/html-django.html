@@ -1,0 +1,37 @@
+{% extends "common/base.html" %}
+{% block subtitle %}Login{% endblock %}
+
+{% block js %}
+  {% compress 'js' %}
+    <script src="{{ STATIC_URL }}libs/json2.js"></script>
+  {% endcompress %}
+{% endblock %}
+
+{% block content %}
+  <form class="login form-horizontal" method="POST">
+    <input type="hidden" name="csrftoken" value="{{ csrf_token() }}" />
+    {% if error %}
+      <div class="form-group error">
+        <div class="col-lg-offset-1">
+          <div id="flash-error" class="text-danger">{{error}}</div>
+        </div>
+      </div>
+    {% endif %}
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for message in messages %}
+          <div class="form-group error">
+            <div class="col-lg-offset-1">
+              <div id="flash-error" class="text-danger">{{ message }}</div>
+            </div>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    <label class="col-lg-2 control-label" for="email">Email</label>
+    <input class="form-control" type="text" name="email" id="email" value="{{form.data.email or ''}}" placeholder="Email" style="width:80%;" />
+    {% if form.errors.email %}
+      <p class="text-danger">{{form.errors.email[0]}}</p>
+    {% endif %}
+    <missingquote class="text-danger>{{form.errors.email[0]}}</p>
+{% endblock %}

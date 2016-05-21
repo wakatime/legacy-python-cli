@@ -142,11 +142,40 @@ class LanguagesTestCase(utils.TestCase):
         execute(args)
 
         self.assertEquals('git', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
+        self.assertEquals('master', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['branch'])
+
+    def test_ioerror_when_reading_git_branch(self):
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        tempdir = tempfile.mkdtemp()
+        shutil.copytree('tests/samples/projects/git', os.path.join(tempdir, 'git'))
+        shutil.move(os.path.join(tempdir, 'git', 'dot_git'), os.path.join(tempdir, 'git', '.git'))
+
+        now = u(int(time.time()))
+        entity = os.path.join(tempdir, 'git', 'emptyfile.txt')
+        config = 'tests/samples/configs/good_config.cfg'
+
+        args = ['--file', entity, '--config', config, '--time', now]
+
+        with utils.mock.patch('wakatime.projects.git.open') as mock_open:
+            mock_open.side_effect = IOError('')
+            execute(args)
+
+        self.assertEquals('git', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
+        self.assertEquals('master', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].get('branch'))
 
     def test_svn_project_detected(self):
         response = Response()
         response.status_code = 0
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        now = u(int(time.time()))
+        entity = 'tests/samples/projects/svn/afolder/emptyfile.txt'
+        config = 'tests/samples/configs/good_config.cfg'
+
+        args = ['--file', entity, '--config', config, '--time', now]
 
         with utils.mock.patch('wakatime.projects.git.Git.process') as mock_git:
             mock_git.return_value = False
@@ -156,15 +185,9 @@ class LanguagesTestCase(utils.TestCase):
                 stderr = ''
                 mock_popen.return_value = (stdout, stderr)
 
-                now = u(int(time.time()))
-                entity = 'tests/samples/projects/svn/afolder/emptyfile.txt'
-                config = 'tests/samples/configs/good_config.cfg'
-
-                args = ['--file', entity, '--config', config, '--time', now]
-
                 execute(args)
 
-                self.assertEquals('svn', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
+        self.assertEquals('svn', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
 
     def test_svn_exception_handled(self):
         response = Response()
@@ -174,21 +197,45 @@ class LanguagesTestCase(utils.TestCase):
         with utils.mock.patch('wakatime.projects.git.Git.process') as mock_git:
             mock_git.return_value = False
 
+            now = u(int(time.time()))
+            entity = 'tests/samples/projects/svn/afolder/emptyfile.txt'
+            config = 'tests/samples/configs/good_config.cfg'
+
+            args = ['--file', entity, '--config', config, '--time', now]
+
             with utils.mock.patch('wakatime.projects.subversion.Popen') as mock_popen:
                 mock_popen.side_effect = OSError('')
 
                 with utils.mock.patch('wakatime.projects.subversion.Popen.communicate') as mock_communicate:
                     mock_communicate.side_effect = OSError('')
 
-                    now = u(int(time.time()))
-                    entity = 'tests/samples/projects/svn/afolder/emptyfile.txt'
-                    config = 'tests/samples/configs/good_config.cfg'
+                    execute(args)
 
-                    args = ['--file', entity, '--config', config, '--time', now]
+            self.assertNotIn('project', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0])
+
+    def test_svn_on_mac(self):
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        now = u(int(time.time()))
+        entity = 'tests/samples/projects/svn/afolder/emptyfile.txt'
+        config = 'tests/samples/configs/good_config.cfg'
+
+        args = ['--file', entity, '--config', config, '--time', now]
+
+        with utils.mock.patch('wakatime.projects.git.Git.process') as mock_git:
+            mock_git.return_value = False
+
+            with utils.mock.patch('wakatime.projects.subversion.platform.system') as mock_system:
+                mock_system.return_value = 'Darwin'
+
+                with utils.mock.patch('wakatime.projects.subversion.Popen') as mock_popen:
+                    mock_popen.side_effect = OSError('')
 
                     execute(args)
 
-                    self.assertNotIn('project', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0])
+            self.assertNotIn('project', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0])
 
     def test_mercurial_project_detected(self):
         response = Response()
@@ -208,6 +255,27 @@ class LanguagesTestCase(utils.TestCase):
 
             self.assertEquals('hg', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
             self.assertEquals('test-hg-branch', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['branch'])
+
+    def test_ioerror_when_reading_mercurial_branch(self):
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        with utils.mock.patch('wakatime.projects.git.Git.process') as mock_git:
+            mock_git.return_value = False
+
+            now = u(int(time.time()))
+            entity = 'tests/samples/projects/hg/emptyfile.txt'
+            config = 'tests/samples/configs/good_config.cfg'
+
+            args = ['--file', entity, '--config', config, '--time', now]
+
+            with utils.mock.patch('wakatime.projects.mercurial.open') as mock_open:
+                mock_open.side_effect = IOError('')
+                execute(args)
+
+            self.assertEquals('hg', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
+            self.assertEquals('default', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['branch'])
 
     def test_project_map(self):
         response = Response()
