@@ -28,8 +28,9 @@ optional arguments:
   --entity-type ENTITY_TYPE
                         entity type for this heartbeat. can be one of "file",
                         "domain", or "app"; defaults to file.
-  --proxy PROXY         optional https proxy url; for example:
-                        https://user:pass@localhost:8080
+  --proxy PROXY         optional proxy configuration. Supports HTTPS and SOCKS
+                        proxies. For example: https://user:pass@host:port or
+                        socks5://user:pass@host:port
   --project PROJECT     optional project name
   --alternate-project ALTERNATE_PROJECT
                         optional alternate project name; auto-discovered

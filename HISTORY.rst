@@ -3,6 +3,13 @@ History
 -------
 
 
+6.0.3 (Unreleased)
+++++++++++++++++++
+
+- Upgrade requests dependency to v2.10.0.
+- Support for SOCKS proxies.
+
+
 6.0.2 (2016-05-16)
 ++++++++++++++++++
 
