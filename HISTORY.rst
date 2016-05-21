@@ -3,7 +3,7 @@ History
 -------
 
 
-6.0.3 (Unreleased)
+6.0.3 (2016-05-21)
 ++++++++++++++++++
 
 - Upgrade requests dependency to v2.10.0.
