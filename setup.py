@@ -1,31 +1,24 @@
 from setuptools import setup
 
-from wakatime.__about__ import (
-    __author__,
-    __author_email__,
-    __description__,
-    __license__,
-    __title__,
-    __url__,
-    __version__,
-)
-
+about = {}
+with open('wakatime/__about__.py') as f:
+    exec(f.read(), about)
 
 packages = [
-    __title__,
+    about['__title__'],
 ]
 
 setup(
-    name=__title__,
-    version=__version__,
-    license=__license__,
-    description=__description__,
+    name=about['__title__'],
+    version=about['__version__'],
+    license=about['__license__'],
+    description=about['__description__'],
     long_description=open('README.rst').read(),
-    author=__author__,
-    author_email=__author_email__,
-    url=__url__,
+    author=about['__author__'],
+    author_email=about['__author_email__'],
+    url=about['__url__'],
     packages=packages,
-    package_dir={__title__: __title__},
+    package_dir={about['__title__']: about['__title__']},
     include_package_data=True,
     zip_safe=False,
     platforms='any',
