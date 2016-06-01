@@ -166,6 +166,26 @@ class LanguagesTestCase(utils.TestCase):
         self.assertEquals('git', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
         self.assertEquals('master', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].get('branch'))
 
+    def test_git_detached_head_not_used_as_branch(self):
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        tempdir = tempfile.mkdtemp()
+        shutil.copytree('tests/samples/projects/git-with-detached-head', os.path.join(tempdir, 'git'))
+        shutil.move(os.path.join(tempdir, 'git', 'dot_git'), os.path.join(tempdir, 'git', '.git'))
+
+        now = u(int(time.time()))
+        entity = os.path.join(tempdir, 'git', 'emptyfile.txt')
+        config = 'tests/samples/configs/good_config.cfg'
+
+        args = ['--file', entity, '--config', config, '--time', now]
+
+        execute(args)
+
+        self.assertEquals('git', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
+        self.assertNotIn('branch', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0])
+
     def test_svn_project_detected(self):
         response = Response()
         response.status_code = 0
