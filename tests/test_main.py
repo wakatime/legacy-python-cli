@@ -187,7 +187,6 @@ class BaseTestCase(utils.TestCase):
             'lines': 2,
             'entity': os.path.abspath(entity),
             'project': os.path.basename(os.path.abspath('.')),
-            'branch': os.environ.get('TRAVIS_COMMIT', ANY),
             'time': float(now),
             'type': 'file',
         }
@@ -199,7 +198,9 @@ class BaseTestCase(utils.TestCase):
             u('lines'): 2,
         }
 
-        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, ANY, None)
+        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(ANY, ANY, None)
+        for key, val in self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].items():
+            self.assertEquals(heartbeat[key], val)
         self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
@@ -228,7 +229,6 @@ class BaseTestCase(utils.TestCase):
             'lines': 2,
             'entity': 'HIDDEN.txt',
             'project': os.path.basename(os.path.abspath('.')),
-            'branch': os.environ.get('TRAVIS_COMMIT', ANY),
             'time': float(now),
             'type': 'file',
         }
@@ -240,7 +240,9 @@ class BaseTestCase(utils.TestCase):
             u('lines'): 2,
         }
 
-        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, ANY, None)
+        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(ANY, ANY, None)
+        for key, val in self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].items():
+            self.assertEquals(heartbeat[key], val)
         self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
@@ -288,7 +290,6 @@ class BaseTestCase(utils.TestCase):
             'lines': 2,
             'entity': 'HIDDEN.txt',
             'project': os.path.basename(os.path.abspath('.')),
-            'branch': os.environ.get('TRAVIS_COMMIT', ANY),
             'time': float(now),
             'type': 'file',
         }
@@ -300,7 +301,9 @@ class BaseTestCase(utils.TestCase):
             u('lines'): 2,
         }
 
-        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, ANY, None)
+        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(ANY, ANY, None)
+        for key, val in self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].items():
+            self.assertEquals(heartbeat[key], val)
         self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
@@ -352,7 +355,6 @@ class BaseTestCase(utils.TestCase):
             'lines': 2,
             'entity': 'HIDDEN.txt',
             'project': os.path.basename(os.path.abspath('.')),
-            'branch': os.environ.get('TRAVIS_COMMIT', ANY),
             'time': float(now),
             'type': 'file',
         }
@@ -364,7 +366,9 @@ class BaseTestCase(utils.TestCase):
             u('lines'): 2,
         }
 
-        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, ANY, None)
+        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(ANY, ANY, None)
+        for key, val in self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].items():
+            self.assertEquals(heartbeat[key], val)
         self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 

@@ -75,7 +75,6 @@ class DependenciesTestCase(utils.TestCase):
             'lines': 36,
             'entity': os.path.realpath(entity),
             'project': u(os.path.basename(os.path.realpath('.'))),
-            'branch': os.environ.get('TRAVIS_COMMIT', ANY),
             'time': float(now),
             'type': 'file',
         }
@@ -88,7 +87,9 @@ class DependenciesTestCase(utils.TestCase):
         }
         expected_dependencies = []
 
-        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, ANY, None)
+        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(ANY, ANY, None)
+        for key, val in self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].items():
+            self.assertEquals(heartbeat[key], val)
         dependencies = self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].get('dependencies', [])
         self.assertListsEqual(dependencies, expected_dependencies)
         self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
@@ -120,7 +121,6 @@ class DependenciesTestCase(utils.TestCase):
             'entity': os.path.realpath(entity),
             'project': u(os.path.basename(os.path.realpath('.'))),
             'dependencies': ANY,
-            'branch': os.environ.get('TRAVIS_COMMIT', ANY),
             'time': float(now),
             'type': 'file',
         }
@@ -144,7 +144,9 @@ class DependenciesTestCase(utils.TestCase):
             'unittest',
         ]
 
-        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, ANY, None)
+        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(ANY, ANY, None)
+        for key, val in self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].items():
+            self.assertEquals(heartbeat[key], val)
         dependencies = self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['dependencies']
         self.assertListsEqual(dependencies, expected_dependencies)
         self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
@@ -172,7 +174,6 @@ class DependenciesTestCase(utils.TestCase):
             'entity': os.path.realpath(entity),
             'project': u(os.path.basename(os.path.realpath('.'))),
             'dependencies': ANY,
-            'branch': os.environ.get('TRAVIS_COMMIT', ANY),
             'time': float(now),
             'type': 'file',
         }
@@ -185,7 +186,9 @@ class DependenciesTestCase(utils.TestCase):
         }
         expected_dependencies = ['animate.css', 'moment', 'moment-timezone']
 
-        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, ANY, None)
+        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(ANY, ANY, None)
+        for key, val in self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].items():
+            self.assertEquals(heartbeat[key], val)
         for dep in expected_dependencies:
             self.assertIn(dep, self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['dependencies'])
         self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
@@ -217,7 +220,6 @@ class DependenciesTestCase(utils.TestCase):
             'entity': os.path.realpath(entity),
             'project': u(os.path.basename(os.path.realpath('.'))),
             'dependencies': ANY,
-            'branch': os.environ.get('TRAVIS_COMMIT', ANY),
             'time': float(now),
             'type': 'file',
         }
@@ -234,7 +236,9 @@ class DependenciesTestCase(utils.TestCase):
             'foobar',
         ]
 
-        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, ANY, None)
+        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(ANY, ANY, None)
+        for key, val in self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].items():
+            self.assertEquals(heartbeat[key], val)
         dependencies = self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['dependencies']
         self.assertListsEqual(dependencies, expected_dependencies)
         self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
@@ -266,7 +270,6 @@ class DependenciesTestCase(utils.TestCase):
             'entity': os.path.realpath(entity),
             'project': u(os.path.basename(os.path.realpath('.'))),
             'dependencies': ANY,
-            'branch': os.environ.get('TRAVIS_COMMIT', ANY),
             'time': float(now),
             'type': 'file',
         }
@@ -281,7 +284,9 @@ class DependenciesTestCase(utils.TestCase):
             'openssl',
         ]
 
-        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, ANY, None)
+        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(ANY, ANY, None)
+        for key, val in self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].items():
+            self.assertEquals(heartbeat[key], val)
         dependencies = self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['dependencies']
         self.assertListsEqual(dependencies, expected_dependencies)
         self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
@@ -313,7 +318,6 @@ class DependenciesTestCase(utils.TestCase):
             'entity': os.path.realpath(entity),
             'project': u(os.path.basename(os.path.realpath('.'))),
             'dependencies': ANY,
-            'branch': os.environ.get('TRAVIS_COMMIT', ANY),
             'time': float(now),
             'type': 'file',
         }
@@ -328,7 +332,9 @@ class DependenciesTestCase(utils.TestCase):
             'openssl',
         ]
 
-        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, ANY, None)
+        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(ANY, ANY, None)
+        for key, val in self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].items():
+            self.assertEquals(heartbeat[key], val)
         dependencies = self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['dependencies']
         self.assertListsEqual(dependencies, expected_dependencies)
         self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
@@ -360,7 +366,6 @@ class DependenciesTestCase(utils.TestCase):
             'entity': os.path.realpath(entity),
             'dependencies': ANY,
             'project': u(os.path.basename(os.path.realpath('.'))),
-            'branch': os.environ.get('TRAVIS_COMMIT', ANY),
             'time': float(now),
             'type': 'file',
         }
@@ -378,7 +383,9 @@ class DependenciesTestCase(utils.TestCase):
             'WakaTime',
         ]
 
-        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, ANY, None)
+        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(ANY, ANY, None)
+        for key, val in self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].items():
+            self.assertEquals(heartbeat[key], val)
         self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
         dependencies = self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['dependencies']
         self.assertListsEqual(dependencies, expected_dependencies)
@@ -410,7 +417,6 @@ class DependenciesTestCase(utils.TestCase):
             'entity': os.path.realpath(entity),
             'dependencies': ANY,
             'project': u(os.path.basename(os.path.realpath('.'))),
-            'branch': os.environ.get('TRAVIS_COMMIT', ANY),
             'time': float(now),
             'type': 'file',
         }
@@ -434,7 +440,9 @@ class DependenciesTestCase(utils.TestCase):
             "'ServiceLocatorTwo.php'",
         ]
 
-        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, ANY, None)
+        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(ANY, ANY, None)
+        for key, val in self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].items():
+            self.assertEquals(heartbeat[key], val)
         self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
         dependencies = self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['dependencies']
         self.assertListsEqual(dependencies, expected_dependencies)
@@ -466,7 +474,6 @@ class DependenciesTestCase(utils.TestCase):
             'dependencies': ANY,
             'entity': os.path.realpath(entity),
             'project': u(os.path.basename(os.path.realpath('.'))),
-            'branch': os.environ.get('TRAVIS_COMMIT', ANY),
             'time': float(now),
             'type': 'file',
         }
@@ -481,7 +488,9 @@ class DependenciesTestCase(utils.TestCase):
             '"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"',
         ]
 
-        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, ANY, None)
+        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(ANY, ANY, None)
+        for key, val in self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].items():
+            self.assertEquals(heartbeat[key], val)
         self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
         dependencies = self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['dependencies']
         self.assertListsEqual(dependencies, expected_dependencies)
@@ -513,7 +522,6 @@ class DependenciesTestCase(utils.TestCase):
             'dependencies': ANY,
             'entity': os.path.realpath(entity),
             'project': u(os.path.basename(os.path.realpath('.'))),
-            'branch': os.environ.get('TRAVIS_COMMIT', ANY),
             'time': float(now),
             'type': 'file',
         }
@@ -528,7 +536,9 @@ class DependenciesTestCase(utils.TestCase):
             '"libs/json2.js"',
         ]
 
-        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, ANY, None)
+        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(ANY, ANY, None)
+        for key, val in self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].items():
+            self.assertEquals(heartbeat[key], val)
         self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
         dependencies = self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['dependencies']
         self.assertListsEqual(dependencies, expected_dependencies)
@@ -560,7 +570,6 @@ class DependenciesTestCase(utils.TestCase):
             'entity': os.path.realpath(entity),
             'project': u(os.path.basename(os.path.realpath('.'))),
             'dependencies': ANY,
-            'branch': os.environ.get('TRAVIS_COMMIT', ANY),
             'time': float(now),
             'type': 'file',
         }
@@ -584,7 +593,9 @@ class DependenciesTestCase(utils.TestCase):
             '"supress"',
         ]
 
-        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(heartbeat, ANY, None)
+        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(ANY, ANY, None)
+        for key, val in self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].items():
+            self.assertEquals(heartbeat[key], val)
         dependencies = self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['dependencies']
         self.assertListsEqual(dependencies, expected_dependencies)
         self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
