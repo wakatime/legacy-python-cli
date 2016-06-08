@@ -52,3 +52,24 @@ class TestCase(unittest.TestCase):
     @property
     def isPy35(self):
         return (sys.version_info[0] == 3 and sys.version_info[1] == 5)
+
+
+try:
+    # Python >= 3
+    from tempfile import TemporaryDirectory
+except ImportError:
+    # Python < 3
+    import shutil
+    import tempfile
+    class TemporaryDirectory(object):
+        """Context manager for tempfile.mkdtemp().
+
+        Adds the ability to use with a `with` statement.
+        """
+
+        def __enter__(self):
+            self.name = tempfile.mkdtemp()
+            return self.name
+
+        def __exit__(self, exc_type, exc_value, traceback):
+            shutil.rmtree(self.name)
