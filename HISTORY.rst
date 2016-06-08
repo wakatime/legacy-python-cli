@@ -3,6 +3,14 @@ History
 -------
 
 
+6.0.4 (2016-06-08)
+++++++++++++++++++
+
+- Upgrade urllib3 to master version to fix bug causing unhandled retry
+  exceptions.
+- Prevent tracking git branch with detached head.
+
+
 6.0.3 (2016-05-21)
 ++++++++++++++++++
 
