@@ -3,6 +3,12 @@ History
 -------
 
 
+6.0.5 (2016-06-13)
+++++++++++++++++++
+
+- Upgrade pygments to v2.1.3 for better language coverage.
+
+
 6.0.4 (2016-06-08)
 ++++++++++++++++++
 
