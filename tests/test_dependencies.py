@@ -149,7 +149,6 @@ class DependenciesTestCase(utils.TestCase):
                 'pygments',
                 'simplejson',
                 'sqlalchemy',
-                'sys',
                 'unittest',
             ]
 
