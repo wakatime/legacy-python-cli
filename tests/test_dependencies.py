@@ -11,7 +11,9 @@ import sys
 from wakatime.compat import u
 from wakatime.exceptions import NotYetImplemented
 from wakatime.dependencies import TokenParser
+from wakatime.packages.pygments.lexers import ClassNotFound
 from wakatime.packages.requests.models import Response
+from wakatime.stats import get_lexer_by_name
 from . import utils
 
 try:
@@ -97,6 +99,63 @@ class DependenciesTestCase(utils.TestCase):
                 self.assertEquals(heartbeat[key], val)
             dependencies = self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].get('dependencies', [])
             self.assertListsEqual(dependencies, expected_dependencies)
+            self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
+            self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
+
+    def test_classnotfound_error_when_passing_none_to_pygments(self):
+        with self.assertRaises(ClassNotFound):
+            get_lexer_by_name(None)
+
+    def test_classnotfound_error_when_parsing_dependencies(self):
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        with utils.TemporaryDirectory() as tempdir:
+            entity = 'tests/samples/codefiles/python.py'
+            shutil.copy(entity, os.path.join(tempdir, 'python.py'))
+            entity = os.path.realpath(os.path.join(tempdir, 'python.py'))
+
+            now = u(int(time.time()))
+            config = 'tests/samples/configs/good_config.cfg'
+
+            args = ['--file', entity, '--config', config, '--time', now]
+
+            with utils.mock.patch('wakatime.stats.guess_lexer_using_filename') as mock_guess:
+                mock_guess.return_value = (None, None)
+
+                with utils.mock.patch('wakatime.stats.get_filetype_from_buffer') as mock_filetype:
+                    mock_filetype.return_value = 'foo'
+                    retval = execute(args)
+
+            self.assertEquals(retval, 102)
+            self.assertEquals(sys.stdout.getvalue(), '')
+            self.assertEquals(sys.stderr.getvalue(), '')
+
+            self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
+            self.patched['wakatime.session_cache.SessionCache.delete'].assert_called_once_with()
+            self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
+
+            heartbeat = {
+                'language': None,
+                'lines': 36,
+                'dependencies': [],
+                'entity': os.path.realpath(entity),
+                'project': u(os.path.basename(os.path.realpath('.'))),
+                'time': float(now),
+                'type': 'file',
+            }
+            stats = {
+                u('cursorpos'): None,
+                u('language'): None,
+                u('lineno'): None,
+                u('lines'): 36,
+                u('dependencies'): [],
+            }
+
+            self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(ANY, ANY, None)
+            for key, val in self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].items():
+                self.assertEquals(heartbeat[key], val)
             self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 

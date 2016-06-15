@@ -20,8 +20,8 @@ from .packages import (
     get_lexer_by_name,
     guess_lexer_for_filename,
     get_filetype_from_buffer,
-    ClassNotFound,
 )
+from .packages.pygments.lexers import ClassNotFound
 
 try:
     from .packages import simplejson as json  # pragma: nocover
@@ -108,7 +108,7 @@ def guess_lexer_using_modeline(text):
     if file_type is not None:
         try:
             lexer = get_lexer_by_name(file_type)
-        except ClassNotFound:  # pragma: nocover
+        except ClassNotFound:
             pass
 
     if lexer is not None:
