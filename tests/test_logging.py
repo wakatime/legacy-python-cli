@@ -119,7 +119,32 @@ class LoggingTestCase(utils.TestCase):
         self.assertIn('response_code', output[4])
 
     @log_capture()
-    def test_exception_traceback(self, logs):
+    def test_exception_traceback_logged_in_debug_mode(self, logs):
+        logging.disable(logging.NOTSET)
+
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        now = u(int(time.time()))
+        entity = 'tests/samples/codefiles/python.py'
+        config = 'tests/samples/configs/good_config.cfg'
+        args = ['--file', entity, '--config', config, '--time', now, '--verbose']
+
+        with utils.mock.patch('wakatime.stats.open') as mock_open:
+            mock_open.side_effect = Exception('FooBar')
+
+            retval = execute(args)
+            self.assertEquals(retval, 102)
+            self.assertEquals(sys.stdout.getvalue(), '')
+            self.assertEquals(sys.stderr.getvalue(), '')
+
+            output = u("\n").join([u(' ').join(x) for x in logs.actual()])
+            self.assertIn(u('WakaTime DEBUG Traceback (most recent call last):'), output)
+            self.assertIn(u('Exception: FooBar'), output)
+
+    @log_capture()
+    def test_exception_traceback_not_logged_normally(self, logs):
         logging.disable(logging.NOTSET)
 
         response = Response()
@@ -140,5 +165,4 @@ class LoggingTestCase(utils.TestCase):
             self.assertEquals(sys.stderr.getvalue(), '')
 
             output = u("\n").join([u(' ').join(x) for x in logs.actual()])
-            self.assertIn(u('WakaTime ERROR Traceback (most recent call last):'), output)
-            self.assertIn(u('Exception: FooBar'), output)
+            self.assertEquals(u(''), output)

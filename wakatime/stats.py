@@ -231,7 +231,7 @@ def get_file_head(file_name):
     try:
         with open(file_name, 'r', encoding='utf-8') as fh:
             text = fh.read(512000)
-    except:  # pragma: nocover
+    except:
         try:
             with open(file_name, 'r', encoding=sys.getfilesystemencoding()) as fh:
                 text = fh.read(512000)
