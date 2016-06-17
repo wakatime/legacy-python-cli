@@ -3,6 +3,13 @@ History
 -------
 
 
+6.0.6 (2016-06-17)
+++++++++++++++++++
+
+- Use correct namespace for pygments.lexers.ClassNotFound exception so it is
+  caught when dependency detection not available for a language.
+
+
 6.0.5 (2016-06-13)
 ++++++++++++++++++
 
