@@ -95,7 +95,7 @@ Each plugin also has it's own log file for things outside of the common wakatime
 * **Coda** logs to ``/var/log/system.log`` so use ``sudo tail -f /var/log/system.log`` in Terminal to watch Coda 2 logs
 * **Eclipse** logs can be found in the Eclipse ``Error Log`` (Window -> Show View -> Error Log)
 * **Emacs** messages go to the *messages* buffer window
-* **Jetbrains IDEs (IntelliJ IDEA, PyCharm, RubyMine, PhpStorm, AppCode, AndroidStudio, WebStorm)** log to ``idea.log`` (`locating IDE log files <https://intellij-support.jetbrains.com/entries/23352446-Locating-IDE-log-files>`_)
+* **Jetbrains IDEs (IntelliJ IDEA, PyCharm, RubyMine, PhpStorm, AppCode, AndroidStudio, WebStorm)** log to ``idea.log`` (`locating IDE log files <https://intellij-support.jetbrains.com/hc/en-us/articles/207241085-Locating-IDE-log-files>`_)
 * **Komodo** logs are written to ``pystderr.log`` (Help -> Troubleshooting -> View Log File)
 * **Netbeans** logs to it's own log file (View -> IDE Log)
 * **Notepad++** errors go to ``AppData\Roaming\Notepad++\plugins\config\WakaTime.log`` (this file is only created when an error occurs)
