@@ -5,14 +5,20 @@ from wakatime.main import execute
 from wakatime.offlinequeue import Queue
 from wakatime.packages import requests
 
+import logging
 import os
 import sqlite3
 import sys
 import tempfile
 import time
+from testfixtures import log_capture
 from wakatime.compat import u
 from wakatime.packages.requests.models import Response
 from . import utils
+try:
+    from mock import call
+except ImportError:
+    from unittest.mock import call
 
 
 class OfflineQueueTestCase(utils.TestCase):
@@ -170,3 +176,35 @@ class OfflineQueueTestCase(utils.TestCase):
         db_file = queue.get_db_file()
         expected = os.path.join(os.path.expanduser('~'), '.wakatime.db')
         self.assertEquals(db_file, expected)
+
+    @log_capture()
+    def test_heartbeat_saved_when_requests_raises_exception(self, logs):
+        logging.disable(logging.NOTSET)
+
+        with tempfile.NamedTemporaryFile() as fh:
+            with utils.mock.patch('wakatime.offlinequeue.Queue.get_db_file') as mock_db_file:
+                mock_db_file.return_value = fh.name
+
+                self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].side_effect = AttributeError("'Retry' object has no attribute 'history'")
+
+                now = u(int(time.time()))
+                entity = 'tests/samples/codefiles/twolinefile.txt'
+                config = 'tests/samples/configs/good_config.cfg'
+
+                args = ['--file', entity, '--config', config, '--time', now]
+                execute(args)
+
+                queue = Queue()
+                saved_heartbeat = queue.pop()
+                self.assertEquals(os.path.realpath(entity), saved_heartbeat['entity'])
+
+                self.assertEquals(sys.stdout.getvalue(), '')
+                self.assertEquals(sys.stderr.getvalue(), '')
+
+                output = [u(' ').join(x) for x in logs.actual()]
+                expected = u("AttributeError: \\'Retry\\' object has no attribute \\'history\\'")
+                self.assertIn(expected, output[0])
+
+                self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
+                self.patched['wakatime.session_cache.SessionCache.delete'].assert_has_calls([call(), call()])
+                self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
