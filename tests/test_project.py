@@ -8,6 +8,7 @@ from wakatime.packages.requests.models import Response
 import logging
 import os
 import shutil
+import sys
 import tempfile
 import time
 from testfixtures import log_capture
@@ -344,6 +345,9 @@ class LanguagesTestCase(utils.TestCase):
         args = ['--file', entity, '--config', config, '--time', now]
 
         execute(args)
+
+        self.assertEquals(sys.stdout.getvalue(), '')
+        self.assertEquals(sys.stderr.getvalue(), '')
 
         output = [u(' ').join(x) for x in logs.actual()]
         expected = u('WakaTime WARNING Regex error (unexpected end of regular expression) for projectmap pattern: invalid[({regex')
