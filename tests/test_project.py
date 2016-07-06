@@ -5,10 +5,12 @@ from wakatime.main import execute
 from wakatime.packages import requests
 from wakatime.packages.requests.models import Response
 
+import logging
 import os
 import shutil
 import tempfile
 import time
+from testfixtures import log_capture
 from wakatime.compat import u
 from wakatime.exceptions import NotYetImplemented
 from wakatime.projects.base import BaseProject
@@ -326,3 +328,25 @@ class LanguagesTestCase(utils.TestCase):
         execute(args)
 
         self.assertEquals('proj-map42', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
+
+    @log_capture()
+    def test_project_map_with_invalid_regex(self, logs):
+        logging.disable(logging.NOTSET)
+
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        now = u(int(time.time()))
+        entity = 'tests/samples/projects/project_map42/emptyfile.txt'
+        config = 'tests/samples/configs/project_map_invalid.cfg'
+
+        args = ['--file', entity, '--config', config, '--time', now]
+
+        execute(args)
+
+        output = [u(' ').join(x) for x in logs.actual()]
+        expected = u('WakaTime WARNING Regex error (unexpected end of regular expression) for projectmap pattern: invalid[({regex')
+        if self.isPy35:
+            expected = u('WakaTime WARNING Regex error (unterminated character set at position 7) for projectmap pattern: invalid[({regex')
+        self.assertEquals(output[0], expected)
