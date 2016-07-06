@@ -561,14 +561,11 @@ class BaseTestCase(utils.TestCase):
                 mock_gethostname.return_value = hostname
                 self.assertEquals(type(hostname).__name__, 'str')
 
-                config = 'tests/samples/configs/has_everything.cfg'
+                config = 'tests/samples/configs/good_config.cfg'
                 args = ['--file', entity, '--config', config]
                 retval = execute(args)
                 self.assertEquals(retval, SUCCESS)
-                expected_stdout = open('tests/samples/output/main_test_good_config_file').read()
-                traceback_file = os.path.realpath('wakatime/main.py')
-                lineno = int(re.search(r' line (\d+),', sys.stdout.getvalue()).group(1))
-                self.assertEquals(sys.stdout.getvalue(), expected_stdout.format(file=traceback_file, lineno=lineno))
+                self.assertEquals(sys.stdout.getvalue(), '')
                 self.assertEquals(sys.stderr.getvalue(), '')
 
                 self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
@@ -580,6 +577,32 @@ class BaseTestCase(utils.TestCase):
 
                 headers = self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].call_args[0][0].headers
                 self.assertEquals(headers.get('X-Machine-Name'), hostname.encode('utf-8') if is_py3 else hostname)
+
+    def test_hostname_set_from_config_file(self):
+        response = Response()
+        response.status_code = 201
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        with utils.TemporaryDirectory() as tempdir:
+            entity = 'tests/samples/codefiles/emptyfile.txt'
+            shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
+            entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
+
+            hostname = 'fromcfgfile'
+            config = 'tests/samples/configs/has_everything.cfg'
+            args = ['--file', entity, '--config', config, '--timeout', '15']
+            retval = execute(args)
+            self.assertEquals(retval, SUCCESS)
+
+            self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
+            self.patched['wakatime.session_cache.SessionCache.delete'].assert_not_called()
+            self.patched['wakatime.session_cache.SessionCache.save'].assert_called_once_with(ANY)
+
+            self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
+            self.patched['wakatime.offlinequeue.Queue.pop'].assert_called_once_with()
+
+            headers = self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].call_args[0][0].headers
+            self.assertEquals(headers.get('X-Machine-Name'), hostname.encode('utf-8') if is_py3 else hostname)
 
     def test_nonascii_timezone(self):
         response = Response()
