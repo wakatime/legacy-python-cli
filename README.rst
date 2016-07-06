@@ -57,7 +57,7 @@ Configuring
 Options can be passed via command line, or set in the ``$HOME/.wakatime.cfg``
 config file. Command line arguments take precedence over config file settings.
 The ``$HOME/.wakatime.cfg`` file is in `INI <http://en.wikipedia.org/wiki/INI_file>`_
-format. An example config file looks like::
+format. An example config file with all available options::
 
     [settings]
     debug = false
@@ -74,8 +74,9 @@ format. An example config file looks like::
     proxy = https://user:pass@localhost:8080
     timeout = 30
     [projectmap]
-    projects/foo = new project name
-    ^/home/user/projects/bar(\d+)/ = project{0}
+        projects/foo = new project name
+        ^/home/user/projects/bar(\d+)/ = project{0}
+    hostname = machinename
 
 
 Troubleshooting
