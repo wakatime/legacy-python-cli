@@ -73,10 +73,10 @@ format. An example config file with all available options::
     offline = true
     proxy = https://user:pass@localhost:8080
     timeout = 30
+    hostname = machinename
     [projectmap]
         projects/foo = new project name
         ^/home/user/projects/bar(\d+)/ = project{0}
-    hostname = machinename
 
 
 Troubleshooting
