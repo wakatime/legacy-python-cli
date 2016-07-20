@@ -18,7 +18,7 @@ from wakatime.projects.base import BaseProject
 from . import utils
 
 
-class LanguagesTestCase(utils.TestCase):
+class ProjectTestCase(utils.TestCase):
     patch_these = [
         'wakatime.packages.requests.adapters.HTTPAdapter.send',
         'wakatime.offlinequeue.Queue.push',

@@ -185,7 +185,8 @@ class OfflineQueueTestCase(utils.TestCase):
             with utils.mock.patch('wakatime.offlinequeue.Queue.get_db_file') as mock_db_file:
                 mock_db_file.return_value = fh.name
 
-                self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].side_effect = AttributeError("'Retry' object has no attribute 'history'")
+                exception_msg = u("Oops, requests raised an exception. You're move.")
+                self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].side_effect = AttributeError(exception_msg)
 
                 now = u(int(time.time()))
                 entity = 'tests/samples/codefiles/twolinefile.txt'
@@ -202,8 +203,7 @@ class OfflineQueueTestCase(utils.TestCase):
                 self.assertEquals(sys.stderr.getvalue(), '')
 
                 output = [u(' ').join(x) for x in logs.actual()]
-                expected = u("AttributeError: \\'Retry\\' object has no attribute \\'history\\'")
-                self.assertIn(expected, output[0])
+                self.assertIn(exception_msg, output[0])
 
                 self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
                 self.patched['wakatime.session_cache.SessionCache.delete'].assert_has_calls([call(), call()])

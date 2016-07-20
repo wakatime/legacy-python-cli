@@ -4,11 +4,13 @@
 from wakatime.main import execute
 from wakatime.packages import requests
 
+import logging
 import os
 import time
 import re
 import shutil
 import sys
+from testfixtures import log_capture
 from wakatime.compat import u, is_py3
 from wakatime.constants import (
     API_ERROR,
@@ -30,7 +32,7 @@ except ImportError:
 from wakatime.packages import tzlocal
 
 
-class BaseTestCase(utils.TestCase):
+class MainTestCase(utils.TestCase):
     patch_these = [
         'wakatime.packages.requests.adapters.HTTPAdapter.send',
         'wakatime.offlinequeue.Queue.push',
@@ -715,3 +717,56 @@ class BaseTestCase(utils.TestCase):
                 data = json.loads(body)
                 self.assertEquals(data.get('entity'), entity2)
                 self.assertEquals(data.get('project'), project2)
+
+    @log_capture()
+    def test_nonascii_filename(self, logs):
+        logging.disable(logging.NOTSET)
+
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        with utils.TemporaryDirectory() as tempdir:
+            filename = os.listdir('tests/samples/codefiles/unicode')[0]
+            entity = os.path.join('tests/samples/codefiles/unicode', filename)
+            shutil.copy(entity, os.path.join(tempdir, filename))
+            entity = os.path.realpath(os.path.join(tempdir, filename))
+
+            now = u(int(time.time()))
+            config = 'tests/samples/configs/good_config.cfg'
+
+            args = ['--file', entity, '--key', '123', '--config', config, '--time', now]
+
+            retval = execute(args)
+            self.assertEquals(retval, API_ERROR)
+            self.assertEquals(sys.stdout.getvalue(), '')
+            self.assertEquals(sys.stderr.getvalue(), '')
+
+            output = [u(' ').join(x) for x in logs.actual()]
+            self.assertEquals(len(output), 0)
+
+            self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
+            self.patched['wakatime.session_cache.SessionCache.delete'].assert_called_once_with()
+            self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
+
+            heartbeat = {
+                'language': 'Text only',
+                'lines': 0,
+                'entity': os.path.realpath(entity),
+                'project': os.path.basename(os.path.abspath('.')),
+                'time': float(now),
+                'type': 'file',
+            }
+            stats = {
+                u('cursorpos'): None,
+                u('dependencies'): [],
+                u('language'): u('Text only'),
+                u('lineno'): None,
+                u('lines'): 0,
+            }
+
+            self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(ANY, ANY, None)
+            for key, val in self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].items():
+                self.assertEquals(heartbeat[key], val)
+            self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
+            self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
