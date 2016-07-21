@@ -13,7 +13,7 @@ import logging
 import os
 import traceback
 
-from .compat import u
+from .compat import basestring, u
 from .packages.requests.packages import urllib3
 try:
     from collections import OrderedDict  # pragma: nocover
@@ -28,7 +28,7 @@ except (ImportError, SyntaxError):  # pragma: nocover
 class CustomEncoder(json.JSONEncoder):
 
     def default(self, obj):
-        if isinstance(obj, bytes):  # pragma: nocover
+        if isinstance(obj, basestring):
             obj = u(obj)
             return json.dumps(obj)
         try:  # pragma: nocover
