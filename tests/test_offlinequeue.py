@@ -19,6 +19,10 @@ try:
     from mock import call
 except ImportError:
     from unittest.mock import call
+try:
+    from .packages import simplejson as json
+except (ImportError, SyntaxError):
+    import json
 
 
 class OfflineQueueTestCase(utils.TestCase):
@@ -92,6 +96,76 @@ class OfflineQueueTestCase(utils.TestCase):
                 queue = Queue()
                 saved_heartbeat = queue.pop()
                 self.assertEquals(None, saved_heartbeat)
+
+    def test_all_offline_heartbeats_sent_after_success_response(self):
+        with tempfile.NamedTemporaryFile() as fh:
+            with utils.mock.patch('wakatime.offlinequeue.Queue.get_db_file') as mock_db_file:
+                mock_db_file.return_value = fh.name
+
+                response = Response()
+                response.status_code = 500
+                self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+                config = 'tests/samples/configs/good_config.cfg'
+
+                now1 = u(int(time.time()))
+                entity1 = 'tests/samples/codefiles/emptyfile.txt'
+                project1 = 'proj1'
+
+                args = ['--file', entity1, '--config', config, '--time', now1, '--project', project1]
+                execute(args)
+
+                now2 = u(int(time.time()))
+                entity2 = 'tests/samples/codefiles/twolinefile.txt'
+                project2 = 'proj2'
+
+                args = ['--file', entity2, '--config', config, '--time', now2, '--project', project2]
+                execute(args)
+
+                # send heartbeats from offline queue after 201 response
+                now3 = u(int(time.time()))
+                entity3 = 'tests/samples/codefiles/python.py'
+                project3 = 'proj3'
+                args = ['--file', entity3, '--config', config, '--time', now3, '--project', project3]
+                response.status_code = 201
+                execute(args)
+
+                # offline queue should be empty
+                queue = Queue()
+                saved_heartbeat = queue.pop()
+                self.assertEquals(None, saved_heartbeat)
+
+                calls = self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].call_args_list
+
+                body = calls[0][0][0].body
+                data = json.loads(body)
+                self.assertEquals(data.get('entity'), os.path.abspath(entity1))
+                self.assertEquals(data.get('project'), project1)
+                self.assertEquals(u(int(data.get('time'))), now1)
+
+                body = calls[1][0][0].body
+                data = json.loads(body)
+                self.assertEquals(data.get('entity'), os.path.abspath(entity2))
+                self.assertEquals(data.get('project'), project2)
+                self.assertEquals(u(int(data.get('time'))), now2)
+
+                body = calls[2][0][0].body
+                data = json.loads(body)
+                self.assertEquals(data.get('entity'), os.path.abspath(entity3))
+                self.assertEquals(data.get('project'), project3)
+                self.assertEquals(u(int(data.get('time'))), now3)
+
+                body = calls[3][0][0].body
+                data = json.loads(body)
+                self.assertEquals(data.get('entity'), os.path.abspath(entity1))
+                self.assertEquals(data.get('project'), project1)
+                self.assertEquals(u(int(data.get('time'))), now1)
+
+                body = calls[4][0][0].body
+                data = json.loads(body)
+                self.assertEquals(data.get('entity'), os.path.abspath(entity2))
+                self.assertEquals(data.get('project'), project2)
+                self.assertEquals(u(int(data.get('time'))), now2)
 
     def test_empty_project_can_be_saved(self):
         with tempfile.NamedTemporaryFile() as fh:

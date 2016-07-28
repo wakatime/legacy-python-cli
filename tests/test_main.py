@@ -282,7 +282,7 @@ class MainTestCase(utils.TestCase):
             self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
-    def test_timeout_passed_via_command_line(self):
+    def test_invalid_timeout_passed_via_command_line(self):
         response = Response()
         response.status_code = 201
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
