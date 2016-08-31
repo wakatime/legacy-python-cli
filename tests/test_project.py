@@ -13,6 +13,7 @@ import tempfile
 import time
 from testfixtures import log_capture
 from wakatime.compat import u
+from wakatime.constants import API_ERROR
 from wakatime.exceptions import NotYetImplemented
 from wakatime.projects.base import BaseProject
 from . import utils
@@ -354,3 +355,27 @@ class ProjectTestCase(utils.TestCase):
         if self.isPy35:
             expected = u('WakaTime WARNING Regex error (unterminated character set at position 7) for projectmap pattern: invalid[({regex')
         self.assertEquals(output[0], expected)
+
+    @log_capture()
+    def test_project_map_with_replacement_group_index_error(self, logs):
+        logging.disable(logging.NOTSET)
+
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        now = u(int(time.time()))
+        entity = 'tests/samples/projects/project_map42/emptyfile.txt'
+        config = 'tests/samples/configs/project_map_malformed.cfg'
+
+        args = ['--file', entity, '--config', config, '--time', now]
+
+        retval = execute(args)
+
+        self.assertEquals(retval, API_ERROR)
+        self.assertEquals(sys.stdout.getvalue(), '')
+        self.assertEquals(sys.stderr.getvalue(), '')
+
+        log_output = "\n".join([u(' ').join(x) for x in logs.actual()])
+        expected = u('WakaTime WARNING Regex error (tuple index out of range) for projectmap pattern: proj-map{3}')
+        self.assertEquals(log_output, expected)
