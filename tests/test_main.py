@@ -504,7 +504,45 @@ class MainTestCase(utils.TestCase):
             self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
-    def test_requests_exception(self):
+    @log_capture()
+    def test_500_response_without_offline_logging(self, logs):
+        logging.disable(logging.NOTSET)
+
+        response = Response()
+        response.status_code = 500
+        response._content = 'fake content'
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        with utils.TemporaryDirectory() as tempdir:
+            entity = 'tests/samples/codefiles/twolinefile.txt'
+            shutil.copy(entity, os.path.join(tempdir, 'twolinefile.txt'))
+            entity = os.path.realpath(os.path.join(tempdir, 'twolinefile.txt'))
+
+            now = u(int(time.time()))
+
+            args = ['--file', entity, '--key', '123', '--disableoffline',
+                    '--config', 'tests/samples/configs/good_config.cfg', '--time', now]
+
+            retval = execute(args)
+            self.assertEquals(retval, API_ERROR)
+            self.assertEquals(sys.stdout.getvalue(), '')
+            self.assertEquals(sys.stderr.getvalue(), '')
+
+            log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
+            expected = "WakaTime ERROR {'response_code': 500, 'response_content': u'fake content'}"
+            self.assertEquals(expected, log_output)
+
+            self.patched['wakatime.session_cache.SessionCache.delete'].assert_called_once_with()
+            self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
+            self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
+
+            self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
+            self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
+
+    @log_capture()
+    def test_requests_exception(self, logs):
+        logging.disable(logging.NOTSET)
+
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].side_effect = RequestException('requests exception')
 
         with utils.TemporaryDirectory() as tempdir:
@@ -514,13 +552,23 @@ class MainTestCase(utils.TestCase):
 
             now = u(int(time.time()))
 
-            args = ['--file', entity, '--key', '123',
-                    '--config', 'tests/samples/configs/paranoid.cfg', '--time', now]
+            args = ['--file', entity, '--key', '123', '--verbose',
+                    '--config', 'tests/samples/configs/good_config.cfg', '--time', now]
 
             retval = execute(args)
             self.assertEquals(retval, API_ERROR)
             self.assertEquals(sys.stdout.getvalue(), '')
             self.assertEquals(sys.stderr.getvalue(), '')
+
+            log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
+            expected = 'ImportError: No module named special'
+            self.assertIn(expected, log_output)
+            expected = 'WakaTime DEBUG Sending heartbeat to api at https://api.wakatime.com/api/v1/heartbeats'
+            self.assertIn(expected, log_output)
+            expected = 'WakaTime DEBUG Traceback'
+            self.assertIn(expected, log_output)
+            expected = "RequestException': u'requests exception'"
+            self.assertIn(expected, log_output)
 
             self.patched['wakatime.session_cache.SessionCache.delete'].assert_called_once_with()
             self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
@@ -529,7 +577,7 @@ class MainTestCase(utils.TestCase):
             heartbeat = {
                 'language': 'Text only',
                 'lines': 2,
-                'entity': 'HIDDEN.txt',
+                'entity': entity,
                 'project': os.path.basename(os.path.abspath('.')),
                 'time': float(now),
                 'type': 'file',
@@ -546,6 +594,38 @@ class MainTestCase(utils.TestCase):
             for key, val in self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].items():
                 self.assertEquals(heartbeat[key], val)
             self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
+            self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
+
+    @log_capture()
+    def test_requests_exception_without_offline_logging(self, logs):
+        logging.disable(logging.NOTSET)
+
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].side_effect = RequestException('requests exception')
+
+        with utils.TemporaryDirectory() as tempdir:
+            entity = 'tests/samples/codefiles/twolinefile.txt'
+            shutil.copy(entity, os.path.join(tempdir, 'twolinefile.txt'))
+            entity = os.path.realpath(os.path.join(tempdir, 'twolinefile.txt'))
+
+            now = u(int(time.time()))
+
+            args = ['--file', entity, '--key', '123', '--disableoffline',
+                    '--config', 'tests/samples/configs/good_config.cfg', '--time', now]
+
+            retval = execute(args)
+            self.assertEquals(retval, API_ERROR)
+            self.assertEquals(sys.stdout.getvalue(), '')
+            self.assertEquals(sys.stderr.getvalue(), '')
+
+            log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
+            expected = "WakaTime ERROR {'RequestException': u'requests exception'}"
+            self.assertEquals(expected, log_output)
+
+            self.patched['wakatime.session_cache.SessionCache.delete'].assert_called_once_with()
+            self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
+            self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
+
+            self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
     @log_capture()
