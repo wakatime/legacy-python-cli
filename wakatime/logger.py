@@ -78,8 +78,6 @@ def traceback_formatter(*args, **kwargs):
         level = level.lower()
     if level == 'warn' or level == 'warning':
         logging.getLogger('WakaTime').warning(traceback.format_exc())
-    elif level == 'info':
-        logging.getLogger('WakaTime').info(traceback.format_exc())
     elif level == 'debug':
         logging.getLogger('WakaTime').debug(traceback.format_exc())
     else:
