@@ -17,6 +17,7 @@ from wakatime.constants import (
     AUTH_ERROR,
     CONFIG_FILE_PARSE_ERROR,
     SUCCESS,
+    MALFORMED_HEARTBEAT_ERROR,
 )
 from wakatime.packages.requests.models import Response
 from . import utils
@@ -719,6 +720,43 @@ class MainTestCase(utils.TestCase):
                 self.assertEquals(data.get('project'), project2)
 
     @log_capture()
+    def test_extra_heartbeats_with_malformed_json(self, logs):
+        logging.disable(logging.NOTSET)
+
+        response = Response()
+        response.status_code = 201
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        with utils.TemporaryDirectory() as tempdir:
+            entity = 'tests/samples/codefiles/twolinefile.txt'
+            shutil.copy(entity, os.path.join(tempdir, 'twolinefile.txt'))
+            entity = os.path.realpath(os.path.join(tempdir, 'twolinefile.txt'))
+
+            entity = os.path.abspath('tests/samples/codefiles/emptyfile.txt')
+            config = 'tests/samples/configs/good_config.cfg'
+            args = ['--file', entity, '--config', config, '--extra-heartbeats']
+
+            with utils.mock.patch('wakatime.main.sys.stdin') as mock_stdin:
+                heartbeats = '[{foobar}]'
+                mock_stdin.readline.return_value = heartbeats
+
+                retval = execute(args)
+
+                self.assertEquals(retval, MALFORMED_HEARTBEAT_ERROR)
+                self.assertEquals(sys.stdout.getvalue(), '')
+                self.assertEquals(sys.stderr.getvalue(), '')
+
+                log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
+                self.assertEquals(log_output, '')
+
+                self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
+                self.patched['wakatime.session_cache.SessionCache.delete'].assert_not_called()
+                self.patched['wakatime.session_cache.SessionCache.save'].assert_called_once_with(ANY)
+
+                self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
+                self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
+
+    @log_capture()
     def test_nonascii_filename(self, logs):
         logging.disable(logging.NOTSET)
 
@@ -770,3 +808,27 @@ class MainTestCase(utils.TestCase):
                 self.assertEquals(heartbeat[key], val)
             self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
+
+    @log_capture()
+    def test_unhandled_exception(self, logs):
+        logging.disable(logging.NOTSET)
+
+        with utils.mock.patch('wakatime.main.process_heartbeat') as mock_process_heartbeat:
+            ex_msg = 'testing unhandled exception'
+            mock_process_heartbeat.side_effect = RuntimeError(ex_msg)
+
+            entity = 'tests/samples/codefiles/twolinefile.txt'
+            config = 'tests/samples/configs/good_config.cfg'
+            args = ['--entity', entity, '--key', '123', '--config', config]
+
+            execute(args)
+
+            self.assertIn(ex_msg, sys.stdout.getvalue())
+            self.assertEquals(sys.stderr.getvalue(), '')
+
+            log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
+            self.assertIn(ex_msg, log_output)
+
+            self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
+            self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
+            self.patched['wakatime.session_cache.SessionCache.get'].assert_not_called()
