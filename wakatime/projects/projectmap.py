@@ -68,6 +68,4 @@ class ProjectMap(BaseProject):
         return None
 
     def name(self):
-        if self.project:
-            return u(self.project)
-        return None
+        return u(self.project) if self.project else None
