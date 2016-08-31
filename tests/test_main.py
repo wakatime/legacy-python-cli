@@ -532,8 +532,12 @@ class MainTestCase(utils.TestCase):
 
             log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
             expected = "WakaTime ERROR {'response_code': 500, 'response_content': u'fake content'}"
+            if log_output[-2] == '0':
+                expected = "WakaTime ERROR {'response_content': u'fake content', 'response_code': 500}"
             if is_py3:
                 expected = "WakaTime ERROR {'response_code': 500, 'response_content': 'fake content'}"
+                if log_output[-2] == '0':
+                    expected = "WakaTime ERROR {'response_content': 'fake content', 'response_code': 500}"
             self.assertEquals(expected, log_output)
 
             self.patched['wakatime.session_cache.SessionCache.delete'].assert_called_once_with()
