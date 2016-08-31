@@ -20,6 +20,7 @@ class PythonParser(TokenParser):
         r'^os$',
         r'^sys$',
         r'^sys\.',
+        r'^__future__$',
     ]
 
     def parse(self):
@@ -72,8 +73,6 @@ class PythonParser(TokenParser):
             if self.state == 'from':
                 self.append(content, truncate=True, truncate_to=1)
                 self.state = 'from-2'
-            elif self.state == 'from-2' and content != 'import':
-                self.append(content, truncate=True, truncate_to=1)
             elif self.state == 'import':
                 self.append(content, truncate=True, truncate_to=1)
                 self.state = 'import-2'

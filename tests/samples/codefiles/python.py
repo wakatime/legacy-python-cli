@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # vim: set filetype=python
 
+from __future__ import print_statement
 
 import os, sys
 import django.forms.monstertruck

@@ -79,7 +79,7 @@ class DependenciesTestCase(utils.TestCase):
 
             heartbeat = {
                 'language': u('Python'),
-                'lines': 36,
+                'lines': 37,
                 'entity': os.path.realpath(entity),
                 'project': u(os.path.basename(os.path.realpath('.'))),
                 'time': float(now),
@@ -90,7 +90,7 @@ class DependenciesTestCase(utils.TestCase):
                 u('dependencies'): [],
                 u('language'): u('Python'),
                 u('lineno'): None,
-                u('lines'): 36,
+                u('lines'): 37,
             }
             expected_dependencies = []
 
@@ -138,7 +138,7 @@ class DependenciesTestCase(utils.TestCase):
 
             heartbeat = {
                 'language': None,
-                'lines': 36,
+                'lines': 37,
                 'dependencies': [],
                 'entity': os.path.realpath(entity),
                 'project': u(os.path.basename(os.path.realpath('.'))),
@@ -149,7 +149,7 @@ class DependenciesTestCase(utils.TestCase):
                 u('cursorpos'): None,
                 u('language'): None,
                 u('lineno'): None,
-                u('lines'): 36,
+                u('lines'): 37,
                 u('dependencies'): [],
             }
 
@@ -185,7 +185,7 @@ class DependenciesTestCase(utils.TestCase):
 
             heartbeat = {
                 'language': u('Python'),
-                'lines': 36,
+                'lines': 37,
                 'entity': os.path.realpath(entity),
                 'project': u(os.path.basename(os.path.realpath('.'))),
                 'dependencies': ANY,
@@ -197,7 +197,7 @@ class DependenciesTestCase(utils.TestCase):
                 u('dependencies'): ANY,
                 u('language'): u('Python'),
                 u('lineno'): None,
-                u('lines'): 36,
+                u('lines'): 37,
             }
             expected_dependencies = [
                 'app',
