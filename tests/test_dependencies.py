@@ -4,14 +4,16 @@
 from wakatime.main import execute
 from wakatime.packages import requests
 
+import logging
 import os
 import time
 import shutil
 import sys
+from testfixtures import log_capture
 from wakatime.compat import u
 from wakatime.exceptions import NotYetImplemented
-from wakatime.dependencies import TokenParser
-from wakatime.packages.pygments.lexers import ClassNotFound
+from wakatime.dependencies import DependencyParser, TokenParser
+from wakatime.packages.pygments.lexers import ClassNotFound, PythonLexer
 from wakatime.packages.requests.models import Response
 from wakatime.stats import get_lexer_by_name
 from . import utils
@@ -63,6 +65,25 @@ class DependenciesTestCase(utils.TestCase):
             'one.two.three',
         ]
         self.assertEquals(parser.dependencies, expected)
+
+    @log_capture()
+    def test_dependency_parser(self, logs):
+        logging.disable(logging.NOTSET)
+
+        lexer = PythonLexer
+        lexer.__class__.__name__ = 'FooClass'
+        parser = DependencyParser(None, lexer)
+
+        dependencies = parser.parse()
+
+        log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
+        self.assertEquals(log_output, '')
+
+        self.assertEquals(sys.stdout.getvalue(), '')
+        self.assertEquals(sys.stderr.getvalue(), '')
+
+        expected = []
+        self.assertEquals(dependencies, expected)
 
     def test_io_error_when_parsing_dependencies(self):
         response = Response()
