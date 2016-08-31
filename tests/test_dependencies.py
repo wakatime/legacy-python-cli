@@ -50,6 +50,20 @@ class DependenciesTestCase(utils.TestCase):
             parser.tokens
             mock_extract_tokens.assert_called_once_with()
 
+        parser = TokenParser(None)
+        parser.append('one.two.three', truncate=True, truncate_to=1)
+        parser.append('one.two.three', truncate=True, truncate_to=2)
+        parser.append('one.two.three', truncate=True, truncate_to=3)
+        parser.append('one.two.three', truncate=True, truncate_to=4)
+
+        expected = [
+            'one',
+            'one.two',
+            'one.two.three',
+            'one.two.three',
+        ]
+        self.assertEquals(parser.dependencies, expected)
+
     def test_io_error_when_parsing_dependencies(self):
         response = Response()
         response.status_code = 0

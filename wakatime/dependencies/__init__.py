@@ -68,7 +68,7 @@ class TokenParser(object):
                 pass
             try:
                 with open(self.source_file, 'r', encoding=sys.getfilesystemencoding()) as fh:
-                    return self.lexer.get_tokens_unprocessed(fh.read(512000))
+                    return self.lexer.get_tokens_unprocessed(fh.read(512000))  # pragma: nocover
             except:
                 pass
         return []
