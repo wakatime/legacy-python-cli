@@ -19,6 +19,7 @@ from wakatime.constants import (
     SUCCESS,
     MALFORMED_HEARTBEAT_ERROR,
 )
+from wakatime.packages.requests.exceptions import RequestException
 from wakatime.packages.requests.models import Response
 from . import utils
 
@@ -191,6 +192,52 @@ class MainTestCase(utils.TestCase):
             self.patched['wakatime.session_cache.SessionCache.delete'].assert_not_called()
             self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
 
+    def test_lineno_and_cursorpos(self):
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        entity = 'tests/samples/codefiles/twolinefile.txt'
+        config = 'tests/samples/configs/good_config.cfg'
+        now = u(int(time.time()))
+
+        args = ['--entity', entity, '--config', config, '--time', now, '--lineno', '3', '--cursorpos', '4', '--verbose']
+        retval = execute(args)
+
+        self.assertEquals(sys.stdout.getvalue(), '')
+        self.assertEquals(sys.stderr.getvalue(), '')
+
+        self.assertEquals(retval, API_ERROR)
+
+        self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
+        self.patched['wakatime.session_cache.SessionCache.delete'].assert_called_once_with()
+        self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
+
+        heartbeat = {
+            'language': 'Text only',
+            'lines': 2,
+            'entity': os.path.realpath(entity),
+            'project': os.path.basename(os.path.abspath('.')),
+            'cursorpos': '4',
+            'lineno': '3',
+            'branch': 'master',
+            'time': float(now),
+            'type': 'file',
+        }
+        stats = {
+            u('cursorpos'): '4',
+            u('dependencies'): [],
+            u('language'): u('Text only'),
+            u('lineno'): '3',
+            u('lines'): 2,
+        }
+
+        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(ANY, ANY, None)
+        for key, val in self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].items():
+            self.assertEquals(heartbeat[key], val)
+        self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
+        self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
+
     def test_non_hidden_filename(self):
         response = Response()
         response.status_code = 0
@@ -353,7 +400,6 @@ class MainTestCase(utils.TestCase):
             args = ['--file', entity, '--key', '123',
                     '--config', 'tests/samples/configs/paranoid.cfg', '--time', now]
 
-
             retval = execute(args)
             self.assertEquals(retval, API_ERROR)
             self.assertEquals(sys.stdout.getvalue(), '')
@@ -400,7 +446,6 @@ class MainTestCase(utils.TestCase):
             args = ['--file', entity, '--key', '123',
                     '--config', 'tests/samples/configs/paranoid.cfg', '--time', now]
 
-
             retval = execute(args)
             self.assertEquals(retval, API_ERROR)
             self.assertEquals(sys.stdout.getvalue(), '')
@@ -428,9 +473,52 @@ class MainTestCase(utils.TestCase):
             args = ['--file', entity, '--key', '123',
                     '--config', 'tests/samples/configs/paranoid.cfg', '--time', now]
 
-
             retval = execute(args)
             self.assertEquals(retval, AUTH_ERROR)
+            self.assertEquals(sys.stdout.getvalue(), '')
+            self.assertEquals(sys.stderr.getvalue(), '')
+
+            self.patched['wakatime.session_cache.SessionCache.delete'].assert_called_once_with()
+            self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
+            self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
+
+            heartbeat = {
+                'language': 'Text only',
+                'lines': 2,
+                'entity': 'HIDDEN.txt',
+                'project': os.path.basename(os.path.abspath('.')),
+                'time': float(now),
+                'type': 'file',
+            }
+            stats = {
+                u('cursorpos'): None,
+                u('dependencies'): [],
+                u('language'): u('Text only'),
+                u('lineno'): None,
+                u('lines'): 2,
+            }
+
+            self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(ANY, ANY, None)
+            for key, val in self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].items():
+                self.assertEquals(heartbeat[key], val)
+            self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
+            self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
+
+    def test_requests_exception(self):
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].side_effect = RequestException('requests exception')
+
+        with utils.TemporaryDirectory() as tempdir:
+            entity = 'tests/samples/codefiles/twolinefile.txt'
+            shutil.copy(entity, os.path.join(tempdir, 'twolinefile.txt'))
+            entity = os.path.realpath(os.path.join(tempdir, 'twolinefile.txt'))
+
+            now = u(int(time.time()))
+
+            args = ['--file', entity, '--key', '123',
+                    '--config', 'tests/samples/configs/paranoid.cfg', '--time', now]
+
+            retval = execute(args)
+            self.assertEquals(retval, API_ERROR)
             self.assertEquals(sys.stdout.getvalue(), '')
             self.assertEquals(sys.stderr.getvalue(), '')
 
@@ -685,10 +773,9 @@ class MainTestCase(utils.TestCase):
             shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
 
-            package_path = 'wakatime.packages.tzlocal.get_localzone'
             timezone = tzlocal.get_localzone()
             timezone.zone = 'tz汉语' if is_py3 else 'tz\xe6\xb1\x89\xe8\xaf\xad'
-            with utils.mock.patch(package_path) as mock_getlocalzone:
+            with utils.mock.patch('wakatime.packages.tzlocal.get_localzone') as mock_getlocalzone:
                 mock_getlocalzone.return_value = timezone
 
                 config = 'tests/samples/configs/has_everything.cfg'
@@ -705,6 +792,34 @@ class MainTestCase(utils.TestCase):
 
                 headers = self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].call_args[0][0].headers
                 self.assertEquals(headers.get('TimeZone'), u(timezone.zone).encode('utf-8') if is_py3 else timezone.zone)
+
+    def test_tzlocal_exception(self):
+        response = Response()
+        response.status_code = 201
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        with utils.TemporaryDirectory() as tempdir:
+            entity = 'tests/samples/codefiles/emptyfile.txt'
+            shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
+            entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
+
+            with utils.mock.patch('wakatime.packages.tzlocal.get_localzone') as mock_getlocalzone:
+                mock_getlocalzone.side_effect = Exception('tzlocal exception')
+
+                config = 'tests/samples/configs/has_everything.cfg'
+                args = ['--file', entity, '--config', config, '--timeout', '15']
+                retval = execute(args)
+                self.assertEquals(retval, SUCCESS)
+
+                self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
+                self.patched['wakatime.session_cache.SessionCache.delete'].assert_not_called()
+                self.patched['wakatime.session_cache.SessionCache.save'].assert_called_once_with(ANY)
+
+                self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
+                self.patched['wakatime.offlinequeue.Queue.pop'].assert_called_once_with()
+
+                headers = self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].call_args[0][0].headers
+                self.assertEquals(headers.get('TimeZone'), None)
 
     def test_timezone_header(self):
         response = Response()
