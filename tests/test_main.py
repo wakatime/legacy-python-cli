@@ -306,6 +306,38 @@ class MainTestCase(utils.TestCase):
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
             self.patched['wakatime.session_cache.SessionCache.get'].assert_not_called()
 
+    @log_capture()
+    def test_exclude_file(self, logs):
+        logging.disable(logging.NOTSET)
+
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        with utils.TemporaryDirectory() as tempdir:
+            entity = 'tests/samples/codefiles/emptyfile.txt'
+            shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
+            entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
+
+            config = 'tests/samples/configs/good_config.cfg'
+            args = ['--file', entity, '--config', config, '--exclude', 'empty', '--verbose']
+            retval = execute(args)
+            self.assertEquals(retval, SUCCESS)
+
+            self.assertEquals(sys.stdout.getvalue(), '')
+            self.assertEquals(sys.stderr.getvalue(), '')
+
+            log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
+            expected = 'WakaTime DEBUG Skipping because matches exclude pattern: empty'
+            self.assertEquals(log_output, expected)
+
+            self.patched['wakatime.session_cache.SessionCache.get'].assert_not_called()
+            self.patched['wakatime.session_cache.SessionCache.delete'].assert_not_called()
+            self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
+
+            self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
+            self.patched['wakatime.offlinequeue.Queue.pop'].assert_called_once_with()
+
     def test_500_response(self):
         response = Response()
         response.status_code = 500
