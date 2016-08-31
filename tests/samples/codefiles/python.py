@@ -3,7 +3,7 @@
 
 
 import os, sys
-import django
+import django.forms.monstertruck
 from app import *
 from flask import session
 import simplejson as json

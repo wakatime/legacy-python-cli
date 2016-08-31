@@ -49,9 +49,7 @@ class PythonParser(TokenParser):
                 self._process_import(token, content)
 
     def _process_operator(self, token, content):
-        if self.state is not None:
-            if content == '.':
-                self.nonpackage = True
+        pass
 
     def _process_punctuation(self, token, content):
         if content == '(':
