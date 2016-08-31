@@ -13,6 +13,10 @@ import tempfile
 import time
 from testfixtures import log_capture
 from wakatime.compat import u
+from wakatime.constants import (
+    AUTH_ERROR,
+    SUCCESS,
+)
 from wakatime.packages.requests.models import Response
 from . import utils
 try:
@@ -212,7 +216,63 @@ class OfflineQueueTestCase(utils.TestCase):
                 response = CustomResponse()
                 self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
+                retval = execute(args)
+                self.assertEquals(retval, AUTH_ERROR)
+
+                # offline queue should be empty
+                queue = Queue()
+                saved_heartbeat = queue.pop()
+                self.assertEquals(sys.stdout.getvalue(), '')
+                self.assertEquals(sys.stderr.getvalue(), '')
+                self.assertEquals(os.path.realpath(entity2), saved_heartbeat['entity'])
+
+    def test_500_error_when_sending_offline_heartbeats(self):
+        with tempfile.NamedTemporaryFile() as fh:
+            with utils.mock.patch('wakatime.offlinequeue.Queue.get_db_file') as mock_db_file:
+                mock_db_file.return_value = fh.name
+
+                response = Response()
+                response.status_code = 500
+                self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+                config = 'tests/samples/configs/good_config.cfg'
+
+                now1 = u(int(time.time()))
+                entity1 = 'tests/samples/codefiles/emptyfile.txt'
+                project1 = 'proj1'
+
+                args = ['--file', entity1, '--config', config, '--time', now1, '--project', project1]
                 execute(args)
+
+                now2 = u(int(time.time()))
+                entity2 = 'tests/samples/codefiles/twolinefile.txt'
+                project2 = 'proj2'
+
+                args = ['--file', entity2, '--config', config, '--time', now2, '--project', project2]
+                execute(args)
+
+                # send heartbeats from offline queue after 201 response
+                now3 = u(int(time.time()))
+                entity3 = 'tests/samples/codefiles/python.py'
+                project3 = 'proj3'
+                args = ['--file', entity3, '--config', config, '--time', now3, '--project', project3]
+
+                class CustomResponse(Response):
+                    count = 0
+                    @property
+                    def status_code(self):
+                        if self.count > 2:
+                            return 500
+                        self.count += 1
+                        return 201
+                    @status_code.setter
+                    def status_code(self, value):
+                        pass
+                response = CustomResponse()
+                self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+                retval = execute(args)
+                self.assertEquals(retval, SUCCESS)
 
                 # offline queue should be empty
                 queue = Queue()
