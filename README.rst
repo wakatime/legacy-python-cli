@@ -125,4 +125,12 @@ Before contributing a pull request, make sure tests pass::
     pip install tox
     tox
 
+The above will run tests on all Python versions available on your machine.
+To just run tests on a single Python version::
+
+    virtualenv venv
+    . venv/bin/activate
+    pip install -r dev-requirements.txt
+    nosetests
+
 Many thanks to all `contributors <https://github.com/wakatime/wakatime/blob/master/AUTHORS>`_!
