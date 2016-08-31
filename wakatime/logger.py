@@ -13,7 +13,7 @@ import logging
 import os
 import traceback
 
-from .compat import basestring, u
+from .compat import u
 from .packages.requests.packages import urllib3
 try:
     from collections import OrderedDict  # pragma: nocover
@@ -27,16 +27,19 @@ except (ImportError, SyntaxError):  # pragma: nocover
 
 class CustomEncoder(json.JSONEncoder):
 
+    def encode(self, obj):
+        try:
+            return super(CustomEncoder, self).encode(obj)
+        except UnicodeDecodeError:
+            obj = u(obj)
+            return super(CustomEncoder, self).encode(obj)
+
     def default(self, obj):
-        if isinstance(obj, basestring):
+        try:
+            return super(CustomEncoder, self).default(obj)
+        except TypeError:
             obj = u(obj)
-            return json.dumps(obj)
-        try:  # pragma: nocover
-            encoded = super(CustomEncoder, self).default(obj)
-        except UnicodeDecodeError:  # pragma: nocover
-            obj = u(obj)
-            encoded = super(CustomEncoder, self).default(obj)
-        return encoded
+            return super(CustomEncoder, self).default(obj)
 
 
 class JsonFormatter(logging.Formatter):
