@@ -265,6 +265,52 @@ class DependenciesTestCase(utils.TestCase):
             self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
+    def test_grunt_dependencies_detected(self):
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        with utils.TemporaryDirectory() as tempdir:
+            entity = 'tests/samples/codefiles/Gruntfile'
+            shutil.copy(entity, os.path.join(tempdir, 'Gruntfile'))
+            entity = os.path.realpath(os.path.join(tempdir, 'Gruntfile'))
+
+            now = u(int(time.time()))
+            config = 'tests/samples/configs/good_config.cfg'
+
+            args = ['--file', entity, '--config', config, '--time', now]
+
+            retval = execute(args)
+            self.assertEquals(sys.stdout.getvalue(), '')
+            self.assertEquals(sys.stderr.getvalue(), '')
+            self.assertEquals(retval, 102)
+
+            heartbeat = {
+                'language': None,
+                'lines': 23,
+                'entity': os.path.realpath(entity),
+                'project': u(os.path.basename(os.path.realpath('.'))),
+                'dependencies': ANY,
+                'time': float(now),
+                'type': 'file',
+            }
+            stats = {
+                u('cursorpos'): None,
+                u('dependencies'): ANY,
+                u('language'): None,
+                u('lineno'): None,
+                u('lines'): 23,
+            }
+            expected_dependencies = ['grunt']
+
+            self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(ANY, ANY, None)
+            for key, val in self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].items():
+                self.assertEquals(heartbeat[key], val)
+            for dep in expected_dependencies:
+                self.assertIn(dep, self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['dependencies'])
+            self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
+            self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
+
     def test_java_dependencies_detected(self):
         response = Response()
         response.status_code = 0
