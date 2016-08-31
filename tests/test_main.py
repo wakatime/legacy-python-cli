@@ -511,6 +511,8 @@ class MainTestCase(utils.TestCase):
         response = Response()
         response.status_code = 500
         response._content = 'fake content'
+        if is_py3:
+            response._content = 'fake content'.encode('utf8')
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
         with utils.TemporaryDirectory() as tempdir:
@@ -530,6 +532,8 @@ class MainTestCase(utils.TestCase):
 
             log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
             expected = "WakaTime ERROR {'response_code': 500, 'response_content': u'fake content'}"
+            if is_py3:
+                expected = "WakaTime ERROR {'response_code': 500, 'response_content': 'fake content'}"
             self.assertEquals(expected, log_output)
 
             self.patched['wakatime.session_cache.SessionCache.delete'].assert_called_once_with()
@@ -562,12 +566,16 @@ class MainTestCase(utils.TestCase):
 
             log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
             expected = 'ImportError: No module named special'
+            if is_py3:
+                expected = "ImportError: No module named 'wakatime.dependencies.special'"
             self.assertIn(expected, log_output)
             expected = 'WakaTime DEBUG Sending heartbeat to api at https://api.wakatime.com/api/v1/heartbeats'
             self.assertIn(expected, log_output)
             expected = 'WakaTime DEBUG Traceback'
             self.assertIn(expected, log_output)
             expected = "RequestException': u'requests exception'"
+            if is_py3:
+                expected = "RequestException': 'requests exception'"
             self.assertIn(expected, log_output)
 
             self.patched['wakatime.session_cache.SessionCache.delete'].assert_called_once_with()
@@ -619,6 +627,8 @@ class MainTestCase(utils.TestCase):
 
             log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
             expected = "WakaTime ERROR {'RequestException': u'requests exception'}"
+            if is_py3:
+                expected = "WakaTime ERROR {'RequestException': 'requests exception'}"
             self.assertEquals(expected, log_output)
 
             self.patched['wakatime.session_cache.SessionCache.delete'].assert_called_once_with()
