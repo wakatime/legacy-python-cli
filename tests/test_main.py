@@ -428,7 +428,10 @@ class MainTestCase(utils.TestCase):
             self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
-    def test_missing_entity_file(self):
+    @log_capture()
+    def test_missing_entity_file(self, logs):
+        logging.disable(logging.NOTSET)
+
         response = Response()
         response.status_code = 201
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
@@ -436,11 +439,15 @@ class MainTestCase(utils.TestCase):
         entity = 'tests/samples/codefiles/missingfile.txt'
 
         config = 'tests/samples/configs/good_config.cfg'
-        args = ['--file', entity, '--config', config]
+        args = ['--file', entity, '--config', config, '--verbose']
         retval = execute(args)
         self.assertEquals(retval, SUCCESS)
         self.assertEquals(sys.stdout.getvalue(), '')
         self.assertEquals(sys.stderr.getvalue(), '')
+
+        log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
+        expected = 'WakaTime DEBUG File does not exist; ignoring this heartbeat.'
+        self.assertEquals(log_output, expected)
 
         self.patched['wakatime.session_cache.SessionCache.get'].assert_not_called()
         self.patched['wakatime.session_cache.SessionCache.delete'].assert_not_called()
@@ -448,6 +455,35 @@ class MainTestCase(utils.TestCase):
 
         self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_called_once_with()
+
+    @log_capture()
+    def test_missing_entity_argument(self, logs):
+        logging.disable(logging.NOTSET)
+
+        response = Response()
+        response.status_code = 201
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        config = 'tests/samples/configs/good_config.cfg'
+        args = ['--config', config]
+
+        with self.assertRaises(SystemExit):
+            execute(args)
+
+        self.assertEquals(sys.stdout.getvalue(), '')
+        expected = 'error: argument --entity is required'
+        self.assertIn(expected, sys.stderr.getvalue())
+
+        log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
+        expected = ''
+        self.assertEquals(log_output, expected)
+
+        self.patched['wakatime.session_cache.SessionCache.get'].assert_not_called()
+        self.patched['wakatime.session_cache.SessionCache.delete'].assert_not_called()
+        self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
+
+        self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
+        self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
     def test_proxy_argument(self):
         response = Response()
