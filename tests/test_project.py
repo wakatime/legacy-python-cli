@@ -204,12 +204,15 @@ class ProjectTestCase(utils.TestCase):
         with utils.mock.patch('wakatime.projects.git.Git.process') as mock_git:
             mock_git.return_value = False
 
-            with utils.mock.patch('wakatime.projects.subversion.Popen.communicate') as mock_popen:
-                stdout = open('tests/samples/output/svn').read()
-                stderr = ''
-                mock_popen.return_value = (stdout, stderr)
+            with utils.mock.patch('wakatime.projects.subversion.Subversion._has_xcode_tools') as mock_has_xcode:
+                mock_has_xcode.return_value = True
 
-                execute(args)
+                with utils.mock.patch('wakatime.projects.subversion.Popen.communicate') as mock_popen:
+                    stdout = open('tests/samples/output/svn').read()
+                    stderr = ''
+                    mock_popen.return_value = utils.DynamicIterable((stdout, stderr), max_calls=1)
+
+                    execute(args)
 
         self.assertEquals('svn', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
 
@@ -227,17 +230,46 @@ class ProjectTestCase(utils.TestCase):
 
             args = ['--file', entity, '--config', config, '--time', now]
 
-            with utils.mock.patch('wakatime.projects.subversion.Popen') as mock_popen:
-                mock_popen.side_effect = OSError('')
+            with utils.mock.patch('wakatime.projects.subversion.Subversion._has_xcode_tools') as mock_has_xcode:
+                mock_has_xcode.return_value = True
 
-                with utils.mock.patch('wakatime.projects.subversion.Popen.communicate') as mock_communicate:
-                    mock_communicate.side_effect = OSError('')
+                with utils.mock.patch('wakatime.projects.subversion.Popen') as mock_popen:
+                    mock_popen.side_effect = OSError('')
+
+                    with utils.mock.patch('wakatime.projects.subversion.Popen.communicate') as mock_communicate:
+                        mock_communicate.side_effect = OSError('')
+
+                        execute(args)
+
+            self.assertNotIn('project', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0])
+
+    def test_svn_on_mac_without_xcode_tools_installed(self):
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        now = u(int(time.time()))
+        entity = 'tests/samples/projects/svn/afolder/emptyfile.txt'
+        config = 'tests/samples/configs/good_config.cfg'
+
+        args = ['--file', entity, '--config', config, '--time', now]
+
+        with utils.mock.patch('wakatime.projects.git.Git.process') as mock_git:
+            mock_git.return_value = False
+
+            with utils.mock.patch('wakatime.projects.subversion.platform.system') as mock_system:
+                mock_system.return_value = 'Darwin'
+
+                with utils.mock.patch('wakatime.projects.subversion.Popen.communicate') as mock_popen:
+                    stdout = open('tests/samples/output/svn').read()
+                    stderr = ''
+                    mock_popen.return_value = utils.DynamicIterable((stdout, stderr), raise_on_calls=[OSError('')])
 
                     execute(args)
 
             self.assertNotIn('project', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0])
 
-    def test_svn_on_mac(self):
+    def test_svn_on_mac_with_xcode_tools_installed(self):
         response = Response()
         response.status_code = 0
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
@@ -255,11 +287,23 @@ class ProjectTestCase(utils.TestCase):
                 mock_system.return_value = 'Darwin'
 
                 with utils.mock.patch('wakatime.projects.subversion.Popen') as mock_popen:
-                    mock_popen.side_effect = OSError('')
+                    stdout = open('tests/samples/output/svn').read()
+                    stderr = ''
+                    class Dynamic(object):
+                        def __init__(self):
+                            self.called = 0
+                        def communicate(self):
+                            self.called += 1
+                            if self.called == 2:
+                                return (stdout, stderr)
+                        def wait(self):
+                            if self.called == 1:
+                                return 0
+                    mock_popen.return_value = Dynamic()
 
                     execute(args)
 
-            self.assertNotIn('project', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0])
+        self.assertEquals('svn', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
 
     def test_mercurial_project_detected(self):
         response = Response()

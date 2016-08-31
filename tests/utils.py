@@ -73,3 +73,28 @@ except ImportError:
 
         def __exit__(self, exc_type, exc_value, traceback):
             shutil.rmtree(self.name)
+
+
+class DynamicIterable(object):
+    def __init__(self, data, max_calls=None, raise_on_calls=None):
+        self.called = 0
+        self.max_calls = max_calls
+        self.raise_on_calls = raise_on_calls
+        self.index = 0
+        self.data = data
+    def __iter__(self):
+        return self
+    def __next__(self):
+        if self.raise_on_calls and self.called < len(self.raise_on_calls) and self.raise_on_calls[self.called]:
+            raise self.raise_on_calls[self.called]
+        if self.index >= len(self.data):
+            self.called += 1
+            self.index = 0
+            raise StopIteration
+        val = self.data[self.index]
+        self.index += 1
+        if not self.max_calls or self.called <= self.max_calls:
+            return val
+        return None
+    def next(self):
+        return self.__next__()
