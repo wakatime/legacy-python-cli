@@ -259,7 +259,7 @@ class OfflineQueueTestCase(utils.TestCase):
             with utils.mock.patch('wakatime.offlinequeue.Queue.get_db_file') as mock_db_file:
                 mock_db_file.return_value = fh.name
 
-                exception_msg = u("Oops, requests raised an exception. You're move.")
+                exception_msg = u("Oops, requests raised an exception. This is a test.")
                 self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].side_effect = AttributeError(exception_msg)
 
                 now = u(int(time.time()))

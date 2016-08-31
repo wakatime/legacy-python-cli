@@ -616,7 +616,7 @@ class MainTestCase(utils.TestCase):
             shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
 
-            package_path = 'wakatime.packages.py3.tzlocal.get_localzone' if is_py3 else 'wakatime.packages.py2.tzlocal.get_localzone'
+            package_path = 'wakatime.packages.tzlocal.get_localzone'
             timezone = tzlocal.get_localzone()
             timezone.zone = 'tz汉语' if is_py3 else 'tz\xe6\xb1\x89\xe8\xaf\xad'
             with utils.mock.patch(package_path) as mock_getlocalzone:
