@@ -202,7 +202,7 @@ class OfflineQueueTestCase(utils.TestCase):
                     count = 0
                     @property
                     def status_code(self):
-                        if self.count > 0:
+                        if self.count > 2:
                             return 401
                         self.count += 1
                         return 201
@@ -219,7 +219,7 @@ class OfflineQueueTestCase(utils.TestCase):
                 saved_heartbeat = queue.pop()
                 self.assertEquals(sys.stdout.getvalue(), '')
                 self.assertEquals(sys.stderr.getvalue(), '')
-                self.assertEquals(os.path.realpath(entity1), saved_heartbeat['entity'])
+                self.assertEquals(os.path.realpath(entity2), saved_heartbeat['entity'])
 
     def test_empty_project_can_be_saved(self):
         with tempfile.NamedTemporaryFile() as fh:
