@@ -867,8 +867,12 @@ class MainTestCase(utils.TestCase):
             shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
 
-            timezone = tzlocal.get_localzone()
-            timezone.zone = 'tz汉语' if is_py3 else 'tz\xe6\xb1\x89\xe8\xaf\xad'
+            class TZ(object):
+                @property
+                def zone(self):
+                    return 'tz汉语' if is_py3 else 'tz\xe6\xb1\x89\xe8\xaf\xad'
+            timezone = TZ()
+
             with utils.mock.patch('wakatime.packages.tzlocal.get_localzone') as mock_getlocalzone:
                 mock_getlocalzone.return_value = timezone
 
@@ -886,6 +890,40 @@ class MainTestCase(utils.TestCase):
 
                 headers = self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].call_args[0][0].headers
                 self.assertEquals(headers.get('TimeZone'), u(timezone.zone).encode('utf-8') if is_py3 else timezone.zone)
+
+    def test_timezone_with_invalid_encoding(self):
+        response = Response()
+        response.status_code = 201
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        with utils.TemporaryDirectory() as tempdir:
+            entity = 'tests/samples/codefiles/emptyfile.txt'
+            shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
+            entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
+
+            class TZ(object):
+                @property
+                def zone(self):
+                    return bytes('\xab', 'utf-16') if is_py3 else '\xab'
+            timezone = TZ()
+
+            with self.assertRaises(UnicodeDecodeError):
+                timezone.zone.decode('utf8')
+
+            with utils.mock.patch('wakatime.packages.tzlocal.get_localzone') as mock_getlocalzone:
+                mock_getlocalzone.return_value = timezone
+
+                config = 'tests/samples/configs/has_everything.cfg'
+                args = ['--file', entity, '--config', config, '--timeout', '15']
+                retval = execute(args)
+                self.assertEquals(retval, SUCCESS)
+
+                self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
+                self.patched['wakatime.session_cache.SessionCache.delete'].assert_not_called()
+                self.patched['wakatime.session_cache.SessionCache.save'].assert_called_once_with(ANY)
+
+                self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
+                self.patched['wakatime.offlinequeue.Queue.pop'].assert_called_once_with()
 
     def test_tzlocal_exception(self):
         response = Response()

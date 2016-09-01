@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
 
+from wakatime.compat import is_py3, u
 from wakatime.main import execute
 from wakatime.packages import requests
+from wakatime.packages.requests.models import Response
 
 import logging
 import os
@@ -10,8 +12,6 @@ import tempfile
 import time
 import sys
 from testfixtures import log_capture
-from wakatime.compat import u
-from wakatime.packages.requests.models import Response
 from . import utils
 
 
@@ -139,9 +139,9 @@ class LoggingTestCase(utils.TestCase):
             self.assertEquals(sys.stdout.getvalue(), '')
             self.assertEquals(sys.stderr.getvalue(), '')
 
-            output = u("\n").join([u(' ').join(x) for x in logs.actual()])
-            self.assertIn(u('WakaTime DEBUG Traceback (most recent call last):'), output)
-            self.assertIn(u('Exception: FooBar'), output)
+            log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
+            self.assertIn(u('WakaTime DEBUG Traceback (most recent call last):'), log_output)
+            self.assertIn(u('Exception: FooBar'), log_output)
 
     @log_capture()
     def test_exception_traceback_not_logged_normally(self, logs):
@@ -164,5 +164,23 @@ class LoggingTestCase(utils.TestCase):
             self.assertEquals(sys.stdout.getvalue(), '')
             self.assertEquals(sys.stderr.getvalue(), '')
 
-            output = u("\n").join([u(' ').join(x) for x in logs.actual()])
-            self.assertEquals(u(''), output)
+            log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
+            self.assertEquals(u(''), log_output)
+
+    @log_capture()
+    def test_can_log_invalid_utf8(self, logs):
+        logging.disable(logging.NOTSET)
+
+        data = bytes('\xab', 'utf-16') if is_py3 else '\xab'
+
+        with self.assertRaises(UnicodeDecodeError):
+            data.decode('utf8')
+
+        logger = logging.getLogger('WakaTime')
+        logger.error(data)
+
+        found = False
+        for msg in list(logs.actual())[0]:
+            if u(msg) == u(data):
+                found = True
+        self.assertTrue(found)

@@ -12,7 +12,6 @@
 import logging
 import re
 import sys
-import traceback
 
 from ..compat import u, open, import_module
 from ..exceptions import NotYetImplemented
@@ -120,7 +119,7 @@ class DependencyParser(object):
             except AttributeError:
                 log.debug('Module {0} is missing class {1}'.format(module.__name__, class_name))
         except ImportError:
-            log.debug(traceback.format_exc())
+            log.traceback(logging.DEBUG)
 
     def parse(self):
         if self.parser:
