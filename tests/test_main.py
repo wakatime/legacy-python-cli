@@ -736,7 +736,7 @@ class MainTestCase(utils.TestCase):
             entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
             now = u(int(time.time()))
 
-            args = ['--file', entity, '--key', '123', '--write',
+            args = ['--file', entity, '--key', '123', '--write', '--verbose',
                     '--config', 'tests/samples/configs/good_config.cfg', '--time', now]
 
             retval = execute(args)
