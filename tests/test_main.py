@@ -725,6 +725,52 @@ class MainTestCase(utils.TestCase):
 
             self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_called_once_with(ANY, cert=None, proxies={'https': 'localhost:1234'}, stream=False, timeout=60, verify=True)
 
+    def test_write_argument(self):
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        with utils.TemporaryDirectory() as tempdir:
+            entity = 'tests/samples/codefiles/emptyfile.txt'
+            shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
+            entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
+            now = u(int(time.time()))
+
+            args = ['--file', entity, '--key', '123', '--write',
+                    '--config', 'tests/samples/configs/good_config.cfg', '--time', now]
+
+            retval = execute(args)
+            self.assertEquals(retval, API_ERROR)
+            self.assertEquals(sys.stdout.getvalue(), '')
+            self.assertEquals(sys.stderr.getvalue(), '')
+
+            self.patched['wakatime.session_cache.SessionCache.delete'].assert_called_once_with()
+            self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
+            self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
+
+            heartbeat = {
+                'language': 'Text only',
+                'lines': 0,
+                'entity': entity,
+                'project': os.path.basename(os.path.abspath('.')),
+                'time': float(now),
+                'type': 'file',
+                'is_write': True,
+            }
+            stats = {
+                u('cursorpos'): None,
+                u('dependencies'): [],
+                u('language'): u('Text only'),
+                u('lineno'): None,
+                u('lines'): 0,
+            }
+
+            self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(ANY, ANY, None)
+            for key, val in self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].items():
+                self.assertEquals(heartbeat[key], val)
+            self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
+            self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
+
     def test_entity_type_domain(self):
         response = Response()
         response.status_code = 0
