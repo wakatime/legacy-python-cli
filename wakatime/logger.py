@@ -61,9 +61,6 @@ class JsonFormatter(logging.Formatter):
             lvl = logger.getEffectiveLevel()
         logger.log(lvl, traceback.format_exc())
 
-    def formatException(self, exc_info):
-        raise RuntimeError('Use traceback method instead.')
-
 
 def set_log_level(logger, args):
     level = logging.WARN
