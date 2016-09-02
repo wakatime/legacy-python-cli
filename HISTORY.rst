@@ -3,6 +3,16 @@ History
 -------
 
 
+6.0.8 (2016-09-02)
+++++++++++++++++++
+
+- Prevent encoding errors when logging files with special characters.
+- Upgrade pytz to v2016.6.1.
+- Upgrade requests to v2.11.1.
+- Upgrade simplejson to v3.8.2.
+- Upgrade tzlocal to v1.2.2.
+
+
 6.0.7 (2016-07-06)
 ++++++++++++++++++
 
