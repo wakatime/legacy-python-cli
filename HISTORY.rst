@@ -3,6 +3,13 @@ History
 -------
 
 
+6.0.9 (2016-09-13)
+++++++++++++++++++
+
+- Force file path to use system path separator.
+- Handle exception from Python system library read permission problem.
+
+
 6.0.8 (2016-09-02)
 ++++++++++++++++++
 
