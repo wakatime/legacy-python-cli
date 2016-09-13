@@ -478,7 +478,7 @@ def format_file_path(filepath):
         filepath = os.path.realpath(os.path.abspath(filepath))
         filepath = re.sub(r'[/\\]', os.path.sep, filepath)
     except:
-        pass
+        pass  # pragma: nocover
     return filepath
 
 
