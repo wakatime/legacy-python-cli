@@ -3,6 +3,13 @@ History
 -------
 
 
+6.1.0 (unreleased)
+++++++++++++++++++
+
+- Exit with status code 104 when api key is missing or invalid. Exit with
+  status code 103 when config file missing or invalid.
+
+
 6.0.9 (2016-09-13)
 ++++++++++++++++++
 
