@@ -3,7 +3,7 @@ History
 -------
 
 
-6.1.0 (unreleased)
+6.1.0 (2016-10-11)
 ++++++++++++++++++
 
 - Exit with status code 104 when api key is missing or invalid. Exit with
