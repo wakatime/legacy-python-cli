@@ -86,7 +86,8 @@ def parseConfigFile(configFile=None):
                 print(traceback.format_exc())
                 return None
     except IOError:
-        print(u('Error: Could not read from config file {0}').format(u(configFile)))
+        sys.stderr.write(u("Error: Could not read from config file {0}\n").format(u(configFile)))
+        raise SystemExit(CONFIG_FILE_PARSE_ERROR)
     return configs
 
 
@@ -197,7 +198,10 @@ def parseArguments():
         if default_key:
             args.key = default_key
         else:
-            parser.error('Missing api key')
+            try:
+                parser.error('Missing api key')
+            except SystemExit:
+                raise SystemExit(AUTH_ERROR)
     if not args.entity:
         if args.file:
             args.entity = args.file

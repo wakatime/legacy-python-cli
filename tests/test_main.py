@@ -48,8 +48,10 @@ class MainTestCase(utils.TestCase):
 
     def test_help_contents(self):
         args = ['--help']
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(SystemExit) as e:
             execute(args)
+
+        self.assertEquals(int(str(e.exception)), 0)
         expected_stdout = open('tests/samples/output/test_help_contents').read()
         self.assertEquals(sys.stdout.getvalue(), expected_stdout)
         self.assertEquals(sys.stderr.getvalue(), '')
@@ -98,10 +100,12 @@ class MainTestCase(utils.TestCase):
                 config = os.path.join(os.path.expanduser('~'), '.wakatime.cfg')
                 args = ['--file', entity]
 
-                with self.assertRaises(SystemExit):
+                with self.assertRaises(SystemExit) as e:
                     execute(args)
-                expected_stdout = u("Error: Could not read from config file {0}\n").format(u(config))
-                expected_stderr = open('tests/samples/output/test_missing_config_file').read()
+
+                self.assertEquals(int(str(e.exception)), CONFIG_FILE_PARSE_ERROR)
+                expected_stdout = u('')
+                expected_stderr = u("Error: Could not read from config file {0}\n").format(u(config))
                 self.assertEquals(sys.stdout.getvalue(), expected_stdout)
                 self.assertEquals(sys.stderr.getvalue(), expected_stderr)
                 self.patched['wakatime.session_cache.SessionCache.get'].assert_not_called()
@@ -115,10 +119,12 @@ class MainTestCase(utils.TestCase):
             entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
 
             args = ['--file', entity, '--config', config]
-            with self.assertRaises(SystemExit):
+            with self.assertRaises(SystemExit) as e:
                 execute(args)
-            expected_stdout = u("Error: Could not read from config file foo\n")
-            expected_stderr = open('tests/samples/output/test_missing_config_file').read()
+
+            self.assertEquals(int(str(e.exception)), CONFIG_FILE_PARSE_ERROR)
+            expected_stdout = u('')
+            expected_stderr = u("Error: Could not read from config file foo\n")
             self.assertEquals(sys.stdout.getvalue(), expected_stdout)
             self.assertEquals(sys.stderr.getvalue(), expected_stderr)
 
@@ -343,8 +349,10 @@ class MainTestCase(utils.TestCase):
             config = 'tests/samples/configs/good_config.cfg'
             args = ['--file', entity, '--key', '123', '--config', config, '--timeout', 'abc']
 
-            with self.assertRaises(SystemExit):
+            with self.assertRaises(SystemExit) as e:
                 execute(args)
+
+            self.assertEquals(int(str(e.exception)), 2)
             self.assertEquals(sys.stdout.getvalue(), '')
             expected_stderr = open('tests/samples/output/main_test_timeout_passed_via_command_line').read()
             self.assertEquals(sys.stderr.getvalue(), expected_stderr)
@@ -681,11 +689,42 @@ class MainTestCase(utils.TestCase):
         config = 'tests/samples/configs/good_config.cfg'
         args = ['--config', config]
 
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(SystemExit) as e:
             execute(args)
 
+        self.assertEquals(int(str(e.exception)), 2)
         self.assertEquals(sys.stdout.getvalue(), '')
         expected = 'error: argument --entity is required'
+        self.assertIn(expected, sys.stderr.getvalue())
+
+        log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
+        expected = ''
+        self.assertEquals(log_output, expected)
+
+        self.patched['wakatime.session_cache.SessionCache.get'].assert_not_called()
+        self.patched['wakatime.session_cache.SessionCache.delete'].assert_not_called()
+        self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
+
+        self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
+        self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
+
+    @log_capture()
+    def test_missing_api_key(self, logs):
+        logging.disable(logging.NOTSET)
+
+        response = Response()
+        response.status_code = 201
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        config = 'tests/samples/configs/missing_api_key.cfg'
+        args = ['--config', config]
+
+        with self.assertRaises(SystemExit) as e:
+            execute(args)
+
+        self.assertEquals(int(str(e.exception)), AUTH_ERROR)
+        self.assertEquals(sys.stdout.getvalue(), '')
+        expected = 'error: Missing api key'
         self.assertIn(expected, sys.stderr.getvalue())
 
         log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
