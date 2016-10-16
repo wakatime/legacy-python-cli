@@ -85,7 +85,60 @@ class DependenciesTestCase(utils.TestCase):
         expected = []
         self.assertEquals(dependencies, expected)
 
-    def test_io_error_when_parsing_dependencies(self):
+    @log_capture()
+    def test_missing_dependency_parser_in_debug_mode(self, logs):
+        logging.disable(logging.NOTSET)
+
+        # turn on debug mode
+        log = logging.getLogger('WakaTime')
+        log.setLevel(logging.DEBUG)
+
+        lexer = PythonLexer
+        lexer.__class__.__name__ = 'FooClass'
+        parser = DependencyParser(None, lexer)
+
+        # parse dependencies
+        dependencies = parser.parse()
+
+        log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
+        expected = 'WakaTime DEBUG Parsing dependencies not supported for python.FooClass'
+        self.assertEquals(log_output, expected)
+
+        self.assertEquals(sys.stdout.getvalue(), '')
+        self.assertEquals(sys.stderr.getvalue(), '')
+
+        expected = []
+        self.assertEquals(dependencies, expected)
+
+    @log_capture()
+    def test_missing_dependency_parser_importerror_in_debug_mode(self, logs):
+        logging.disable(logging.NOTSET)
+
+        # turn on debug mode
+        log = logging.getLogger('WakaTime')
+        log.setLevel(logging.DEBUG)
+
+        with utils.mock.patch('wakatime.dependencies.import_module') as mock_import:
+            mock_import.side_effect = ImportError('foo')
+
+            lexer = PythonLexer
+            lexer.__class__.__name__ = 'FooClass'
+            parser = DependencyParser(None, lexer)
+
+            # parse dependencies
+            dependencies = parser.parse()
+
+        log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
+        expected = 'WakaTime DEBUG Parsing dependencies not supported for python.FooClass'
+        self.assertEquals(log_output, expected)
+
+        self.assertEquals(sys.stdout.getvalue(), '')
+        self.assertEquals(sys.stderr.getvalue(), '')
+
+        expected = []
+        self.assertEquals(dependencies, expected)
+
+    def test_io_error_suppressed_when_parsing_dependencies(self):
         response = Response()
         response.status_code = 0
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
@@ -137,11 +190,11 @@ class DependenciesTestCase(utils.TestCase):
             self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
-    def test_classnotfound_error_when_passing_none_to_pygments(self):
+    def test_classnotfound_error_raised_when_passing_none_to_pygments(self):
         with self.assertRaises(ClassNotFound):
             get_lexer_by_name(None)
 
-    def test_classnotfound_error_when_parsing_dependencies(self):
+    def test_classnotfound_error_suppressed_when_parsing_dependencies(self):
         response = Response()
         response.status_code = 0
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response

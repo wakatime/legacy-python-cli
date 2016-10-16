@@ -577,13 +577,9 @@ class MainTestCase(utils.TestCase):
             self.assertEquals(sys.stderr.getvalue(), '')
 
             log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
-            expected = 'ImportError: No module named special'
-            if is_py3:
-                expected = "ImportError: No module named 'wakatime.dependencies.special'"
+            expected = 'Parsing dependencies not supported for special.TextParser'
             self.assertIn(expected, log_output)
             expected = 'WakaTime DEBUG Sending heartbeat to api at https://api.wakatime.com/api/v1/heartbeats'
-            self.assertIn(expected, log_output)
-            expected = 'WakaTime DEBUG Traceback'
             self.assertIn(expected, log_output)
             expected = "RequestException': u'requests exception'"
             if is_py3:
