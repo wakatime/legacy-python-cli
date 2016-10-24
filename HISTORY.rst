@@ -3,6 +3,13 @@ History
 -------
 
 
+6.2.0 (2016-10-24)
+++++++++++++++++++
+
+- New WAKATIME_HOME env variable for setting path to config and log files. #67
+- Improve debug warning message from unsupported dependency parsers. #65
+
+
 6.1.0 (2016-10-11)
 ++++++++++++++++++
 
