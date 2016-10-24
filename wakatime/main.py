@@ -74,6 +74,12 @@ def parseConfigFile(configFile=None):
     at ~/.wakatime.cfg.
     """
 
+    # get config file location from ENV
+    home = os.environ.get('WAKATIME_HOME')
+    if not configFile and home:
+        configFile = os.path.join(os.path.expanduser(home), '.wakatime.cfg')
+
+    # use default config file location
     if not configFile:
         configFile = os.path.join(os.path.expanduser('~'), '.wakatime.cfg')
 
@@ -244,6 +250,9 @@ def parseArguments():
         args.verbose = configs.getboolean('settings', 'debug')
     if not args.logfile and configs.has_option('settings', 'logfile'):
         args.logfile = configs.get('settings', 'logfile')
+    if not args.logfile and os.environ.get('WAKATIME_HOME'):
+        home = os.environ.get('WAKATIME_HOME')
+        args.logfile = os.path.join(os.path.expanduser(home), '.wakatime.log')
     if not args.api_url and configs.has_option('settings', 'api_url'):
         args.api_url = configs.get('settings', 'api_url')
     if not args.timeout and configs.has_option('settings', 'timeout'):

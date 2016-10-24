@@ -94,21 +94,56 @@ class MainTestCase(utils.TestCase):
             shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
 
-            with utils.mock.patch('wakatime.main.open') as mock_open:
-                mock_open.side_effect = IOError('')
+            with utils.mock.patch('wakatime.main.os.environ.get') as mock_env:
+                mock_env.return_value = None
 
-                config = os.path.join(os.path.expanduser('~'), '.wakatime.cfg')
+                with utils.mock.patch('wakatime.main.open') as mock_open:
+                    mock_open.side_effect = IOError('')
+
+                    config = os.path.join(os.path.expanduser('~'), '.wakatime.cfg')
+                    args = ['--file', entity]
+
+                    with self.assertRaises(SystemExit) as e:
+                        execute(args)
+
+                    self.assertEquals(int(str(e.exception)), CONFIG_FILE_PARSE_ERROR)
+                    expected_stdout = u('')
+                    expected_stderr = u("Error: Could not read from config file {0}\n").format(u(config))
+                    self.assertEquals(sys.stdout.getvalue(), expected_stdout)
+                    self.assertEquals(sys.stderr.getvalue(), expected_stderr)
+                    self.patched['wakatime.session_cache.SessionCache.get'].assert_not_called()
+
+    def test_config_file_from_env(self):
+        response = Response()
+        response.status_code = 201
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        with utils.TemporaryDirectory() as tempdir:
+            entity = 'tests/samples/codefiles/emptyfile.txt'
+            shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
+            entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
+            config = 'tests/samples/configs/has_everything.cfg'
+            shutil.copy(config, os.path.join(tempdir, '.wakatime.cfg'))
+            config = os.path.realpath(os.path.join(tempdir, '.wakatime.cfg'))
+
+            with utils.mock.patch('wakatime.main.os.environ.get') as mock_env:
+                mock_env.return_value = tempdir
+
                 args = ['--file', entity]
+                retval = execute(args)
+                self.assertEquals(retval, SUCCESS)
+                expected_stdout = open('tests/samples/output/main_test_good_config_file').read()
+                traceback_file = os.path.realpath('wakatime/main.py')
+                lineno = int(re.search(r' line (\d+),', sys.stdout.getvalue()).group(1))
+                self.assertEquals(sys.stdout.getvalue(), expected_stdout.format(file=traceback_file, lineno=lineno))
+                self.assertEquals(sys.stderr.getvalue(), '')
 
-                with self.assertRaises(SystemExit) as e:
-                    execute(args)
+                self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
+                self.patched['wakatime.session_cache.SessionCache.delete'].assert_not_called()
+                self.patched['wakatime.session_cache.SessionCache.save'].assert_called_once_with(ANY)
 
-                self.assertEquals(int(str(e.exception)), CONFIG_FILE_PARSE_ERROR)
-                expected_stdout = u('')
-                expected_stderr = u("Error: Could not read from config file {0}\n").format(u(config))
-                self.assertEquals(sys.stdout.getvalue(), expected_stdout)
-                self.assertEquals(sys.stderr.getvalue(), expected_stderr)
-                self.patched['wakatime.session_cache.SessionCache.get'].assert_not_called()
+                self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
+                self.patched['wakatime.offlinequeue.Queue.pop'].assert_called_once_with()
 
     def test_missing_config_file(self):
         config = 'foo'

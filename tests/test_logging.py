@@ -10,6 +10,7 @@ import logging
 import os
 import tempfile
 import time
+import shutil
 import sys
 from testfixtures import log_capture
 from . import utils
@@ -83,6 +84,42 @@ class LoggingTestCase(utils.TestCase):
             self.assertEquals(logging.WARNING, logging.getLogger('WakaTime').level)
             self.assertEquals(logfile, logging.getLogger('WakaTime').handlers[0].baseFilename)
             logs.check()
+
+    @log_capture()
+    def test_log_file_location_can_be_set_from_env_variable(self, logs):
+        logging.disable(logging.NOTSET)
+
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        now = u(int(time.time()))
+
+        with utils.TemporaryDirectory() as tempdir:
+            entity = 'tests/samples/codefiles/python.py'
+            shutil.copy(entity, os.path.join(tempdir, 'python.py'))
+            entity = os.path.realpath(os.path.join(tempdir, 'python.py'))
+            config = 'tests/samples/configs/good_config.cfg'
+            shutil.copy(config, os.path.join(tempdir, '.wakatime.cfg'))
+            config = os.path.realpath(os.path.join(tempdir, '.wakatime.cfg'))
+            logfile = os.path.realpath(os.path.join(tempdir, '.wakatime.log'))
+
+            with utils.mock.patch('wakatime.main.os.environ.get') as mock_env:
+                mock_env.return_value = tempdir
+
+                args = ['--file', entity, '--config', config, '--time', now]
+
+                execute(args)
+
+                retval = execute(args)
+                self.assertEquals(retval, 102)
+                self.assertEquals(sys.stdout.getvalue(), '')
+                self.assertEquals(sys.stderr.getvalue(), '')
+
+                self.assertEquals(logging.WARNING, logging.getLogger('WakaTime').level)
+                actual_logfile = os.path.realpath(logging.getLogger('WakaTime').handlers[0].baseFilename)
+                self.assertEquals(logfile, actual_logfile)
+                logs.check()
 
     @log_capture()
     def test_verbose_flag_enables_verbose_logging(self, logs):
