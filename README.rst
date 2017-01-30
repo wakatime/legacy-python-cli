@@ -54,9 +54,9 @@ For command line options, run ``wakatime --help``.
 Configuring
 -----------
 
-Options can be passed via command line, or set in the ``$HOME/.wakatime.cfg``
+Options can be passed via command line, or set in the ``$WAKATIME_HOME/.wakatime.cfg``
 config file. Command line arguments take precedence over config file settings.
-The ``$HOME/.wakatime.cfg`` file is in `INI <http://en.wikipedia.org/wiki/INI_file>`_
+The ``$WAKATIME_HOME/.wakatime.cfg`` file is in `INI <http://en.wikipedia.org/wiki/INI_file>`_
 format. An example config file with all available options::
 
     [settings]
@@ -82,7 +82,7 @@ format. An example config file with all available options::
 Troubleshooting
 ---------------
 
-WakaTime CLI writes errors to a common log file in your User ``$HOME`` directory::
+WakaTime CLI writes errors to a common log file in your User ``$WAKATIME_HOME`` directory::
 
     ~/.wakatime.log
 
