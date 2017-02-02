@@ -243,10 +243,10 @@ def parseArguments():
     else:
         args.hidefilenames = []
         if configs.has_option('settings', 'hidefilenames'):
-            option = configs.get('settings', 'hidefilenames').strip()
-            if option.lower() == 'true':
+            option = configs.get('settings', 'hidefilenames')
+            if option.strip().lower() == 'true':
                 args.hidefilenames = ['.*']
-            elif option.lower() != 'false':
+            elif option.strip().lower() != 'false':
                 try:
                     for pattern in option.split("\n"):
                         if pattern.strip() != '':
