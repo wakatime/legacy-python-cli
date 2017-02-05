@@ -24,7 +24,7 @@ WakaTime
 
 Command line interface to `WakaTime <https://wakatime.com/>`_ used by all WakaTime `text editor plugins <https://wakatime.com/editors>`_.
 
-Note: You shouldn't need to directly use this package unless you are `building your own plugin <https://wakatime.com/help/misc/creating-plugin>`_ or your text editor's plugin asks you to install the wakatime cli interface manually.
+Note: You shouldn't need to directly use this package unless you are `building your own plugin <https://wakatime.com/help/misc/creating-plugin>`_ or your text editor's plugin asks you to install the WakaTime cli interface manually.
 
 Go to http://wakatime.com/editors to install the plugin for your text editor or IDE.
 
@@ -32,7 +32,7 @@ Go to http://wakatime.com/editors to install the plugin for your text editor or 
 Installation
 ------------
 
-Each `plugin <https://wakatime.com/editors>`_ should install wakatime for you, except for the `Emacs WakaTime plugin <https://github.com/wakatime/wakatime-mode>`_.
+Each `plugin <https://wakatime.com/editors>`_ should install WakaTime for you, except for the `Emacs WakaTime plugin <https://github.com/wakatime/wakatime-mode>`_.
 
 Install the plugin for your IDE/editor at https://wakatime.com/editors, which will install wakatime-cli(this package) for you.
 
@@ -86,7 +86,7 @@ WakaTime CLI writes errors to a common log file in your User ``$WAKATIME_HOME`` 
 
     ~/.wakatime.log
 
-Set ``debug=true`` in ``~/.wakatime.cfg`` for more verbose logging, but don't forget to set it back to ``debug=false`` afterwards or your editor might be laggy while waiting for wakatime cli to finish executing.
+Set ``debug=true`` in ``~/.wakatime.cfg`` for more verbose logging, but don't forget to set it back to ``debug=false`` afterwards or your editor might be laggy while waiting for wakatime-cli to finish executing.
 
 Each plugin also has it's own log file for things outside of the common wakatime cli:
 
