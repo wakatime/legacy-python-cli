@@ -3,6 +3,12 @@ History
 -------
 
 
+6.2.1 (2017-02-08)
+++++++++++++++++++
+
+- Allow boolean or list of regex patterns for hidefilenames config setting.
+
+
 6.2.0 (2016-10-24)
 ++++++++++++++++++
 
