@@ -3,6 +3,12 @@ History
 -------
 
 
+6.2.2 (2017-02-13)
+++++++++++++++++++
+
+- Upgrade pygments library to v2.2.0 for improved language detection.
+
+
 6.2.1 (2017-02-08)
 ++++++++++++++++++
 
