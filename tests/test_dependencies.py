@@ -440,7 +440,6 @@ class DependenciesTestCase(utils.TestCase):
                 u('lines'): 20,
             }
             expected_dependencies = [
-                'googlecode.javacv',
                 'colorfulwolf.webcamapplet',
                 'foobar',
             ]
