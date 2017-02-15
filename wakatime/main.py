@@ -210,11 +210,7 @@ def parseArguments():
             except SystemExit:
                 raise SystemExit(AUTH_ERROR)
 
-    is_valid = False
-    try:
-        is_valid = not not re.match(r'^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$', args.key, re.I)
-    except:
-        pass
+    is_valid = not not re.match(r'^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$', args.key, re.I)
     if not is_valid:
         try:
             parser.error('Invalid api key. Find your api key from wakatime.com/settings.')
@@ -260,25 +256,18 @@ def parseArguments():
             if option.strip().lower() == 'true':
                 args.hidefilenames = ['.*']
             elif option.strip().lower() != 'false':
-                try:
-                    for pattern in option.split("\n"):
-                        if pattern.strip() != '':
-                            args.hidefilenames.append(pattern)
-                except TypeError:
-                    pass
+                for pattern in option.split("\n"):
+                    if pattern.strip() != '':
+                        args.hidefilenames.append(pattern)
     if args.offline and configs.has_option('settings', 'offline'):
         args.offline = configs.getboolean('settings', 'offline')
     if not args.proxy and configs.has_option('settings', 'proxy'):
         args.proxy = configs.get('settings', 'proxy')
     if args.proxy:
-        is_valid = False
-        try:
-            pattern = r'^((https?|socks5)://)?([^:@]+(:([^:@])+)?@)?[^:]+(:\d+)?$'
-            if '\\' in args.proxy:
-                pattern = r'^.*\\.+$'
-            is_valid = not not re.match(pattern, args.proxy, re.I)
-        except:
-            pass
+        pattern = r'^((https?|socks5)://)?([^:@]+(:([^:@])+)?@)?[^:]+(:\d+)?$'
+        if '\\' in args.proxy:
+            pattern = r'^.*\\.+$'
+        is_valid = not not re.match(pattern, args.proxy, re.I)
         if not is_valid:
             parser.error('Invalid proxy. Must be in format ' +
                             'https://user:pass@host:port or ' +
