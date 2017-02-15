@@ -161,7 +161,7 @@ class MainTestCase(utils.TestCase):
 
             self.assertEquals(int(str(e.exception)), 2)
             self.assertEquals(sys.stdout.getvalue(), '')
-            expected = 'error: Invalid proxy. Must be in format https://user:pass@host:port or socks5://user:pass@host:port or domain\user:pass.'
+            expected = 'error: Invalid proxy. Must be in format https://user:pass@host:port or socks5://user:pass@host:port or domain\\user:pass.'
             self.assertIn(expected, sys.stderr.getvalue())
 
             log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
