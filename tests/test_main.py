@@ -10,6 +10,7 @@ import time
 import re
 import shutil
 import sys
+import uuid
 from testfixtures import log_capture
 from wakatime.compat import u, is_py3
 from wakatime.constants import (
@@ -68,9 +69,10 @@ class MainTestCase(utils.TestCase):
             entity = 'tests/samples/codefiles/twolinefile.txt'
             shutil.copy(entity, os.path.join(tempdir, 'twolinefile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'twolinefile.txt'))
-
+            key = str(uuid.uuid4())
             config = 'tests/samples/configs/good_config.cfg'
-            args = ['--file', entity, '--key', '123', '--config', config]
+
+            args = ['--file', entity, '--key', key, '--config', config]
 
             retval = execute(args)
             self.assertEquals(retval, SUCCESS)
@@ -192,7 +194,11 @@ class MainTestCase(utils.TestCase):
             self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_called_once_with()
 
-    def test_api_key_without_underscore_accepted(self):
+    def test_api_key_setting_without_underscore_accepted(self):
+        """Api key in wakatime.cfg should also work without an underscore:
+            apikey = XXX
+        """
+
         response = Response()
         response.status_code = 201
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
@@ -288,11 +294,11 @@ class MainTestCase(utils.TestCase):
             entity = 'tests/samples/codefiles/twolinefile.txt'
             shutil.copy(entity, os.path.join(tempdir, 'twolinefile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'twolinefile.txt'))
-
             now = u(int(time.time()))
             config = 'tests/samples/configs/good_config.cfg'
+            key = str(uuid.uuid4())
 
-            args = ['--file', entity, '--key', '123', '--config', config, '--time', now]
+            args = ['--file', entity, '--key', key, '--config', config, '--time', now]
 
             retval = execute(args)
             self.assertEquals(retval, API_ERROR)
@@ -334,11 +340,11 @@ class MainTestCase(utils.TestCase):
             entity = 'tests/samples/codefiles/twolinefile.txt'
             shutil.copy(entity, os.path.join(tempdir, 'twolinefile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'twolinefile.txt'))
-
             now = u(int(time.time()))
             config = 'tests/samples/configs/paranoid.cfg'
+            key = str(uuid.uuid4())
 
-            args = ['--file', entity, '--key', '123', '--config', config, '--time', now]
+            args = ['--file', entity, '--key', key, '--config', config, '--time', now]
 
             retval = execute(args)
             self.assertEquals(retval, API_ERROR)
@@ -380,11 +386,11 @@ class MainTestCase(utils.TestCase):
             entity = 'tests/samples/codefiles/twolinefile.txt'
             shutil.copy(entity, os.path.join(tempdir, 'twolinefile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'twolinefile.txt'))
-
             now = u(int(time.time()))
             config = 'tests/samples/configs/hide_file_names.cfg'
+            key = str(uuid.uuid4())
 
-            args = ['--file', entity, '--key', '123', '--config', config, '--time', now]
+            args = ['--file', entity, '--key', key, '--config', config, '--time', now]
 
             retval = execute(args)
             self.assertEquals(retval, API_ERROR)
@@ -426,11 +432,11 @@ class MainTestCase(utils.TestCase):
             entity = 'tests/samples/codefiles/emptyfile.txt'
             shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
-
             now = u(int(time.time()))
             config = 'tests/samples/configs/hide_file_names.cfg'
+            key = str(uuid.uuid4())
 
-            args = ['--file', entity, '--key', '123', '--config', config, '--time', now]
+            args = ['--file', entity, '--key', key, '--config', config, '--time', now]
 
             retval = execute(args)
             self.assertEquals(retval, API_ERROR)
@@ -472,9 +478,9 @@ class MainTestCase(utils.TestCase):
             entity = 'tests/samples/codefiles/twolinefile.txt'
             shutil.copy(entity, os.path.join(tempdir, 'twolinefile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'twolinefile.txt'))
-
             config = 'tests/samples/configs/good_config.cfg'
-            args = ['--file', entity, '--key', '123', '--config', config, '--timeout', 'abc']
+            key = str(uuid.uuid4())
+            args = ['--file', entity, '--key', key, '--config', config, '--timeout', 'abc']
 
             with self.assertRaises(SystemExit) as e:
                 execute(args)
@@ -500,8 +506,8 @@ class MainTestCase(utils.TestCase):
             entity = 'tests/samples/codefiles/emptyfile.txt'
             shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
-
             config = 'tests/samples/configs/good_config.cfg'
+
             args = ['--file', entity, '--config', config, '--exclude', 'empty', '--verbose']
             retval = execute(args)
             self.assertEquals(retval, SUCCESS)
@@ -529,10 +535,10 @@ class MainTestCase(utils.TestCase):
             entity = 'tests/samples/codefiles/twolinefile.txt'
             shutil.copy(entity, os.path.join(tempdir, 'twolinefile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'twolinefile.txt'))
-
             now = u(int(time.time()))
+            key = str(uuid.uuid4())
 
-            args = ['--file', entity, '--key', '123',
+            args = ['--file', entity, '--key', key,
                     '--config', 'tests/samples/configs/paranoid.cfg', '--time', now]
 
             retval = execute(args)
@@ -575,10 +581,10 @@ class MainTestCase(utils.TestCase):
             entity = 'tests/samples/codefiles/twolinefile.txt'
             shutil.copy(entity, os.path.join(tempdir, 'twolinefile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'twolinefile.txt'))
-
             now = u(int(time.time()))
+            key = str(uuid.uuid4())
 
-            args = ['--file', entity, '--key', '123',
+            args = ['--file', entity, '--key', key,
                     '--config', 'tests/samples/configs/paranoid.cfg', '--time', now]
 
             retval = execute(args)
@@ -602,10 +608,10 @@ class MainTestCase(utils.TestCase):
             entity = 'tests/samples/codefiles/twolinefile.txt'
             shutil.copy(entity, os.path.join(tempdir, 'twolinefile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'twolinefile.txt'))
-
             now = u(int(time.time()))
+            key = str(uuid.uuid4())
 
-            args = ['--file', entity, '--key', '123',
+            args = ['--file', entity, '--key', key,
                     '--config', 'tests/samples/configs/paranoid.cfg', '--time', now]
 
             retval = execute(args)
@@ -654,10 +660,10 @@ class MainTestCase(utils.TestCase):
             entity = 'tests/samples/codefiles/twolinefile.txt'
             shutil.copy(entity, os.path.join(tempdir, 'twolinefile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'twolinefile.txt'))
-
             now = u(int(time.time()))
+            key = str(uuid.uuid4())
 
-            args = ['--file', entity, '--key', '123', '--disableoffline',
+            args = ['--file', entity, '--key', key, '--disableoffline',
                     '--config', 'tests/samples/configs/good_config.cfg', '--time', now]
 
             retval = execute(args)
@@ -692,10 +698,10 @@ class MainTestCase(utils.TestCase):
             entity = 'tests/samples/codefiles/twolinefile.txt'
             shutil.copy(entity, os.path.join(tempdir, 'twolinefile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'twolinefile.txt'))
-
             now = u(int(time.time()))
+            key = str(uuid.uuid4())
 
-            args = ['--file', entity, '--key', '123', '--verbose',
+            args = ['--file', entity, '--key', key, '--verbose',
                     '--config', 'tests/samples/configs/good_config.cfg', '--time', now]
 
             retval = execute(args)
@@ -749,10 +755,10 @@ class MainTestCase(utils.TestCase):
             entity = 'tests/samples/codefiles/twolinefile.txt'
             shutil.copy(entity, os.path.join(tempdir, 'twolinefile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'twolinefile.txt'))
-
             now = u(int(time.time()))
+            key = str(uuid.uuid4())
 
-            args = ['--file', entity, '--key', '123', '--disableoffline',
+            args = ['--file', entity, '--key', key, '--disableoffline',
                     '--config', 'tests/samples/configs/good_config.cfg', '--time', now]
 
             retval = execute(args)
@@ -847,7 +853,37 @@ class MainTestCase(utils.TestCase):
 
         self.assertEquals(int(str(e.exception)), AUTH_ERROR)
         self.assertEquals(sys.stdout.getvalue(), '')
-        expected = 'error: Missing api key'
+        expected = 'error: Missing api key. Find your api key from wakatime.com/settings.'
+        self.assertIn(expected, sys.stderr.getvalue())
+
+        log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
+        expected = ''
+        self.assertEquals(log_output, expected)
+
+        self.patched['wakatime.session_cache.SessionCache.get'].assert_not_called()
+        self.patched['wakatime.session_cache.SessionCache.delete'].assert_not_called()
+        self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
+
+        self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
+        self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
+
+    @log_capture()
+    def test_invalid_api_key(self, logs):
+        logging.disable(logging.NOTSET)
+
+        response = Response()
+        response.status_code = 201
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        config = 'tests/samples/configs/missing_api_key.cfg'
+        args = ['--config', config, '--key', 'invalid-api-key']
+
+        with self.assertRaises(SystemExit) as e:
+            execute(args)
+
+        self.assertEquals(int(str(e.exception)), AUTH_ERROR)
+        self.assertEquals(sys.stdout.getvalue(), '')
+        expected = 'error: Invalid api key. Find your api key from wakatime.com/settings.'
         self.assertIn(expected, sys.stderr.getvalue())
 
         log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
@@ -870,9 +906,10 @@ class MainTestCase(utils.TestCase):
             entity = 'tests/samples/codefiles/emptyfile.txt'
             shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
+            proxy = 'localhost:1337'
 
             config = 'tests/samples/configs/good_config.cfg'
-            args = ['--file', entity, '--config', config, '--proxy', 'localhost:1234']
+            args = ['--file', entity, '--config', config, '--proxy', proxy]
             retval = execute(args)
             self.assertEquals(retval, SUCCESS)
             self.assertEquals(sys.stdout.getvalue(), '')
@@ -885,7 +922,7 @@ class MainTestCase(utils.TestCase):
             self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_called_once_with()
 
-            self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_called_once_with(ANY, cert=None, proxies={'https': 'localhost:1234'}, stream=False, timeout=60, verify=True)
+            self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_called_once_with(ANY, cert=None, proxies={'https': proxy}, stream=False, timeout=60, verify=True)
 
     def test_write_argument(self):
         response = Response()
@@ -897,8 +934,9 @@ class MainTestCase(utils.TestCase):
             shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
             now = u(int(time.time()))
+            key = str(uuid.uuid4())
 
-            args = ['--file', entity, '--key', '123', '--write', '--verbose',
+            args = ['--file', entity, '--key', key, '--write', '--verbose',
                     '--config', 'tests/samples/configs/good_config.cfg', '--time', now]
 
             retval = execute(args)
@@ -1292,11 +1330,11 @@ class MainTestCase(utils.TestCase):
             entity = os.path.join('tests/samples/codefiles/unicode', filename)
             shutil.copy(entity, os.path.join(tempdir, filename))
             entity = os.path.realpath(os.path.join(tempdir, filename))
-
             now = u(int(time.time()))
             config = 'tests/samples/configs/good_config.cfg'
+            key = str(uuid.uuid4())
 
-            args = ['--file', entity, '--key', '123', '--config', config, '--time', now]
+            args = ['--file', entity, '--key', key, '--config', config, '--time', now]
 
             retval = execute(args)
             self.assertEquals(retval, API_ERROR)
@@ -1342,7 +1380,9 @@ class MainTestCase(utils.TestCase):
 
             entity = 'tests/samples/codefiles/twolinefile.txt'
             config = 'tests/samples/configs/good_config.cfg'
-            args = ['--entity', entity, '--key', '123', '--config', config]
+            key = str(uuid.uuid4())
+
+            args = ['--entity', entity, '--key', key, '--config', config]
 
             execute(args)
 

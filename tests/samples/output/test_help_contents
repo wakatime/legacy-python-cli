@@ -30,7 +30,7 @@ optional arguments:
                         "domain", or "app"; defaults to file.
   --proxy PROXY         optional proxy configuration. Supports HTTPS and SOCKS
                         proxies. For example: https://user:pass@host:port or
-                        socks5://user:pass@host:port
+                        socks5://user:pass@host:port or domain\user:pass
   --project PROJECT     optional project name
   --alternate-project ALTERNATE_PROJECT
                         optional alternate project name; auto-discovered

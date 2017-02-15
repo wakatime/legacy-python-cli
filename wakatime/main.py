@@ -137,7 +137,8 @@ def parseArguments():
                         help='optional proxy configuration. Supports HTTPS '+
                         'and SOCKS proxies. For example: '+
                         'https://user:pass@host:port or '+
-                        'socks5://user:pass@host:port')
+                        'socks5://user:pass@host:port or ' +
+                        'domain\\user:pass')
     parser.add_argument('--project', dest='project',
             help='optional project name')
     parser.add_argument('--alternate-project', dest='alternate_project',
@@ -205,9 +206,21 @@ def parseArguments():
             args.key = default_key
         else:
             try:
-                parser.error('Missing api key')
+                parser.error('Missing api key. Find your api key from wakatime.com/settings.')
             except SystemExit:
                 raise SystemExit(AUTH_ERROR)
+
+    is_valid = False
+    try:
+        is_valid = not not re.match(r'^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$', args.key, re.I)
+    except:
+        pass
+    if not is_valid:
+        try:
+            parser.error('Invalid api key. Find your api key from wakatime.com/settings.')
+        except SystemExit:
+            raise SystemExit(AUTH_ERROR)
+
     if not args.entity:
         if args.file:
             args.entity = args.file
@@ -257,6 +270,20 @@ def parseArguments():
         args.offline = configs.getboolean('settings', 'offline')
     if not args.proxy and configs.has_option('settings', 'proxy'):
         args.proxy = configs.get('settings', 'proxy')
+    if args.proxy:
+        is_valid = False
+        try:
+            pattern = r'^((https?|socks5)://)?([^:@]+(:([^:@])+)?@)?[^:]+(:\d+)?$'
+            if '\\' in args.proxy:
+                pattern = r'^.*\\.+$'
+            is_valid = not not re.match(pattern, args.proxy, re.I)
+        except:
+            pass
+        if not is_valid:
+            parser.error('Invalid proxy. Must be in format ' +
+                            'https://user:pass@host:port or ' +
+                            'socks5://user:pass@host:port or ' +
+                            'domain\\user:pass.')
     if not args.verbose and configs.has_option('settings', 'verbose'):
         args.verbose = configs.getboolean('settings', 'verbose')
     if not args.verbose and configs.has_option('settings', 'debug'):
@@ -385,9 +412,6 @@ def send_heartbeat(project=None, branch=None, hostname=None, stats={}, key=None,
     }
     if hostname:
         headers['X-Machine-Name'] = u(hostname).encode('utf-8')
-    proxies = {}
-    if proxy:
-        proxies['https'] = proxy
 
     # add Olson timezone to request
     try:
@@ -399,6 +423,19 @@ def send_heartbeat(project=None, branch=None, hostname=None, stats={}, key=None,
 
     session_cache = SessionCache()
     session = session_cache.get()
+
+    proxies = {}
+    if proxy:
+        if '\\' in proxy:
+            from .packages.requests_ntlm import HttpNtlmAuth
+            username = proxy.rsplit(':', 1)
+            password = ''
+            if len(username) == 2:
+                password = username[1]
+            username = username[0]
+            session.auth = HttpNtlmAuth(username, password, session)
+        else:
+            proxies['https'] = proxy
 
     # log time to api
     response = None
