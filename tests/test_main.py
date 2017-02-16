@@ -539,7 +539,7 @@ class MainTestCase(utils.TestCase):
             self.assertEquals(sys.stderr.getvalue(), '')
 
             log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
-            expected = u('WakaTime WARNING Regex error (unexpected end of regular expression) for projectmap pattern: invalid(regex')
+            expected = u('WakaTime WARNING Regex error (unbalanced parenthesis) for include pattern: invalid(regex')
             if self.isPy35OrNewer:
                 expected = 'WakaTime WARNING Regex error (missing ), unterminated subpattern at position 7) for include pattern: invalid(regex'
             self.assertEquals(expected, log_output)
