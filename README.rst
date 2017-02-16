@@ -24,7 +24,7 @@ WakaTime
 
 Command line interface to `WakaTime <https://wakatime.com/>`_ used by all WakaTime `text editor plugins <https://wakatime.com/editors>`_.
 
-Note: You shouldn't need to directly use this package unless you are `building your own plugin <https://wakatime.com/help/misc/creating-plugin>`_ or your text editor's plugin asks you to install the WakaTime cli interface manually.
+Note: You shouldn't need to directly use this package unless you are `building your own plugin <https://wakatime.com/help/misc/creating-plugin>`_ or your text editor's plugin asks you to install the WakaTime CLI manually.
 
 Go to http://wakatime.com/editors to install the plugin for your text editor or IDE.
 
@@ -34,9 +34,9 @@ Installation
 
 Each `plugin <https://wakatime.com/editors>`_ should install WakaTime for you, except for the `Emacs WakaTime plugin <https://github.com/wakatime/wakatime-mode>`_.
 
-Install the plugin for your IDE/editor at https://wakatime.com/editors, which will install wakatime-cli(this package) for you.
+Install the plugin for your IDE/editor at https://wakatime.com/editors, which will install this WakaTime CLI for you.
 
-If your plugin does not install wakatime-cli, install it with::
+If your plugin does not install WakaTime CLI, install it with::
 
     sudo pip install wakatime
 
@@ -86,9 +86,9 @@ WakaTime CLI writes errors to a common log file in your User ``$WAKATIME_HOME`` 
 
     ~/.wakatime.log
 
-Set ``debug=true`` in ``~/.wakatime.cfg`` for more verbose logging, but don't forget to set it back to ``debug=false`` afterwards or your editor might be laggy while waiting for wakatime-cli to finish executing.
+Set ``debug=true`` in ``~/.wakatime.cfg`` for more verbose logging, but don't forget to set it back to ``debug=false`` afterwards or your editor might be laggy while waiting for WakaTime CLI to finish executing.
 
-Each plugin also has it's own log file for things outside of the common wakatime cli:
+Each plugin also has it's own log file for things outside of the common WakaTime CLI:
 
 * **Atom** writes errors to the developer console (View -> Developer -> Toggle Developer Tools)
 * **Brackets** errors go to the developer console (Debug -> Show Developer Tools)
