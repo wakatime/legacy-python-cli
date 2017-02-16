@@ -3,6 +3,15 @@ History
 -------
 
 
+6.2.3 (2017-02-15)
+++++++++++++++++++
+
+- Support NTLM proxy format like domain\\user:pass. #23
+- Upgrade pytz to v2016.10.
+- Upgrade requests to v2.13.0.
+- Upgrade pysocks to v1.6.6.
+
+
 6.2.2 (2017-02-13)
 ++++++++++++++++++
 
