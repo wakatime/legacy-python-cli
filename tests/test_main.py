@@ -539,8 +539,10 @@ class MainTestCase(utils.TestCase):
             self.assertEquals(sys.stderr.getvalue(), '')
 
             log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
-            expected = 'WakaTime WARNING Regex error'
-            self.assertIn(expected, log_output)
+            expected = u('WakaTime WARNING Regex error (unexpected end of regular expression) for projectmap pattern: invalid(regex')
+            if self.isPy35OrNewer:
+                expected = 'WakaTime WARNING Regex error (missing ), unterminated subpattern at position 7) for include pattern: invalid(regex'
+            self.assertEquals(expected, log_output)
 
             self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
             self.patched['wakatime.session_cache.SessionCache.delete'].assert_called_once_with()

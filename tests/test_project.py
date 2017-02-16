@@ -396,7 +396,7 @@ class ProjectTestCase(utils.TestCase):
 
         output = [u(' ').join(x) for x in logs.actual()]
         expected = u('WakaTime WARNING Regex error (unexpected end of regular expression) for projectmap pattern: invalid[({regex')
-        if self.isPy35:
+        if self.isPy35OrNewer:
             expected = u('WakaTime WARNING Regex error (unterminated character set at position 7) for projectmap pattern: invalid[({regex')
         self.assertEquals(output[0], expected)
 

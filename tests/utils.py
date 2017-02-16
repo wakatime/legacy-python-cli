@@ -50,8 +50,10 @@ class TestCase(unittest.TestCase):
         self.assertEquals(self.normalize_list(first_list), self.normalize_list(second_list))
 
     @property
-    def isPy35(self):
-        return (sys.version_info[0] == 3 and sys.version_info[1] == 5)
+    def isPy35OrNewer(self):
+        if sys.version_info[0] > 3:
+            return True
+        return (sys.version_info[0] >= 3 and sys.version_info[1] >= 5)
 
 
 try:
