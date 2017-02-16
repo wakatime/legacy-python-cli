@@ -5,8 +5,9 @@ python:
     - "3.3"
     - "3.4"
     - "3.5"
+    - "3.6"
 # command to install dependencies
-install: 
+install:
     - if [[ $TRAVIS_PYTHON_VERSION == '2.6' ]]; then travis_retry pip install unittest2; fi
     - travis_retry pip install -r dev-requirements.txt
     - travis_retry pip install coveralls
