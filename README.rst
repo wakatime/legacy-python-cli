@@ -38,9 +38,7 @@ Install the plugin for your IDE/editor:
 
 https://wakatime.com/editors
 
-If your plugin does not install WakaTime CLI, install it with::
-
-    sudo pip install wakatime
+Each plugin either comes pre-bundled with WakaTime CLI, or downloads the latest version from GitHub for you.
 
 
 Usage
