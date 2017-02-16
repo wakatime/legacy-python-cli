@@ -24,17 +24,19 @@ WakaTime
 
 Command line interface to `WakaTime <https://wakatime.com/>`_ used by all WakaTime `text editor plugins <https://wakatime.com/editors>`_.
 
-Note: You shouldn't need to directly use this package unless you are `building your own plugin <https://wakatime.com/help/misc/creating-plugin>`_ or your text editor's plugin asks you to install the WakaTime CLI manually.
-
 Go to http://wakatime.com/editors to install the plugin for your text editor or IDE.
 
 
 Installation
 ------------
 
-Each `plugin <https://wakatime.com/editors>`_ should install WakaTime for you, except for the `Emacs WakaTime plugin <https://github.com/wakatime/wakatime-mode>`_.
+Note: You shouldn't need to directly use this package unless you are `building your own plugin <https://wakatime.com/help/misc/creating-plugin>`_ or your text editor's plugin asks you to install the WakaTime CLI manually.
 
-Install the plugin for your IDE/editor at https://wakatime.com/editors, which will install this WakaTime CLI for you.
+Each `plugin <https://wakatime.com/editors>`_ installs the WakaTime CLI for you, except for the `Emacs WakaTime plugin <https://github.com/wakatime/wakatime-mode>`_.
+
+Install the plugin for your IDE/editor:
+
+https://wakatime.com/editors
 
 If your plugin does not install WakaTime CLI, install it with::
 
@@ -49,6 +51,8 @@ then follow the `Creating a Plugin <https://wakatime.com/help/misc/creating-plug
 guide.
 
 For command line options, run ``wakatime --help``.
+
+Some more usage information is available in the `FAQ <https://wakatime.com/faq>`_.
 
 
 Configuring
@@ -78,9 +82,13 @@ format. An example config file with all available options::
         projects/foo = new project name
         ^/home/user/projects/bar(\d+)/ = project{0}
 
+For commonly used configuration options, see examples in the `FAQ <https://wakatime.com/faq>`_.
+
 
 Troubleshooting
 ---------------
+
+Read the `FAQ <https://wakatime.com/faq>`_ for solutions to common problems.
 
 WakaTime CLI writes errors to a common log file in your User ``$WAKATIME_HOME`` directory::
 
@@ -88,7 +96,7 @@ WakaTime CLI writes errors to a common log file in your User ``$WAKATIME_HOME`` 
 
 Set ``debug=true`` in ``~/.wakatime.cfg`` for more verbose logging, but don't forget to set it back to ``debug=false`` afterwards or your editor might be laggy while waiting for WakaTime CLI to finish executing.
 
-Each plugin also has it's own log file for things outside of the common WakaTime CLI:
+Each plugin also has it's own log file for things outside the scope of WakaTime CLI:
 
 * **Atom** writes errors to the developer console (View -> Developer -> Toggle Developer Tools)
 * **Brackets** errors go to the developer console (Debug -> Show Developer Tools)
