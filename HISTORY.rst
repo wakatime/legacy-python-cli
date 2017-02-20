@@ -3,6 +3,14 @@ History
 -------
 
 
+7.0.0 (2017-02-20)
+++++++++++++++++++
+
+- Existing --alternate-language cli argument now overwrites auto-detected
+  language. Previously, was only used when unable to auto-detect language.
+- Give TypeScript higher priority than TypoScript.
+
+
 6.3.0 (2017-02-16)
 ++++++++++++++++++
 
