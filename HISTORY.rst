@@ -3,6 +3,12 @@ History
 -------
 
 
+7.0.1 (2017-02-20)
+++++++++++++++++++
+
+- Rename --alternate-language cli argument to --language.
+
+
 7.0.0 (2017-02-20)
 ++++++++++++++++++
 
