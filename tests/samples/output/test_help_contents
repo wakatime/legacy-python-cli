@@ -2,11 +2,11 @@ usage: wakatime [-h] [--entity FILE] [--key KEY] [--write] [--plugin PLUGIN]
                 [--time time] [--lineno LINENO] [--cursorpos CURSORPOS]
                 [--entity-type ENTITY_TYPE] [--proxy PROXY]
                 [--project PROJECT] [--alternate-project ALTERNATE_PROJECT]
-                [--alternate-language ALTERNATE_LANGUAGE]
-                [--hostname HOSTNAME] [--disableoffline] [--hidefilenames]
-                [--exclude EXCLUDE] [--include INCLUDE] [--extra-heartbeats]
-                [--logfile LOGFILE] [--apiurl API_URL] [--timeout TIMEOUT]
-                [--config CONFIG] [--verbose] [--version]
+                [--language ALTERNATE_LANGUAGE] [--hostname HOSTNAME]
+                [--disableoffline] [--hidefilenames] [--exclude EXCLUDE]
+                [--include INCLUDE] [--extra-heartbeats] [--logfile LOGFILE]
+                [--apiurl API_URL] [--timeout TIMEOUT] [--config CONFIG]
+                [--verbose] [--version]
 
 Common interface for the WakaTime api.
 
@@ -35,7 +35,7 @@ optional arguments:
   --alternate-project ALTERNATE_PROJECT
                         optional alternate project name; auto-discovered
                         project takes priority
-  --alternate-language ALTERNATE_LANGUAGE
+  --language ALTERNATE_LANGUAGE
                         optional alternate language name; if valid, takes
                         priority over auto-detected language
   --hostname HOSTNAME   hostname of current machine.

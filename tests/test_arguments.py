@@ -389,6 +389,22 @@ class MainTestCase(utils.TestCase):
         self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
+    def test_old_alternate_language_argument_still_supported(self):
+        response = Response()
+        response.status_code = 500
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        now = u(int(time.time()))
+        config = 'tests/samples/configs/good_config.cfg'
+        entity = 'tests/samples/codefiles/python.py'
+        args = ['--file', entity, '--config', config, '--time', now, '--alternate-language', 'JAVA']
+
+        retval = execute(args)
+        self.assertEquals(retval, 102)
+
+        language = u('Java')
+        self.assertEqual(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].get('language'), language)
+
     def test_extra_heartbeats_argument(self):
         response = Response()
         response.status_code = 201

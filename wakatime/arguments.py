@@ -81,7 +81,9 @@ def parseArguments():
     parser.add_argument('--alternate-project', dest='alternate_project',
             help='optional alternate project name; auto-discovered project '+
                  'takes priority')
-    parser.add_argument('--alternate-language', dest='alternate_language',
+    parser.add_argument('--alternate-language',  dest='alternate_language_old',
+            help=argparse.SUPPRESS)
+    parser.add_argument('--language', dest='alternate_language',
             help='optional alternate language name; if valid, takes priority '+
                  'over auto-detected language')
     parser.add_argument('--hostname', dest='hostname', help='hostname of '+
@@ -159,6 +161,10 @@ def parseArguments():
             args.entity = args.file
         else:
             parser.error('argument --entity is required')
+
+    if not args.alternate_language and args.alternate_language_old:
+        args.alternate_language = args.alternate_language_old
+
     if not args.exclude:
         args.exclude = []
     if configs.has_option('settings', 'ignore'):

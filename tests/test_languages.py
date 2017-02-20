@@ -112,7 +112,7 @@ class LanguagesTestCase(utils.TestCase):
         now = u(int(time.time()))
         config = 'tests/samples/configs/good_config.cfg'
         entity = 'tests/samples/codefiles/python.py'
-        args = ['--file', entity, '--config', config, '--time', now, '--alternate-language', 'JAVA']
+        args = ['--file', entity, '--config', config, '--time', now, '--language', 'JAVA']
 
         retval = execute(args)
         self.assertEquals(retval, 102)
@@ -132,7 +132,7 @@ class LanguagesTestCase(utils.TestCase):
             now = u(int(time.time()))
             config = 'tests/samples/configs/good_config.cfg'
             entity = 'tests/samples/codefiles/python.py'
-            args = ['--file', entity, '--config', config, '--time', now, '--alternate-language', language.upper()]
+            args = ['--file', entity, '--config', config, '--time', now, '--language', language.upper()]
 
             retval = execute(args)
             self.assertEquals(retval, 102)
@@ -150,7 +150,7 @@ class LanguagesTestCase(utils.TestCase):
             now = u(int(time.time()))
             config = 'tests/samples/configs/good_config.cfg'
             entity = 'tests/samples/codefiles/python.py'
-            args = ['--file', entity, '--config', config, '--time', now, '--alternate-language', 'java', '--plugin', 'NeoVim/703 vim-wakatime/4.0.9']
+            args = ['--file', entity, '--config', config, '--time', now, '--language', 'java', '--plugin', 'NeoVim/703 vim-wakatime/4.0.9']
 
             retval = execute(args)
             self.assertEquals(retval, 102)
@@ -169,7 +169,7 @@ class LanguagesTestCase(utils.TestCase):
             now = u(int(time.time()))
             config = 'tests/samples/configs/good_config.cfg'
             entity = 'tests/samples/codefiles/python.py'
-            args = ['--file', entity, '--config', config, '--time', now, '--alternate-language', 'foo', '--plugin', 'NeoVim/703 vim-wakatime/4.0.9']
+            args = ['--file', entity, '--config', config, '--time', now, '--language', 'foo', '--plugin', 'NeoVim/703 vim-wakatime/4.0.9']
 
             retval = execute(args)
             self.assertEquals(retval, 102)
@@ -191,7 +191,7 @@ class LanguagesTestCase(utils.TestCase):
                 now = u(int(time.time()))
                 config = 'tests/samples/configs/good_config.cfg'
                 entity = 'tests/samples/codefiles/python.py'
-                args = ['--file', entity, '--config', config, '--time', now, '--alternate-language', 'foo', '--plugin', 'NeoVim/703 vim-wakatime/4.0.9']
+                args = ['--file', entity, '--config', config, '--time', now, '--language', 'foo', '--plugin', 'NeoVim/703 vim-wakatime/4.0.9']
 
                 retval = execute(args)
                 self.assertEquals(retval, 102)
