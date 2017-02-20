@@ -3,6 +3,12 @@ History
 -------
 
 
+7.0.2 (2017-02-20)
+++++++++++++++++++
+
+- Rename alternate_language to language in extra heartbeats json.
+
+
 7.0.1 (2017-02-20)
 ++++++++++++++++++
 
