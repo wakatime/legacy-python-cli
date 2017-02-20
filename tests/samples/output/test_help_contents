@@ -36,8 +36,8 @@ optional arguments:
                         optional alternate project name; auto-discovered
                         project takes priority
   --alternate-language ALTERNATE_LANGUAGE
-                        optional alternate language name; auto-detected
-                        languagetakes priority
+                        optional alternate language name; if valid, takes
+                        priority over auto-detected language
   --hostname HOSTNAME   hostname of current machine.
   --disableoffline      disables offline time logging instead of queuing
                         logged time

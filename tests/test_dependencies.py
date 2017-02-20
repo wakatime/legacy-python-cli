@@ -836,3 +836,67 @@ class DependenciesTestCase(utils.TestCase):
             self.assertListsEqual(dependencies, expected_dependencies)
             self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
+
+    def test_dependencies_still_detected_when_alternate_language_used(self):
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        with utils.TemporaryDirectory() as tempdir:
+            entity = 'tests/samples/codefiles/python.py'
+            shutil.copy(entity, os.path.join(tempdir, 'python.py'))
+            entity = os.path.realpath(os.path.join(tempdir, 'python.py'))
+
+            now = u(int(time.time()))
+            config = 'tests/samples/configs/good_config.cfg'
+
+            args = ['--file', entity, '--config', config, '--time', now, '--alternate-language', 'PYTHON']
+
+            with utils.mock.patch('wakatime.stats.smart_guess_lexer') as mock_guess_lexer:
+                mock_guess_lexer.return_value = None
+
+                retval = execute(args)
+
+                self.assertEquals(retval, 102)
+                self.assertEquals(sys.stdout.getvalue(), '')
+                self.assertEquals(sys.stderr.getvalue(), '')
+
+                self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
+                self.patched['wakatime.session_cache.SessionCache.delete'].assert_called_once_with()
+                self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
+
+                heartbeat = {
+                    'language': u('Python'),
+                    'lines': 37,
+                    'entity': os.path.realpath(entity),
+                    'project': u(os.path.basename(os.path.realpath('.'))),
+                    'dependencies': ANY,
+                    'time': float(now),
+                    'type': 'file',
+                }
+                stats = {
+                    u('cursorpos'): None,
+                    u('dependencies'): ANY,
+                    u('language'): u('Python'),
+                    u('lineno'): None,
+                    u('lines'): 37,
+                }
+                expected_dependencies = [
+                    'app',
+                    'django',
+                    'flask',
+                    'jinja',
+                    'mock',
+                    'pygments',
+                    'simplejson',
+                    'sqlalchemy',
+                    'unittest',
+                ]
+
+                self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(ANY, ANY, None)
+                for key, val in self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].items():
+                    self.assertEquals(heartbeat[key], val)
+                dependencies = self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['dependencies']
+                self.assertListsEqual(dependencies, expected_dependencies)
+                self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
+                self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()

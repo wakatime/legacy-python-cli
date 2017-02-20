@@ -18,6 +18,7 @@ from .dependencies import DependencyParser
 
 from .packages.pygments.lexers import (
     ClassNotFound,
+    find_lexer_class,
     get_lexer_by_name,
     guess_lexer_for_filename,
 )
@@ -43,11 +44,15 @@ def get_file_stats(file_name, entity_type='file', lineno=None, cursorpos=None,
             'cursorpos': cursorpos,
         }
     else:
-        language, lexer = guess_language(file_name)
+        language = standardize_language(alternate_language, plugin)
+        lexer = get_lexer(language)
+
+        if not language:
+            language, lexer = guess_language(file_name)
+
         parser = DependencyParser(file_name, lexer)
         dependencies = parser.parse()
-        if language is None and alternate_language:
-            language = standardize_language(alternate_language, plugin)
+
         stats = {
             'language': language,
             'dependencies': dependencies,
@@ -56,6 +61,19 @@ def get_file_stats(file_name, entity_type='file', lineno=None, cursorpos=None,
             'cursorpos': cursorpos,
         }
     return stats
+
+
+def get_lexer(language):
+    """Return a Pygments Lexer object for the given language string."""
+
+    if not language:
+        return None
+
+    lexer_cls = find_lexer_class(language)
+    if lexer_cls:
+        return lexer_cls()
+
+    return None
 
 
 def guess_language(file_name):
@@ -187,6 +205,9 @@ def number_lines_in_file(file_name):
 
 def standardize_language(language, plugin):
     """Maps a string to the equivalent Pygments language."""
+
+    if not language:
+        return None
 
     # standardize language for this plugin
     if plugin:

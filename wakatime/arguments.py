@@ -82,8 +82,8 @@ def parseArguments():
             help='optional alternate project name; auto-discovered project '+
                  'takes priority')
     parser.add_argument('--alternate-language', dest='alternate_language',
-            help='optional alternate language name; auto-detected language'+
-                 'takes priority')
+            help='optional alternate language name; if valid, takes priority '+
+                 'over auto-detected language')
     parser.add_argument('--hostname', dest='hostname', help='hostname of '+
                         'current machine.')
     parser.add_argument('--disableoffline', dest='offline',
