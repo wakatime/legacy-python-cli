@@ -2,11 +2,10 @@ usage: wakatime [-h] [--entity FILE] [--key KEY] [--write] [--plugin PLUGIN]
                 [--time time] [--lineno LINENO] [--cursorpos CURSORPOS]
                 [--entity-type ENTITY_TYPE] [--proxy PROXY]
                 [--project PROJECT] [--alternate-project ALTERNATE_PROJECT]
-                [--language ALTERNATE_LANGUAGE] [--hostname HOSTNAME]
-                [--disableoffline] [--hidefilenames] [--exclude EXCLUDE]
-                [--include INCLUDE] [--extra-heartbeats] [--logfile LOGFILE]
-                [--apiurl API_URL] [--timeout TIMEOUT] [--config CONFIG]
-                [--verbose] [--version]
+                [--language LANGUAGE] [--hostname HOSTNAME] [--disableoffline]
+                [--hidefilenames] [--exclude EXCLUDE] [--include INCLUDE]
+                [--extra-heartbeats] [--logfile LOGFILE] [--apiurl API_URL]
+                [--timeout TIMEOUT] [--config CONFIG] [--verbose] [--version]
 
 Common interface for the WakaTime api.
 
@@ -35,9 +34,8 @@ optional arguments:
   --alternate-project ALTERNATE_PROJECT
                         optional alternate project name; auto-discovered
                         project takes priority
-  --language ALTERNATE_LANGUAGE
-                        optional alternate language name; if valid, takes
-                        priority over auto-detected language
+  --language LANGUAGE   optional language name; if valid, takes priority over
+                        auto-detected language
   --hostname HOSTNAME   hostname of current machine.
   --disableoffline      disables offline time logging instead of queuing
                         logged time

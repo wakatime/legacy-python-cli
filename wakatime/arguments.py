@@ -81,11 +81,11 @@ def parseArguments():
     parser.add_argument('--alternate-project', dest='alternate_project',
             help='optional alternate project name; auto-discovered project '+
                  'takes priority')
-    parser.add_argument('--alternate-language',  dest='alternate_language_old',
+    parser.add_argument('--alternate-language',  dest='alternate_language',
             help=argparse.SUPPRESS)
-    parser.add_argument('--language', dest='alternate_language',
-            help='optional alternate language name; if valid, takes priority '+
-                 'over auto-detected language')
+    parser.add_argument('--language', dest='language',
+            help='optional language name; if valid, takes priority over '+
+                 'auto-detected language')
     parser.add_argument('--hostname', dest='hostname', help='hostname of '+
                         'current machine.')
     parser.add_argument('--disableoffline', dest='offline',
@@ -162,8 +162,8 @@ def parseArguments():
         else:
             parser.error('argument --entity is required')
 
-    if not args.alternate_language and args.alternate_language_old:
-        args.alternate_language = args.alternate_language_old
+    if not args.language and args.alternate_language:
+        args.language = args.alternate_language
 
     if not args.exclude:
         args.exclude = []

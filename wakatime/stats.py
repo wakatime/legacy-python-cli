@@ -34,7 +34,7 @@ log = logging.getLogger('WakaTime')
 
 
 def get_file_stats(file_name, entity_type='file', lineno=None, cursorpos=None,
-                   plugin=None, alternate_language=None):
+                   plugin=None, language=None):
     if entity_type != 'file':
         stats = {
             'language': None,
@@ -44,7 +44,7 @@ def get_file_stats(file_name, entity_type='file', lineno=None, cursorpos=None,
             'cursorpos': cursorpos,
         }
     else:
-        language = standardize_language(alternate_language, plugin)
+        language = standardize_language(language, plugin)
         lexer = get_lexer(language)
 
         if not language:

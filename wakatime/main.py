@@ -262,7 +262,7 @@ def process_heartbeat(args, configs, hostname, heartbeat):
                                 lineno=heartbeat.get('lineno'),
                                 cursorpos=heartbeat.get('cursorpos'),
                                 plugin=args.plugin,
-                                alternate_language=heartbeat.get('alternate_language'))
+                                language=heartbeat.get('language'))
 
         project = heartbeat.get('project') or heartbeat.get('alternate_project')
         branch = None
