@@ -16,12 +16,12 @@ import sys
 from .compat import u, open
 from .dependencies import DependencyParser
 
-from .packages import (
+from .packages.pygments.lexers import (
+    ClassNotFound,
     get_lexer_by_name,
     guess_lexer_for_filename,
-    get_filetype_from_buffer,
 )
-from .packages.pygments.lexers import ClassNotFound
+from .packages.pygments.modeline import get_filetype_from_buffer
 
 try:
     from .packages import simplejson as json  # pragma: nocover
@@ -30,6 +30,32 @@ except (ImportError, SyntaxError):  # pragma: nocover
 
 
 log = logging.getLogger('WakaTime')
+
+
+def get_file_stats(file_name, entity_type='file', lineno=None, cursorpos=None,
+                   plugin=None, alternate_language=None):
+    if entity_type != 'file':
+        stats = {
+            'language': None,
+            'dependencies': [],
+            'lines': None,
+            'lineno': lineno,
+            'cursorpos': cursorpos,
+        }
+    else:
+        language, lexer = guess_language(file_name)
+        parser = DependencyParser(file_name, lexer)
+        dependencies = parser.parse()
+        if language is None and alternate_language:
+            language = standardize_language(alternate_language, plugin)
+        stats = {
+            'language': language,
+            'dependencies': dependencies,
+            'lines': number_lines_in_file(file_name),
+            'lineno': lineno,
+            'cursorpos': cursorpos,
+        }
+    return stats
 
 
 def guess_language(file_name):
@@ -79,13 +105,13 @@ def guess_lexer_using_filename(file_name, text):
 
     try:
         lexer = guess_lexer_for_filename(file_name, text)
-    except:  # pragma: nocover
+    except:
         pass
 
     if lexer is not None:
         try:
             accuracy = lexer.analyse_text(text)
-        except:  # pragma: nocover
+        except:
             pass
 
     return lexer, accuracy
@@ -157,32 +183,6 @@ def number_lines_in_file(file_name):
         except:
             return None
     return lines
-
-
-def get_file_stats(file_name, entity_type='file', lineno=None, cursorpos=None,
-                   plugin=None, alternate_language=None):
-    if entity_type != 'file':
-        stats = {
-            'language': None,
-            'dependencies': [],
-            'lines': None,
-            'lineno': lineno,
-            'cursorpos': cursorpos,
-        }
-    else:
-        language, lexer = guess_language(file_name)
-        parser = DependencyParser(file_name, lexer)
-        dependencies = parser.parse()
-        if language is None and alternate_language:
-            language = standardize_language(alternate_language, plugin)
-        stats = {
-            'language': language,
-            'dependencies': dependencies,
-            'lines': number_lines_in_file(file_name),
-            'lineno': lineno,
-            'cursorpos': cursorpos,
-        }
-    return stats
 
 
 def standardize_language(language, plugin):

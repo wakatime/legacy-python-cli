@@ -198,3 +198,19 @@ class LanguagesTestCase(utils.TestCase):
 
                 language = None
                 self.assertEqual(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].get('language'), language)
+
+    def test_typescript_detected_correctly(self):
+        response = Response()
+        response.status_code = 500
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        now = u(int(time.time()))
+        config = 'tests/samples/configs/good_config.cfg'
+        entity = 'tests/samples/codefiles/typescript.ts'
+        args = ['--file', entity, '--config', config, '--time', now]
+
+        retval = execute(args)
+        self.assertEquals(retval, 102)
+
+        language = u('TypeScript')
+        self.assertEqual(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].get('language'), language)
