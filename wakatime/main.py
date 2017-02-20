@@ -3,7 +3,7 @@
     wakatime.main
     ~~~~~~~~~~~~~
 
-    wakatime module entry point.
+    Module entry point.
 
     :copyright: (c) 2013 Alan Hamlett.
     :license: BSD, see LICENSE for more details.

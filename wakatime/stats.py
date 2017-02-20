@@ -197,10 +197,7 @@ def standardize_language(language, plugin):
 
     # standardize language against default languages
     standardized = get_language_from_json(language, 'default')
-    if standardized is not None:
-        return standardized
-
-    return None
+    return standardized
 
 
 def get_language_from_json(language, key):
@@ -214,10 +211,8 @@ def get_language_from_json(language, key):
     try:
         with open(file_name, 'r', encoding='utf-8') as fh:
             languages = json.loads(fh.read())
-            if language in languages.values():
-                return language
-            if languages.get(language):
-                return languages[language]
+            if languages.get(language.lower()):
+                return languages[language.lower()]
     except:
         pass
 

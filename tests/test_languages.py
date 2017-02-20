@@ -127,16 +127,16 @@ class LanguagesTestCase(utils.TestCase):
 
         with utils.mock.patch('wakatime.stats.smart_guess_lexer') as mock_guess_lexer:
             mock_guess_lexer.return_value = None
+            language = u('Java')
 
             now = u(int(time.time()))
             config = 'tests/samples/configs/good_config.cfg'
             entity = 'tests/samples/codefiles/python.py'
-            args = ['--file', entity, '--config', config, '--time', now, '--alternate-language', 'Java']
+            args = ['--file', entity, '--config', config, '--time', now, '--alternate-language', language.upper()]
 
             retval = execute(args)
             self.assertEquals(retval, 102)
 
-            language = u('Java')
             self.assertEqual(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].get('language'), language)
 
     def test_vim_alternate_language_is_used_when_not_guessed(self):
