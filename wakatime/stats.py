@@ -44,9 +44,7 @@ def get_file_stats(file_name, entity_type='file', lineno=None, cursorpos=None,
             'cursorpos': cursorpos,
         }
     else:
-        language = standardize_language(language, plugin)
-        lexer = get_lexer(language)
-
+        language, lexer = standardize_language(language, plugin)
         if not language:
             language, lexer = guess_language(file_name)
 
@@ -61,19 +59,6 @@ def get_file_stats(file_name, entity_type='file', lineno=None, cursorpos=None,
             'cursorpos': cursorpos,
         }
     return stats
-
-
-def get_lexer(language):
-    """Return a Pygments Lexer object for the given language string."""
-
-    if not language:
-        return None
-
-    lexer_cls = find_lexer_class(language)
-    if lexer_cls:
-        return lexer_cls()
-
-    return None
 
 
 def guess_language(file_name):
@@ -204,21 +189,37 @@ def number_lines_in_file(file_name):
 
 
 def standardize_language(language, plugin):
-    """Maps a string to the equivalent Pygments language."""
+    """Maps a string to the equivalent Pygments language.
+
+    Returns a tuple of (language_name, lexer_object).
+    """
 
     if not language:
-        return None
+        return None, None
 
     # standardize language for this plugin
     if plugin:
         plugin = plugin.split(' ')[-1].split('/')[0].split('-')[0]
         standardized = get_language_from_json(language, plugin)
         if standardized is not None:
-            return standardized
+            return standardized, get_lexer(standardized)
 
     # standardize language against default languages
     standardized = get_language_from_json(language, 'default')
-    return standardized
+    return standardized, get_lexer(standardized)
+
+
+def get_lexer(language):
+    """Return a Pygments Lexer object for the given language string."""
+
+    if not language:
+        return None
+
+    lexer_cls = find_lexer_class(language)
+    if lexer_cls:
+        return lexer_cls()
+
+    return None
 
 
 def get_language_from_json(language, key):
