@@ -18,10 +18,12 @@ from .compat import u, open
 from .dependencies import DependencyParser
 
 from .packages.pygments.lexers import (
+    _iter_lexerclasses,
+    _fn_matches,
+    basename,
     ClassNotFound,
     find_lexer_class,
     get_lexer_by_name,
-    guess_lexer_for_filename,
 )
 from .packages.pygments.modeline import get_filetype_from_buffer
 
@@ -99,7 +101,7 @@ def smart_guess_lexer(file_name):
         lexer = lexer1
     if (lexer2 and accuracy2 and
         (not accuracy1 or accuracy2 > accuracy1)):
-        lexer = lexer2  # pragma: nocover
+        lexer = lexer2
 
     return lexer
 
@@ -113,7 +115,7 @@ def guess_lexer_using_filename(file_name, text):
     lexer, accuracy = None, None
 
     try:
-        lexer = guess_lexer_for_filename(file_name, text)
+        lexer = custom_pygments_guess_lexer_for_filename(file_name, text)
     except:
         pass
 
@@ -263,3 +265,54 @@ def get_file_head(file_name):
         except:
             log.traceback(logging.DEBUG)
     return text
+
+
+def custom_pygments_guess_lexer_for_filename(_fn, _text, **options):
+    """Overwrite pygments.lexers.guess_lexer_for_filename to customize the
+    priority of different lexers based on popularity of languages."""
+
+    fn = basename(_fn)
+    primary = {}
+    matching_lexers = set()
+    for lexer in _iter_lexerclasses():
+        for filename in lexer.filenames:
+            if _fn_matches(fn, filename):
+                matching_lexers.add(lexer)
+                primary[lexer] = True
+        for filename in lexer.alias_filenames:
+            if _fn_matches(fn, filename):
+                matching_lexers.add(lexer)
+                primary[lexer] = False
+    if not matching_lexers:
+        raise ClassNotFound('no lexer for filename %r found' % fn)
+    if len(matching_lexers) == 1:
+        return matching_lexers.pop()(**options)
+    result = []
+    for lexer in matching_lexers:
+        rv = lexer.analyse_text(_text)
+        if rv == 1.0:
+            return lexer(**options)
+        result.append((rv, customize_priority(lexer)))
+
+    def type_sort(t):
+        # sort by:
+        # - analyse score
+        # - is primary filename pattern?
+        # - priority
+        # - last resort: class name
+        return (t[0], primary[t[1]], t[1].priority, t[1].__name__)
+    result.sort(key=type_sort)
+
+    return result[-1][1](**options)
+
+CUSTOM_PRIORITIES = {
+    'perl': 0.1,
+    'perl6': 0.1,
+    'typescript': 0.11,
+}
+def customize_priority(lexer):
+    """Return an integer priority for the given lexer object."""
+
+    if lexer.name.lower() in CUSTOM_PRIORITIES:
+        lexer.priority = CUSTOM_PRIORITIES[lexer.name.lower()]
+    return lexer
