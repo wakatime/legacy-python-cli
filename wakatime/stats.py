@@ -305,6 +305,7 @@ def custom_pygments_guess_lexer_for_filename(_fn, _text, **options):
 
     return result[-1][1](**options)
 
+
 CUSTOM_PRIORITIES = {
     'perl': 0.1,
     'perl6': 0.1,

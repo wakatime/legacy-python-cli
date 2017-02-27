@@ -3,6 +3,12 @@ History
 -------
 
 
+7.0.3 (2017-02-26)
+++++++++++++++++++
+
+- Ability to prioritize common languages over uncommon lanuages. #81
+
+
 7.0.2 (2017-02-20)
 ++++++++++++++++++
 
