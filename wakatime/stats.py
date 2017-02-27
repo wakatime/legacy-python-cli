@@ -307,9 +307,10 @@ def custom_pygments_guess_lexer_for_filename(_fn, _text, **options):
 
 
 CUSTOM_PRIORITIES = {
+    'typescript': 0.11,
     'perl': 0.1,
     'perl6': 0.1,
-    'typescript': 0.11,
+    'f#': 0.1,
 }
 def customize_priority(lexer):
     """Return an integer priority for the given lexer object."""
