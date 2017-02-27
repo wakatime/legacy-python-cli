@@ -23,31 +23,6 @@ class LanguagesTestCase(utils.TestCase):
         ['wakatime.session_cache.SessionCache.connect', None],
     ]
 
-    def test_language_detected_for_header_file(self):
-        response = Response()
-        response.status_code = 500
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
-
-        now = u(int(time.time()))
-        config = 'tests/samples/configs/good_config.cfg'
-        entity = 'tests/samples/codefiles/see.h'
-        args = ['--file', entity, '--config', config, '--time', now]
-
-        retval = execute(args)
-        self.assertEquals(retval, 102)
-
-        language = u('C')
-        self.assertEqual(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].get('language'), language)
-
-        entity = 'tests/samples/codefiles/seeplusplus.h'
-        args[1] = entity
-
-        retval = execute(args)
-        self.assertEquals(retval, 102)
-
-        language = u('C++')
-        self.assertEqual(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].get('language'), language)
-
     def test_c_language_detected_for_header_with_c_files_in_folder(self):
         response = Response()
         response.status_code = 500
@@ -78,6 +53,22 @@ class LanguagesTestCase(utils.TestCase):
         self.assertEquals(retval, 102)
 
         language = u('C++')
+        self.assertEqual(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].get('language'), language)
+
+    def test_c_not_detected_for_non_header_with_c_files_in_folder(self):
+        response = Response()
+        response.status_code = 500
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        now = u(int(time.time()))
+        config = 'tests/samples/configs/good_config.cfg'
+        entity = 'tests/samples/codefiles/c_and_python/see.py'
+        args = ['--file', entity, '--config', config, '--time', now]
+
+        retval = execute(args)
+        self.assertEquals(retval, 102)
+
+        language = u('Python')
         self.assertEqual(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].get('language'), language)
 
     def test_guess_language(self):

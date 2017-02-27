@@ -42,7 +42,7 @@ class DependenciesTestCase(utils.TestCase):
 
     def test_token_parser(self):
         with self.assertRaises(NotYetImplemented):
-            source_file = 'tests/samples/codefiles/see.h'
+            source_file = 'tests/samples/codefiles/c_only/non_empty.h'
             parser = TokenParser(source_file)
             parser.parse()
 
@@ -458,7 +458,7 @@ class DependenciesTestCase(utils.TestCase):
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
         with utils.TemporaryDirectory() as tempdir:
-            entity = 'tests/samples/codefiles/see.c'
+            entity = 'tests/samples/codefiles/c_only/non_empty.c'
             shutil.copy(entity, os.path.join(tempdir, 'see.c'))
             entity = os.path.realpath(os.path.join(tempdir, 'see.c'))
 
@@ -510,9 +510,9 @@ class DependenciesTestCase(utils.TestCase):
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
         with utils.TemporaryDirectory() as tempdir:
-            entity = 'tests/samples/codefiles/seeplusplus.cpp'
-            shutil.copy(entity, os.path.join(tempdir, 'seeplusplus.cpp'))
-            entity = os.path.realpath(os.path.join(tempdir, 'seeplusplus.cpp'))
+            entity = 'tests/samples/codefiles/c_and_cpp/non_empty.cpp'
+            shutil.copy(entity, os.path.join(tempdir, 'non_empty.cpp'))
+            entity = os.path.realpath(os.path.join(tempdir, 'non_empty.cpp'))
 
             now = u(int(time.time()))
             config = 'tests/samples/configs/good_config.cfg'
@@ -562,7 +562,7 @@ class DependenciesTestCase(utils.TestCase):
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
         with utils.TemporaryDirectory() as tempdir:
-            entity = 'tests/samples/codefiles/seesharp.cs'
+            entity = 'tests/samples/codefiles/csharp/seesharp.cs'
             shutil.copy(entity, os.path.join(tempdir, 'seesharp.cs'))
             entity = os.path.realpath(os.path.join(tempdir, 'seesharp.cs'))
 

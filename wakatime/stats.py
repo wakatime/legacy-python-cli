@@ -11,6 +11,7 @@
 
 import logging
 import os
+import re
 import sys
 
 from .compat import u, open
@@ -64,13 +65,18 @@ def get_file_stats(file_name, entity_type='file', lineno=None, cursorpos=None,
 def guess_language(file_name):
     """Guess lexer and language for a file.
 
-    Returns (language, lexer) tuple where language is a unicode string.
+    Returns a tuple of (language_str, lexer_obj).
     """
 
+    lexer = None
+
     language = get_language_from_extension(file_name)
-    lexer = smart_guess_lexer(file_name)
-    if language is None and lexer is not None:
-        language = u(lexer.name)
+    if language:
+        lexer = get_lexer(language)
+    else:
+        lexer = smart_guess_lexer(file_name)
+        if lexer:
+            language = u(lexer.name)
 
     return language, lexer
 
@@ -151,15 +157,17 @@ def guess_lexer_using_modeline(text):
 
 def get_language_from_extension(file_name):
     """Returns a matching language for the given file extension.
+
+    When guessed_language is 'C', does not restrict to known file extensions.
     """
 
     filepart, extension = os.path.splitext(file_name)
 
-    if os.path.exists(u('{0}{1}').format(u(filepart), u('.c'))) or os.path.exists(u('{0}{1}').format(u(filepart), u('.C'))):
-        return 'C'
+    if re.match(r'\.h.*', extension, re.IGNORECASE) or re.match(r'\.c.*', extension, re.IGNORECASE):
 
-    extension = extension.lower()
-    if extension == '.h':
+        if os.path.exists(u('{0}{1}').format(u(filepart), u('.c'))) or os.path.exists(u('{0}{1}').format(u(filepart), u('.C'))):
+            return 'C'
+
         directory = os.path.dirname(file_name)
         available_files = os.listdir(directory)
         available_extensions = list(zip(*map(os.path.splitext, available_files)))[1]
@@ -191,7 +199,7 @@ def number_lines_in_file(file_name):
 def standardize_language(language, plugin):
     """Maps a string to the equivalent Pygments language.
 
-    Returns a tuple of (language_name, lexer_object).
+    Returns a tuple of (language_str, lexer_obj).
     """
 
     if not language:
