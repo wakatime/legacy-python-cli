@@ -3,6 +3,12 @@ History
 -------
 
 
+7.0.4 (2017-03-01)
+++++++++++++++++++
+
+- Add six library to satisfy missing dependency from ntlm-auth.
+
+
 7.0.3 (2017-02-26)
 ++++++++++++++++++
 
