@@ -41,7 +41,7 @@ def parseConfigFile(configFile=None):
     if not configFile:
         configFile = os.path.join(os.path.expanduser('~'), '.wakatime.cfg')
 
-    configs = configparser.SafeConfigParser(delimiters=('='), strict=False)
+    configs = configparser.ConfigParser(delimiters=('='), strict=False)
     try:
         with open(configFile, 'r', encoding='utf-8') as fh:
             try:
