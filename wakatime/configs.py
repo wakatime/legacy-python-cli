@@ -21,9 +21,9 @@ from .constants import CONFIG_FILE_PARSE_ERROR
 
 
 try:
-    import ConfigParser as configparser
-except ImportError:  # pragma: nocover
     import configparser
+except ImportError:
+    from .packages import configparser
 
 
 def parseConfigFile(configFile=None):
@@ -41,7 +41,7 @@ def parseConfigFile(configFile=None):
     if not configFile:
         configFile = os.path.join(os.path.expanduser('~'), '.wakatime.cfg')
 
-    configs = configparser.SafeConfigParser()
+    configs = configparser.SafeConfigParser(delimiters=('='), strict=False)
     try:
         with open(configFile, 'r', encoding='utf-8') as fh:
             try:

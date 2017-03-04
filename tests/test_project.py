@@ -345,7 +345,10 @@ class ProjectTestCase(utils.TestCase):
             self.assertEquals('hg', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
             self.assertEquals('default', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['branch'])
 
-    def test_project_map(self):
+    @log_capture()
+    def test_project_map(self, logs):
+        logging.disable(logging.NOTSET)
+
         response = Response()
         response.status_code = 0
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
@@ -360,7 +363,17 @@ class ProjectTestCase(utils.TestCase):
 
         self.assertEquals('proj-map', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
 
-    def test_project_map_group_usage(self):
+        self.assertEquals(sys.stdout.getvalue(), '')
+        self.assertEquals(sys.stderr.getvalue(), '')
+
+        log_output = "\n".join([u(' ').join(x) for x in logs.actual()])
+        expected = u('')
+        self.assertEquals(log_output, expected)
+
+    @log_capture()
+    def test_project_map_group_usage(self, logs):
+        logging.disable(logging.NOTSET)
+
         response = Response()
         response.status_code = 0
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
@@ -374,6 +387,13 @@ class ProjectTestCase(utils.TestCase):
         execute(args)
 
         self.assertEquals('proj-map42', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
+
+        self.assertEquals(sys.stdout.getvalue(), '')
+        self.assertEquals(sys.stderr.getvalue(), '')
+
+        log_output = "\n".join([u(' ').join(x) for x in logs.actual()])
+        expected = u('')
+        self.assertEquals(log_output, expected)
 
     @log_capture()
     def test_project_map_with_invalid_regex(self, logs):
@@ -422,4 +442,54 @@ class ProjectTestCase(utils.TestCase):
 
         log_output = "\n".join([u(' ').join(x) for x in logs.actual()])
         expected = u('WakaTime WARNING Regex error (tuple index out of range) for projectmap pattern: proj-map{3}')
+        self.assertEquals(log_output, expected)
+
+    @log_capture()
+    def test_project_map_allows_duplicate_keys(self, logs):
+        logging.disable(logging.NOTSET)
+
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        now = u(int(time.time()))
+        entity = 'tests/samples/projects/project_map/emptyfile.txt'
+        config = 'tests/samples/configs/project_map_with_duplicate_keys.cfg'
+
+        args = ['--file', entity, '--config', config, '--time', now]
+
+        execute(args)
+
+        self.assertEquals('proj-map-duplicate-5', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
+
+        self.assertEquals(sys.stdout.getvalue(), '')
+        self.assertEquals(sys.stderr.getvalue(), '')
+
+        log_output = "\n".join([u(' ').join(x) for x in logs.actual()])
+        expected = u('')
+        self.assertEquals(log_output, expected)
+
+    @log_capture()
+    def test_project_map_allows_colon_in_key(self, logs):
+        logging.disable(logging.NOTSET)
+
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        now = u(int(time.time()))
+        entity = 'tests/samples/projects/project_map/emptyfile.txt'
+        config = 'tests/samples/configs/project_map_with_colon_in_key.cfg'
+
+        args = ['--file', entity, '--config', config, '--time', now]
+
+        execute(args)
+
+        self.assertEquals('proj-map-match', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
+
+        self.assertEquals(sys.stdout.getvalue(), '')
+        self.assertEquals(sys.stderr.getvalue(), '')
+
+        log_output = "\n".join([u(' ').join(x) for x in logs.actual()])
+        expected = u('')
         self.assertEquals(log_output, expected)
