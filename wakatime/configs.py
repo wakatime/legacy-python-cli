@@ -45,7 +45,7 @@ def parseConfigFile(configFile=None):
     try:
         with open(configFile, 'r', encoding='utf-8') as fh:
             try:
-                configs.readfp(fh)
+                configs.read_file(fh)
             except configparser.Error:
                 print(traceback.format_exc())
                 return None
