@@ -16,6 +16,7 @@ import sys
 
 from .compat import u, open
 from .dependencies import DependencyParser
+from .language_priorities import LANGUAGES
 
 from .packages.pygments.lexers import (
     _iter_lexerclasses,
@@ -307,15 +308,9 @@ def custom_pygments_guess_lexer_for_filename(_fn, _text, **options):
     return result[-1][1](**options)
 
 
-CUSTOM_PRIORITIES = {
-    'typescript': 0.11,
-    'perl': 0.1,
-    'perl6': 0.1,
-    'f#': 0.1,
-}
 def customize_priority(lexer):
     """Return an integer priority for the given lexer object."""
 
-    if lexer.name.lower() in CUSTOM_PRIORITIES:
-        lexer.priority = CUSTOM_PRIORITIES[lexer.name.lower()]
+    if lexer.name.lower() in LANGUAGES:
+        lexer.priority = LANGUAGES[lexer.name.lower()]
     return lexer
