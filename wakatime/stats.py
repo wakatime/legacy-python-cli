@@ -311,6 +311,7 @@ def custom_pygments_guess_lexer_for_filename(_fn, _text, **options):
 def customize_priority(lexer):
     """Return an integer priority for the given lexer object."""
 
-    if lexer.name.lower() in LANGUAGES:
-        lexer.priority = LANGUAGES[lexer.name.lower()]
+    lexer_name = lexer.name.lower().replace('sharp', '#')
+    if lexer_name in LANGUAGES:
+        lexer.priority = LANGUAGES[lexer_name]
     return lexer
