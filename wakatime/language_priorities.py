@@ -11,8 +11,8 @@
 
 
 LANGUAGES = {
-    'typescript': 0.11,
-    'perl': 0.1,
-    'perl6': 0.1,
-    'f#': 0.1,
+    'typescript': 0.01,
+    'perl': 0.01,
+    'perl6': 0.01,
+    'f#': 0.01,
 }
