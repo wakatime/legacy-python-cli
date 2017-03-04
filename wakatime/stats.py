@@ -117,13 +117,13 @@ def guess_lexer_using_filename(file_name, text):
     try:
         lexer = custom_pygments_guess_lexer_for_filename(file_name, text)
     except:
-        pass
+        log.traceback(logging.DEBUG)
 
     if lexer is not None:
         try:
             accuracy = lexer.analyse_text(text)
         except:
-            pass
+            log.traceback(logging.DEBUG)
 
     return lexer, accuracy
 
@@ -140,19 +140,19 @@ def guess_lexer_using_modeline(text):
     try:
         file_type = get_filetype_from_buffer(text)
     except:  # pragma: nocover
-        pass
+        log.traceback(logging.DEBUG)
 
     if file_type is not None:
         try:
             lexer = get_lexer_by_name(file_type)
         except ClassNotFound:
-            pass
+            log.traceback(logging.DEBUG)
 
     if lexer is not None:
         try:
             accuracy = lexer.analyse_text(text)
         except:  # pragma: nocover
-            pass
+            log.traceback(logging.DEBUG)
 
     return lexer, accuracy
 
@@ -240,13 +240,14 @@ def get_language_from_json(language, key):
         'languages',
         '{0}.json').format(key.lower())
 
-    try:
-        with open(file_name, 'r', encoding='utf-8') as fh:
-            languages = json.loads(fh.read())
-            if languages.get(language.lower()):
-                return languages[language.lower()]
-    except:
-        pass
+    if os.path.exists(file_name):
+        try:
+            with open(file_name, 'r', encoding='utf-8') as fh:
+                languages = json.loads(fh.read())
+                if languages.get(language.lower()):
+                    return languages[language.lower()]
+        except:
+            log.traceback(logging.DEBUG)
 
     return None
 
