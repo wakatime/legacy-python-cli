@@ -3,6 +3,15 @@ History
 -------
 
 
+8.0.0 (2017-03-16)
+++++++++++++++++++
+
+- Config file not needed when passing api key via command line.
+- Allow colons in [projectmap] config section. #83
+- When unable to detect language and debug mode turned on, log any tracebacks.
+- Increase priority of F# and TypeScript languages.
+
+
 7.0.4 (2017-03-01)
 ++++++++++++++++++
 
