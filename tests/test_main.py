@@ -492,7 +492,7 @@ class MainTestCase(utils.TestCase):
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
         with utils.TemporaryDirectory() as tempdir:
-            filename = os.listdir('tests/samples/codefiles/unicode')[0]
+            filename = list(filter(lambda x: x.endswith('.txt'), os.listdir('tests/samples/codefiles/unicode')))[0]
             entity = os.path.join('tests/samples/codefiles/unicode', filename)
             shutil.copy(entity, os.path.join(tempdir, filename))
             entity = os.path.realpath(os.path.join(tempdir, filename))
@@ -507,8 +507,8 @@ class MainTestCase(utils.TestCase):
             self.assertEquals(sys.stdout.getvalue(), '')
             self.assertEquals(sys.stderr.getvalue(), '')
 
-            output = [u(' ').join(x) for x in logs.actual()]
-            self.assertEquals(len(output), 0)
+            log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
+            self.assertEquals(log_output, '')
 
             self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
             self.patched['wakatime.session_cache.SessionCache.delete'].assert_called_once_with()

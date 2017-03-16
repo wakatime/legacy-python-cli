@@ -15,6 +15,7 @@ from testfixtures import log_capture
 from wakatime.compat import u, is_py3
 from wakatime.constants import (
     API_ERROR,
+    AUTH_ERROR,
     CONFIG_FILE_PARSE_ERROR,
     SUCCESS,
 )
@@ -52,6 +53,7 @@ class MainTestCase(utils.TestCase):
             entity = 'tests/samples/codefiles/emptyfile.txt'
             shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
+            args = ['--file', entity]
 
             with utils.mock.patch('wakatime.configs.os.environ.get') as mock_env:
                 mock_env.return_value = None
@@ -59,18 +61,15 @@ class MainTestCase(utils.TestCase):
                 with utils.mock.patch('wakatime.configs.open') as mock_open:
                     mock_open.side_effect = IOError('')
 
-                    config = os.path.join(os.path.expanduser('~'), '.wakatime.cfg')
-                    args = ['--file', entity]
-
                     with self.assertRaises(SystemExit) as e:
                         execute(args)
 
-                    self.assertEquals(int(str(e.exception)), CONFIG_FILE_PARSE_ERROR)
-                    expected_stdout = u('')
-                    expected_stderr = u("Error: Could not read from config file {0}\n").format(u(config))
-                    self.assertEquals(sys.stdout.getvalue(), expected_stdout)
-                    self.assertEquals(sys.stderr.getvalue(), expected_stderr)
-                    self.patched['wakatime.session_cache.SessionCache.get'].assert_not_called()
+        self.assertEquals(int(str(e.exception)), AUTH_ERROR)
+        expected_stdout = u('')
+        expected_stderr = open('tests/samples/output/configs_test_config_file_not_passed_in_command_line_args').read()
+        self.assertEquals(sys.stdout.getvalue(), expected_stdout)
+        self.assertEquals(sys.stderr.getvalue(), expected_stderr)
+        self.patched['wakatime.session_cache.SessionCache.get'].assert_not_called()
 
     def test_config_file_from_env(self):
         response = Response()
@@ -116,13 +115,14 @@ class MainTestCase(utils.TestCase):
             with self.assertRaises(SystemExit) as e:
                 execute(args)
 
-            self.assertEquals(int(str(e.exception)), CONFIG_FILE_PARSE_ERROR)
-            expected_stdout = u('')
-            expected_stderr = u("Error: Could not read from config file foo\n")
-            self.assertEquals(sys.stdout.getvalue(), expected_stdout)
-            self.assertEquals(sys.stderr.getvalue(), expected_stderr)
+        self.assertEquals(int(str(e.exception)), AUTH_ERROR)
 
-            self.patched['wakatime.session_cache.SessionCache.get'].assert_not_called()
+        expected_stdout = u('')
+        expected_stderr = open('tests/samples/output/configs_test_missing_config_file').read()
+        self.assertEquals(sys.stdout.getvalue(), expected_stdout)
+        self.assertEquals(sys.stderr.getvalue(), expected_stderr)
+
+        self.patched['wakatime.session_cache.SessionCache.get'].assert_not_called()
 
     def test_good_config_file(self):
         response = Response()
@@ -179,7 +179,10 @@ class MainTestCase(utils.TestCase):
             self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_called_once_with()
 
-    def test_bad_config_file(self):
+    @log_capture()
+    def test_bad_config_file(self, logs):
+        logging.disable(logging.NOTSET)
+
         with utils.TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
             shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
@@ -187,10 +190,20 @@ class MainTestCase(utils.TestCase):
 
             config = 'tests/samples/configs/bad_config.cfg'
             args = ['--file', entity, '--config', config]
-            retval = execute(args)
-            self.assertEquals(retval, CONFIG_FILE_PARSE_ERROR)
+
+            with self.assertRaises(SystemExit) as e:
+                execute(args)
+
+            self.assertEquals(int(str(e.exception)), CONFIG_FILE_PARSE_ERROR)
             self.assertIn('ParsingError', sys.stdout.getvalue())
-            self.assertEquals(sys.stderr.getvalue(), '')
+            expected_stderr = ''
+            self.assertEquals(sys.stderr.getvalue(), expected_stderr)
+
+            log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
+            expected = ''
+            self.assertEquals(log_output, expected)
+
+
             self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
             self.patched['wakatime.session_cache.SessionCache.get'].assert_not_called()
             self.patched['wakatime.session_cache.SessionCache.delete'].assert_not_called()

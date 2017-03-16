@@ -241,6 +241,89 @@ class MainTestCase(utils.TestCase):
         self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
+    @log_capture()
+    def test_invalid_api_key(self, logs):
+        logging.disable(logging.NOTSET)
+
+        response = Response()
+        response.status_code = 201
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        key = 'an-invalid-key'
+        args = ['--key', key]
+
+        with self.assertRaises(SystemExit) as e:
+            execute(args)
+
+        self.assertEquals(int(str(e.exception)), AUTH_ERROR)
+        self.assertEquals(sys.stdout.getvalue(), '')
+        expected = 'error: Invalid api key. Find your api key from wakatime.com/settings.'
+        self.assertIn(expected, sys.stderr.getvalue())
+
+        log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
+        expected = ''
+        self.assertEquals(log_output, expected)
+
+        self.patched['wakatime.session_cache.SessionCache.get'].assert_not_called()
+        self.patched['wakatime.session_cache.SessionCache.delete'].assert_not_called()
+        self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
+
+        self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
+        self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
+
+    @log_capture()
+    def test_api_key_passed_via_command_line(self, logs):
+        logging.disable(logging.NOTSET)
+
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        with utils.TemporaryDirectory() as tempdir:
+            filename = list(filter(lambda x: x.endswith('.txt'), os.listdir('tests/samples/codefiles/unicode')))[0]
+            entity = os.path.join('tests/samples/codefiles/unicode', filename)
+            shutil.copy(entity, os.path.join(tempdir, filename))
+            entity = os.path.realpath(os.path.join(tempdir, filename))
+            now = u(int(time.time()))
+            key = str(uuid.uuid4())
+
+            args = ['--file', entity, '--key', key, '--time', now]
+
+            retval = execute(args)
+            self.assertEquals(sys.stdout.getvalue(), '')
+            self.assertEquals(sys.stderr.getvalue(), '')
+
+            log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
+            self.assertEquals(log_output, '')
+
+            self.assertEquals(retval, API_ERROR)
+
+            self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
+            self.patched['wakatime.session_cache.SessionCache.delete'].assert_called_once_with()
+            self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
+
+            heartbeat = {
+                'language': 'Text only',
+                'lines': 0,
+                'entity': os.path.realpath(entity),
+                'project': os.path.basename(os.path.abspath('.')),
+                'time': float(now),
+                'type': 'file',
+            }
+            stats = {
+                u('cursorpos'): None,
+                u('dependencies'): [],
+                u('language'): u('Text only'),
+                u('lineno'): None,
+                u('lines'): 0,
+            }
+
+            self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(ANY, ANY, None)
+            for key, val in self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].items():
+                self.assertEquals(heartbeat[key], val)
+            self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
+            self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
+
     def test_proxy_argument(self):
         response = Response()
         response.status_code = 201

@@ -13,10 +13,9 @@
 from __future__ import print_function
 
 import os
-import sys
 import traceback
 
-from .compat import u, open
+from .compat import open
 from .constants import CONFIG_FILE_PARSE_ERROR
 
 
@@ -48,8 +47,7 @@ def parseConfigFile(configFile=None):
                 configs.read_file(fh)
             except configparser.Error:
                 print(traceback.format_exc())
-                return None
+                raise SystemExit(CONFIG_FILE_PARSE_ERROR)
     except IOError:
-        sys.stderr.write(u("Error: Could not read from config file {0}\n").format(u(configFile)))
-        raise SystemExit(CONFIG_FILE_PARSE_ERROR)
+        pass
     return configs
