@@ -113,12 +113,12 @@ Each plugin also has it's own log file:
 * **Vscode** logs to the developer console (Help -> Toggle Developer Tools)
 * **Xcode** type ``sudo tail -f /var/log/system.log`` in a Terminal to view Xcode errors
 
-Useful API Endpoints::
+Useful API Endpoints:
 
 * `List of Plugins and when they were last heard from <https://wakatime.com/api/v1/users/current/user_agents>`_
 * `List of computers last sending coding activity <https://wakatime.com/api/v1/users/current/machine_names>`_
 
-Useful Resources::
+Useful Resources:
 
 `More Troubleshooting Info <https://wakatime.com/faq#debug-plugins>`_
 
