@@ -86,15 +86,15 @@ For commonly used configuration options, see examples in the `FAQ <https://wakat
 Troubleshooting
 ---------------
 
-Read the `FAQ <https://wakatime.com/faq>`_ for solutions to common problems.
+Read `How to debug the plugins <https://wakatime.com/faq#debug-plugins>`_.
 
-WakaTime CLI writes errors to a common log file in your User ``$WAKATIME_HOME`` directory::
+Make sure to set ``debug=true`` in your ``~/.wakatime.cfg`` file.
+
+Common log file location in your User ``$WAKATIME_HOME`` directory::
 
     ~/.wakatime.log
 
-Set ``debug=true`` in ``~/.wakatime.cfg`` for more verbose logging, but don't forget to set it back to ``debug=false`` afterwards or your editor might be laggy while waiting for WakaTime CLI to finish executing.
-
-Each plugin also has it's own log file for things outside the scope of WakaTime CLI:
+Each plugin also has it's own log file:
 
 * **Atom** writes errors to the developer console (View -> Developer -> Toggle Developer Tools)
 * **Brackets** errors go to the developer console (Debug -> Show Developer Tools)
@@ -113,10 +113,14 @@ Each plugin also has it's own log file for things outside the scope of WakaTime 
 * **Vscode** logs to the developer console (Help -> Toggle Developer Tools)
 * **Xcode** type ``sudo tail -f /var/log/system.log`` in a Terminal to view Xcode errors
 
-Check that heartbeats are received by the WakaTime api with the ``last_heartbeat`` and ``last_plugin`` attributes from the `current user <https://wakatime.com/api/v1/users/current>`_ api resource.
-You can also see a list of all your plugins and when they were last seen by the api with the `user_agents <https://wakatime.com/api/v1/users/current/user_agents>`_ api endpoint.
+Useful API Endpoints::
 
-Note: Saving a file forces a heartbeat to be sent.
+* `List of Plugins and when they were last heard from <https://wakatime.com/api/v1/users/current/user_agents>`_
+* `List of computers last sending coding activity <https://wakatime.com/api/v1/users/current/machine_names>`_
+
+Useful Resources::
+
+`More Troubleshooting Info <https://wakatime.com/faq#debug-plugins>`_
 
 `Official API Docs <https://wakatime.com/api>`_
 
