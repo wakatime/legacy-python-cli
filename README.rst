@@ -120,9 +120,8 @@ Useful API Endpoints:
 
 Useful Resources:
 
-`More Troubleshooting Info <https://wakatime.com/faq#debug-plugins>`_
-
-`Official API Docs <https://wakatime.com/api>`_
+* `More Troubleshooting Info <https://wakatime.com/faq#debug-plugins>`_
+* `Official API Docs <https://wakatime.com/api>`_
 
 
 Contributing
