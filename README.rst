@@ -68,7 +68,7 @@ format. An example config file with all available options::
     exclude =
         ^COMMIT_EDITMSG$
         ^TAG_EDITMSG$
-        ^/var/
+        ^/var/(?!www/).*
         ^/etc/
     include =
         .*
