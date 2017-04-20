@@ -38,3 +38,9 @@ UNKNOWN_ERROR = 105
 Exit code used when the JSON input from `--extra-heartbeats` is malformed.
 """
 MALFORMED_HEARTBEAT_ERROR = 106
+
+""" Max file size supporting line number count stats.
+Files larger than this in bytes will not have a line count stat for performance.
+Default is 2MB.
+"""
+MAX_FILE_SIZE_SUPPORTED = 2000000

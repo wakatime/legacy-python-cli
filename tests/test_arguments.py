@@ -287,7 +287,7 @@ class MainTestCase(utils.TestCase):
             now = u(int(time.time()))
             key = str(uuid.uuid4())
 
-            args = ['--file', entity, '--key', key, '--time', now]
+            args = ['--file', entity, '--key', key, '--time', now, '--config', 'fake-foobar']
 
             retval = execute(args)
             self.assertEquals(sys.stdout.getvalue(), '')

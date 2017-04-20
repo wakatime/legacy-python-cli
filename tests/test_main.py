@@ -15,6 +15,7 @@ from wakatime.compat import u, is_py3
 from wakatime.constants import (
     API_ERROR,
     AUTH_ERROR,
+    MAX_FILE_SIZE_SUPPORTED,
     SUCCESS,
 )
 from wakatime.packages.requests.exceptions import RequestException
@@ -561,3 +562,52 @@ class MainTestCase(utils.TestCase):
             self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
             self.patched['wakatime.session_cache.SessionCache.get'].assert_not_called()
+
+    def test_large_file_skips_lines_count(self):
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        entity = 'tests/samples/codefiles/twolinefile.txt'
+        config = 'tests/samples/configs/good_config.cfg'
+        now = u(int(time.time()))
+
+        args = ['--entity', entity, '--config', config, '--time', now]
+
+        with utils.mock.patch('os.path.getsize') as mock_getsize:
+            mock_getsize.return_value = MAX_FILE_SIZE_SUPPORTED + 1
+
+            retval = execute(args)
+            self.assertEquals(retval, API_ERROR)
+
+            self.assertEquals(sys.stdout.getvalue(), '')
+            self.assertEquals(sys.stderr.getvalue(), '')
+
+        self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
+        self.patched['wakatime.session_cache.SessionCache.delete'].assert_called_once_with()
+        self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
+
+        heartbeat = {
+            'language': 'Text only',
+            'lines': None,
+            'entity': os.path.realpath(entity),
+            'project': os.path.basename(os.path.abspath('.')),
+            'cursorpos': None,
+            'lineno': None,
+            'branch': 'master',
+            'time': float(now),
+            'type': 'file',
+        }
+        stats = {
+            u('cursorpos'): None,
+            u('dependencies'): [],
+            u('language'): u('Text only'),
+            u('lineno'): None,
+            u('lines'): None,
+        }
+
+        self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(ANY, ANY, None)
+        for key, val in self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].items():
+            self.assertEquals(heartbeat[key], val)
+        self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
+        self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
