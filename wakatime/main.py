@@ -34,8 +34,19 @@ from .constants import (
     MALFORMED_HEARTBEAT_ERROR,
 )
 from .logger import setup_logging
+
+log = logging.getLogger('WakaTime')
+
+try:
+    from .packages import requests
+except ImportError:
+    log.traceback(logging.ERROR)
+    print(traceback.format_exc())
+    log.error('Please upgrade Python to the latest version.')
+    print('Please upgrade Python to the latest version.')
+    sys.exit(UNKNOWN_ERROR)
+
 from .offlinequeue import Queue
-from .packages import requests
 from .packages.requests.exceptions import RequestException
 from .project import get_project_info
 from .session_cache import SessionCache
@@ -46,9 +57,6 @@ try:
 except (ImportError, SyntaxError):  # pragma: nocover
     import json
 from .packages import tzlocal
-
-
-log = logging.getLogger('WakaTime')
 
 
 def send_heartbeat(project=None, branch=None, hostname=None, stats={}, key=None,
