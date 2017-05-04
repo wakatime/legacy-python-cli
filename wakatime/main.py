@@ -151,7 +151,7 @@ def send_heartbeat(project=None, branch=None, hostname=None, stats={}, key=None,
     response = None
     try:
         response = session.post(api_url, data=request_body, headers=headers,
-                                proxies=proxies, timeout=timeout)
+                                proxies=proxies, timeout=timeout, verify=args.certFile)
     except RequestException:
         exception_data = {
             sys.exc_info()[0].__name__: u(sys.exc_info()[1]),
