@@ -62,7 +62,7 @@ from .packages import tzlocal
 def send_heartbeat(project=None, branch=None, hostname=None, stats={}, key=None,
                    entity=None, timestamp=None, is_write=None, plugin=None,
                    offline=None, entity_type='file', hidefilenames=None,
-                   proxy=None, api_url=None, timeout=None, **kwargs):
+                   proxy=None, api_url=None, timeout=None,strictSSL=True, **kwargs):
     """Sends heartbeat as POST request to WakaTime api server.
 
     Returns `SUCCESS` when heartbeat was sent, otherwise returns an
@@ -151,7 +151,7 @@ def send_heartbeat(project=None, branch=None, hostname=None, stats={}, key=None,
     response = None
     try:
         response = session.post(api_url, data=request_body, headers=headers,
-                                proxies=proxies, timeout=timeout, verify=args.certFile)
+                                proxies=proxies, timeout=timeout, verify=strictSSL)
     except RequestException:
         exception_data = {
             sys.exc_info()[0].__name__: u(sys.exc_info()[1]),
@@ -240,6 +240,7 @@ def sync_offline_heartbeats(args, hostname):
             proxy=args.proxy,
             api_url=args.api_url,
             timeout=args.timeout,
+            strictSSL=args.strictSSL
         )
         if status != SUCCESS:
             if status == AUTH_ERROR:
@@ -287,6 +288,7 @@ def process_heartbeat(args, configs, hostname, heartbeat):
         heartbeat['hidefilenames'] = args.hidefilenames
         heartbeat['proxy'] = args.proxy
         heartbeat['api_url'] = args.api_url
+        heartbeat['strictSSL'] = args.strictSSL
 
         return send_heartbeat(**heartbeat)
 
