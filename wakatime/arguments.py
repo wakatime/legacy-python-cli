@@ -165,8 +165,8 @@ def parseArguments():
 
     if not args.exclude:
         args.exclude = []
-    if configs.has_option('settings', 'certFile'):
-        args.certFile = configs.get('settings', 'certFile')
+    if configs.has_option('settings', 'strictSSL'):
+        args.strictSSL = configs.getboolean('settings', 'strictSSL')
     if configs.has_option('settings', 'ignore'):
         try:
             for pattern in configs.get('settings', 'ignore').split("\n"):
