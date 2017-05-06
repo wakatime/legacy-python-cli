@@ -7,6 +7,8 @@ History
 ++++++++++++++++++
 
 - Ability to disable SSL cert verification. #90
+- Disable line count stats for files larger than 2MB to improve performance.
+- Print error saying Python needs upgrading when requests can't be imported.
 
 
 8.0.0 (2017-03-16)
