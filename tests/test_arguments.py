@@ -31,7 +31,7 @@ except ImportError:
     from unittest.mock import ANY, call
 
 
-class MainTestCase(utils.TestCase):
+class ArgumentsTestCase(utils.TestCase):
     patch_these = [
         'wakatime.packages.requests.adapters.HTTPAdapter.send',
         'wakatime.offlinequeue.Queue.push',
