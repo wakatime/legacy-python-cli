@@ -63,7 +63,7 @@ format. An example config file with all available options::
 
     [settings]
     debug = false
-    apikey = your-api-key
+    api_key = your-api-key
     hidefilenames = false
     exclude =
         ^COMMIT_EDITMSG$
@@ -74,7 +74,7 @@ format. An example config file with all available options::
         .*
     offline = true
     proxy = https://user:pass@localhost:8080
-    nosslverify = false
+    no_ssl_verify = false
     timeout = 30
     hostname = machinename
     [projectmap]
