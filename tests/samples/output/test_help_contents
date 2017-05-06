@@ -1,6 +1,6 @@
 usage: wakatime [-h] [--entity FILE] [--key KEY] [--write] [--plugin PLUGIN]
                 [--time time] [--lineno LINENO] [--cursorpos CURSORPOS]
-                [--entity-type ENTITY_TYPE] [--proxy PROXY]
+                [--entity-type ENTITY_TYPE] [--proxy PROXY] [--no-ssl-verify]
                 [--project PROJECT] [--alternate-project ALTERNATE_PROJECT]
                 [--language LANGUAGE] [--hostname HOSTNAME] [--disableoffline]
                 [--hidefilenames] [--exclude EXCLUDE] [--include INCLUDE]
@@ -30,6 +30,8 @@ optional arguments:
   --proxy PROXY         optional proxy configuration. Supports HTTPS and SOCKS
                         proxies. For example: https://user:pass@host:port or
                         socks5://user:pass@host:port or domain\user:pass
+  --no-ssl-verify       disables SSL certificate verification for HTTPS
+                        requests. By default, SSL certificates are verified.
   --project PROJECT     optional project name
   --alternate-project ALTERNATE_PROJECT
                         optional alternate project name; auto-discovered

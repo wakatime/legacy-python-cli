@@ -1,6 +1,6 @@
 usage: wakatime [-h] [--entity FILE] [--key KEY] [--write] [--plugin PLUGIN]
                 [--time time] [--lineno LINENO] [--cursorpos CURSORPOS]
-                [--entity-type ENTITY_TYPE] [--proxy PROXY]
+                [--entity-type ENTITY_TYPE] [--proxy PROXY] [--no-ssl-verify]
                 [--project PROJECT] [--alternate-project ALTERNATE_PROJECT]
                 [--language LANGUAGE] [--hostname HOSTNAME] [--disableoffline]
                 [--hidefilenames] [--exclude EXCLUDE] [--include INCLUDE]

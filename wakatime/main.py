@@ -62,7 +62,8 @@ from .packages import tzlocal
 def send_heartbeat(project=None, branch=None, hostname=None, stats={}, key=None,
                    entity=None, timestamp=None, is_write=None, plugin=None,
                    offline=None, entity_type='file', hidefilenames=None,
-                   proxy=None, api_url=None, timeout=None, **kwargs):
+                   proxy=None, nosslverify=None, api_url=None, timeout=None,
+                   **kwargs):
     """Sends heartbeat as POST request to WakaTime api server.
 
     Returns `SUCCESS` when heartbeat was sent, otherwise returns an
@@ -151,7 +152,8 @@ def send_heartbeat(project=None, branch=None, hostname=None, stats={}, key=None,
     response = None
     try:
         response = session.post(api_url, data=request_body, headers=headers,
-                                proxies=proxies, timeout=timeout)
+                                proxies=proxies, timeout=timeout,
+                                verify=not nosslverify)
     except RequestException:
         exception_data = {
             sys.exc_info()[0].__name__: u(sys.exc_info()[1]),
@@ -286,6 +288,7 @@ def process_heartbeat(args, configs, hostname, heartbeat):
         heartbeat['offline'] = args.offline
         heartbeat['hidefilenames'] = args.hidefilenames
         heartbeat['proxy'] = args.proxy
+        heartbeat['nosslverify'] = args.nosslverify
         heartbeat['api_url'] = args.api_url
 
         return send_heartbeat(**heartbeat)
