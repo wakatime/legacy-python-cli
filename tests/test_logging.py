@@ -8,7 +8,6 @@ from wakatime.packages.requests.models import Response
 
 import logging
 import os
-import tempfile
 import time
 import shutil
 import sys
@@ -67,7 +66,7 @@ class LoggingTestCase(utils.TestCase):
         response.status_code = 0
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
-        with tempfile.NamedTemporaryFile() as fh:
+        with utils.NamedTemporaryFile() as fh:
             now = u(int(time.time()))
             entity = 'tests/samples/codefiles/python.py'
             config = 'tests/samples/configs/good_config.cfg'

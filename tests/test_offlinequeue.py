@@ -9,7 +9,6 @@ import logging
 import os
 import sqlite3
 import sys
-import tempfile
 import time
 from testfixtures import log_capture
 from wakatime.compat import u
@@ -39,7 +38,7 @@ class OfflineQueueTestCase(utils.TestCase):
     ]
 
     def test_heartbeat_saved_from_error_response(self):
-        with tempfile.NamedTemporaryFile() as fh:
+        with utils.NamedTemporaryFile() as fh:
             with utils.mock.patch('wakatime.offlinequeue.Queue.get_db_file') as mock_db_file:
                 mock_db_file.return_value = fh.name
 
@@ -59,7 +58,7 @@ class OfflineQueueTestCase(utils.TestCase):
                 self.assertEquals(os.path.realpath(entity), saved_heartbeat['entity'])
 
     def test_heartbeat_discarded_from_400_response(self):
-        with tempfile.NamedTemporaryFile() as fh:
+        with utils.NamedTemporaryFile() as fh:
             with utils.mock.patch('wakatime.offlinequeue.Queue.get_db_file') as mock_db_file:
                 mock_db_file.return_value = fh.name
 
@@ -79,7 +78,7 @@ class OfflineQueueTestCase(utils.TestCase):
                 self.assertEquals(None, saved_heartbeat)
 
     def test_offline_heartbeat_sent_after_success_response(self):
-        with tempfile.NamedTemporaryFile() as fh:
+        with utils.NamedTemporaryFile() as fh:
             with utils.mock.patch('wakatime.offlinequeue.Queue.get_db_file') as mock_db_file:
                 mock_db_file.return_value = fh.name
 
@@ -102,7 +101,7 @@ class OfflineQueueTestCase(utils.TestCase):
                 self.assertEquals(None, saved_heartbeat)
 
     def test_all_offline_heartbeats_sent_after_success_response(self):
-        with tempfile.NamedTemporaryFile() as fh:
+        with utils.NamedTemporaryFile() as fh:
             with utils.mock.patch('wakatime.offlinequeue.Queue.get_db_file') as mock_db_file:
                 mock_db_file.return_value = fh.name
 
@@ -172,7 +171,7 @@ class OfflineQueueTestCase(utils.TestCase):
                 self.assertEquals(u(int(data.get('time'))), now2)
 
     def test_auth_error_when_sending_offline_heartbeats(self):
-        with tempfile.NamedTemporaryFile() as fh:
+        with utils.NamedTemporaryFile() as fh:
             with utils.mock.patch('wakatime.offlinequeue.Queue.get_db_file') as mock_db_file:
                 mock_db_file.return_value = fh.name
 
@@ -227,7 +226,7 @@ class OfflineQueueTestCase(utils.TestCase):
                 self.assertEquals(os.path.realpath(entity2), saved_heartbeat['entity'])
 
     def test_500_error_when_sending_offline_heartbeats(self):
-        with tempfile.NamedTemporaryFile() as fh:
+        with utils.NamedTemporaryFile() as fh:
             with utils.mock.patch('wakatime.offlinequeue.Queue.get_db_file') as mock_db_file:
                 mock_db_file.return_value = fh.name
 
@@ -282,7 +281,7 @@ class OfflineQueueTestCase(utils.TestCase):
                 self.assertEquals(os.path.realpath(entity2), saved_heartbeat['entity'])
 
     def test_empty_project_can_be_saved(self):
-        with tempfile.NamedTemporaryFile() as fh:
+        with utils.NamedTemporaryFile() as fh:
             with utils.mock.patch('wakatime.offlinequeue.Queue.get_db_file') as mock_db_file:
                 mock_db_file.return_value = fh.name
 
@@ -304,7 +303,7 @@ class OfflineQueueTestCase(utils.TestCase):
                 self.assertEquals(os.path.realpath(entity), saved_heartbeat['entity'])
 
     def test_get_handles_connection_exception(self):
-        with tempfile.NamedTemporaryFile() as fh:
+        with utils.NamedTemporaryFile() as fh:
             with utils.mock.patch('wakatime.offlinequeue.Queue.get_db_file') as mock_db_file:
                 mock_db_file.return_value = fh.name
 
@@ -334,7 +333,7 @@ class OfflineQueueTestCase(utils.TestCase):
                 self.assertEquals(os.path.realpath(entity), saved_heartbeat['entity'])
 
     def test_push_handles_connection_exception(self):
-        with tempfile.NamedTemporaryFile() as fh:
+        with utils.NamedTemporaryFile() as fh:
             with utils.mock.patch('wakatime.offlinequeue.Queue.get_db_file') as mock_db_file:
                 mock_db_file.return_value = fh.name
 
@@ -369,7 +368,7 @@ class OfflineQueueTestCase(utils.TestCase):
     def test_heartbeat_saved_when_requests_raises_exception(self, logs):
         logging.disable(logging.NOTSET)
 
-        with tempfile.NamedTemporaryFile() as fh:
+        with utils.NamedTemporaryFile() as fh:
             with utils.mock.patch('wakatime.offlinequeue.Queue.get_db_file') as mock_db_file:
                 mock_db_file.return_value = fh.name
 

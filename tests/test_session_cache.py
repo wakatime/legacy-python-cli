@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 
-import tempfile
 from wakatime.session_cache import SessionCache
 from wakatime.logger import setup_logging
 from . import utils
@@ -29,7 +28,7 @@ class SessionCacheTestCase(utils.TestCase):
         setup_logging(self.args, self.args.version)
 
     def test_can_crud_session(self):
-        with tempfile.NamedTemporaryFile() as fh:
+        with utils.NamedTemporaryFile() as fh:
             cache = SessionCache()
             cache.DB_FILE = fh.name
 
@@ -43,7 +42,7 @@ class SessionCacheTestCase(utils.TestCase):
             self.assertEquals(session.headers.get('x-test'), None)
 
     def test_handles_connection_exception(self):
-        with tempfile.NamedTemporaryFile() as fh:
+        with utils.NamedTemporaryFile() as fh:
             cache = SessionCache()
             cache.DB_FILE = fh.name
 

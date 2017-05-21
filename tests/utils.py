@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import os
 import sys
+import tempfile
 
 from wakatime.compat import u
 
@@ -16,6 +18,7 @@ try:
 except ImportError:
     # Python >= 2.7
     import unittest
+
 
 class TestCase(unittest.TestCase):
     patch_these = []
@@ -62,7 +65,6 @@ try:
 except ImportError:
     # Python < 3
     import shutil
-    import tempfile
     class TemporaryDirectory(object):
         """Context manager for tempfile.mkdtemp().
 
@@ -75,6 +77,25 @@ except ImportError:
 
         def __exit__(self, exc_type, exc_value, traceback):
             shutil.rmtree(self.name)
+
+
+class NamedTemporaryFile(object):
+    """Context manager for a named temporary file compatible with Windows.
+
+    Provides the path to a closed temporary file that is writeable. Deletes the
+    temporary file when exiting the context manager. The built-in
+    tempfile.NamedTemporaryFile is not writeable on Windows.
+    """
+    name = None
+
+    def __enter__(self):
+        fh = tempfile.NamedTemporaryFile(delete=False)
+        self.name = fh.name
+        fh.close()
+        return self
+
+    def __exit__(self, type, value, traceback):
+        os.unlink(self.name)
 
 
 class DynamicIterable(object):
