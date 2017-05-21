@@ -16,6 +16,7 @@ class SessionCacheTestCase(utils.TestCase):
     ]
 
     def setUp(self):
+        super(SessionCacheTestCase, self).setUp()
         class MockArgs(object):
             timestamp = 0
             is_write = False
