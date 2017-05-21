@@ -3,6 +3,7 @@
 
 import tempfile
 from wakatime.session_cache import SessionCache
+from wakatime.logger import setup_logging
 from . import utils
 
 
@@ -13,6 +14,18 @@ class SessionCacheTestCase(utils.TestCase):
         ['wakatime.offlinequeue.Queue.pop', None],
         ['wakatime.offlinequeue.Queue.connect', None],
     ]
+
+    def setUp(self):
+        class MockArgs(object):
+            timestamp = 0
+            is_write = False
+            entity = ''
+            version = ''
+            plugin = ''
+            verbose = False
+            logfile = ''
+        self.args = MockArgs()
+        setup_logging(self.args, self.args.version)
 
     def test_can_crud_session(self):
         with tempfile.NamedTemporaryFile() as fh:
