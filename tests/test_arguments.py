@@ -280,7 +280,7 @@ class ArgumentsTestCase(utils.TestCase):
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
         with utils.TemporaryDirectory() as tempdir:
-            filename = list(filter(lambda x: x.endswith('.txt'), os.listdir('tests/samples/codefiles/unicode')))[0]
+            filename = list(filter(lambda x: x.endswith('.txt'), os.listdir(u('tests/samples/codefiles/unicode'))))[0]
             entity = os.path.join('tests/samples/codefiles/unicode', filename)
             shutil.copy(entity, os.path.join(tempdir, filename))
             entity = os.path.realpath(os.path.join(tempdir, filename))
