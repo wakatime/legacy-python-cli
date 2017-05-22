@@ -7,6 +7,7 @@ from wakatime.packages.requests.models import Response
 
 import logging
 import os
+import platform
 import shutil
 import sys
 import tempfile
@@ -214,7 +215,8 @@ class ProjectTestCase(utils.TestCase):
 
                     execute(args)
 
-        self.assertEquals('svn', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
+        expected = None if platform.system() == 'Windows' else 'svn'
+        self.assertEquals(expected, self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].get('project'))
 
     def test_svn_exception_handled(self):
         response = Response()
