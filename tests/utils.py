@@ -76,7 +76,10 @@ except ImportError:
             return self.name
 
         def __exit__(self, exc_type, exc_value, traceback):
-            shutil.rmtree(u(self.name))
+            try:
+                shutil.rmtree(u(self.name))
+            except:
+                pass
 
 
 class NamedTemporaryFile(object):
