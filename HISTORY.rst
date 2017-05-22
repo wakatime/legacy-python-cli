@@ -3,6 +3,12 @@ History
 -------
 
 
+8.0.2 (unreleased)
+++++++++++++++++++
+
+- Support running automated tests on Linux, OS X, and Windows.
+
+
 8.0.1 (2017-05-05)
 ++++++++++++++++++
 
