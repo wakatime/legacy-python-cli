@@ -53,7 +53,7 @@ class ConfigsTestCase(utils.TestCase):
             entity = 'tests/samples/codefiles/emptyfile.txt'
             shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
-            args = ['--file', entity]
+            args = ['--file', entity, '--logfile', '~/.wakatime.log']
 
             with utils.mock.patch('wakatime.configs.os.environ.get') as mock_env:
                 mock_env.return_value = None
@@ -87,7 +87,7 @@ class ConfigsTestCase(utils.TestCase):
             with utils.mock.patch('wakatime.configs.os.environ.get') as mock_env:
                 mock_env.return_value = tempdir
 
-                args = ['--file', entity]
+                args = ['--file', entity, '--logfile', '~/.wakatime.log']
                 retval = execute(args)
                 self.assertEquals(retval, SUCCESS)
                 expected_stdout = open('tests/samples/output/main_test_good_config_file').read()
@@ -111,7 +111,7 @@ class ConfigsTestCase(utils.TestCase):
             shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
 
-            args = ['--file', entity, '--config', config]
+            args = ['--file', entity, '--config', config, '--logfile', '~/.wakatime.log']
             with self.assertRaises(SystemExit) as e:
                 execute(args)
 
@@ -135,7 +135,7 @@ class ConfigsTestCase(utils.TestCase):
             entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
 
             config = 'tests/samples/configs/has_everything.cfg'
-            args = ['--file', entity, '--config', config]
+            args = ['--file', entity, '--config', config, '--logfile', '~/.wakatime.log']
             retval = execute(args)
             self.assertEquals(retval, SUCCESS)
             expected_stdout = open('tests/samples/output/main_test_good_config_file').read()
@@ -166,7 +166,7 @@ class ConfigsTestCase(utils.TestCase):
             entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
 
             config = 'tests/samples/configs/sample_alternate_apikey.cfg'
-            args = ['--file', entity, '--config', config]
+            args = ['--file', entity, '--config', config, '--logfile', '~/.wakatime.log']
             retval = execute(args)
             self.assertEquals(retval, SUCCESS)
             self.assertEquals(sys.stdout.getvalue(), '')
@@ -189,7 +189,7 @@ class ConfigsTestCase(utils.TestCase):
             entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
 
             config = 'tests/samples/configs/bad_config.cfg'
-            args = ['--file', entity, '--config', config]
+            args = ['--file', entity, '--config', config, '--logfile', '~/.wakatime.log']
 
             with self.assertRaises(SystemExit) as e:
                 execute(args)
@@ -222,7 +222,7 @@ class ConfigsTestCase(utils.TestCase):
             config = 'tests/samples/configs/good_config.cfg'
             key = str(uuid.uuid4())
 
-            args = ['--file', entity, '--key', key, '--config', config, '--time', now]
+            args = ['--file', entity, '--key', key, '--config', config, '--time', now, '--logfile', '~/.wakatime.log']
 
             retval = execute(args)
             self.assertEquals(retval, API_ERROR)
@@ -268,7 +268,7 @@ class ConfigsTestCase(utils.TestCase):
             config = 'tests/samples/configs/paranoid.cfg'
             key = str(uuid.uuid4())
 
-            args = ['--file', entity, '--key', key, '--config', config, '--time', now]
+            args = ['--file', entity, '--key', key, '--config', config, '--time', now, '--logfile', '~/.wakatime.log']
 
             retval = execute(args)
             self.assertEquals(retval, API_ERROR)
@@ -314,7 +314,7 @@ class ConfigsTestCase(utils.TestCase):
             config = 'tests/samples/configs/good_config.cfg'
             key = str(uuid.uuid4())
 
-            args = ['--file', entity, '--key', key, '--config', config, '--time', now, '--hidefilenames']
+            args = ['--file', entity, '--key', key, '--config', config, '--time', now, '--hidefilenames', '--logfile', '~/.wakatime.log']
 
             retval = execute(args)
             self.assertEquals(retval, API_ERROR)
@@ -360,7 +360,7 @@ class ConfigsTestCase(utils.TestCase):
             config = 'tests/samples/configs/hide_file_names.cfg'
             key = str(uuid.uuid4())
 
-            args = ['--file', entity, '--key', key, '--config', config, '--time', now]
+            args = ['--file', entity, '--key', key, '--config', config, '--time', now, '--logfile', '~/.wakatime.log']
 
             retval = execute(args)
             self.assertEquals(retval, API_ERROR)
@@ -406,7 +406,7 @@ class ConfigsTestCase(utils.TestCase):
             config = 'tests/samples/configs/hide_file_names.cfg'
             key = str(uuid.uuid4())
 
-            args = ['--file', entity, '--key', key, '--config', config, '--time', now]
+            args = ['--file', entity, '--key', key, '--config', config, '--time', now, '--logfile', '~/.wakatime.log']
 
             retval = execute(args)
             self.assertEquals(retval, API_ERROR)
@@ -455,7 +455,7 @@ class ConfigsTestCase(utils.TestCase):
             config = 'tests/samples/configs/invalid_hide_file_names.cfg'
             key = str(uuid.uuid4())
 
-            args = ['--file', entity, '--key', key, '--config', config, '--time', now]
+            args = ['--file', entity, '--key', key, '--config', config, '--time', now, '--logfile', '~/.wakatime.log']
 
             retval = execute(args)
             self.assertEquals(retval, API_ERROR)
@@ -508,7 +508,7 @@ class ConfigsTestCase(utils.TestCase):
             entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
             config = 'tests/samples/configs/good_config.cfg'
 
-            args = ['--file', entity, '--config', config, '--exclude', 'empty', '--verbose']
+            args = ['--file', entity, '--config', config, '--exclude', 'empty', '--verbose', '--logfile', '~/.wakatime.log']
             retval = execute(args)
             self.assertEquals(retval, SUCCESS)
 
@@ -538,7 +538,7 @@ class ConfigsTestCase(utils.TestCase):
 
             hostname = 'fromcfgfile'
             config = 'tests/samples/configs/has_everything.cfg'
-            args = ['--file', entity, '--config', config, '--timeout', '15']
+            args = ['--file', entity, '--config', config, '--timeout', '15', '--logfile', '~/.wakatime.log']
             retval = execute(args)
             self.assertEquals(retval, SUCCESS)
 
@@ -563,7 +563,7 @@ class ConfigsTestCase(utils.TestCase):
             entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
 
             config = 'tests/samples/configs/has_ssl_verify_disabled.cfg'
-            args = ['--file', entity, '--config', config, '--timeout', '15']
+            args = ['--file', entity, '--config', config, '--timeout', '15', '--logfile', '~/.wakatime.log']
             retval = execute(args)
             self.assertEquals(retval, SUCCESS)
             self.assertEquals(sys.stdout.getvalue(), '')

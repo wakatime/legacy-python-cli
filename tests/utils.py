@@ -95,7 +95,10 @@ class NamedTemporaryFile(object):
         return self
 
     def __exit__(self, type, value, traceback):
-        os.unlink(self.name)
+        try:
+            os.unlink(self.name)
+        except:
+            pass
 
 
 class DynamicIterable(object):
