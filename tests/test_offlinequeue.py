@@ -19,10 +19,6 @@ from wakatime.constants import (
 from wakatime.packages.requests.models import Response
 from . import utils
 try:
-    from mock import call
-except ImportError:
-    from unittest.mock import call
-try:
     from .packages import simplejson as json
 except (ImportError, SyntaxError):
     import json
@@ -393,5 +389,5 @@ class OfflineQueueTestCase(utils.TestCase):
                 self.assertIn(exception_msg, output[0])
 
                 self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
-                self.patched['wakatime.session_cache.SessionCache.delete'].assert_has_calls([call(), call()])
+                self.patched['wakatime.session_cache.SessionCache.delete'].assert_called_once_with()
                 self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()

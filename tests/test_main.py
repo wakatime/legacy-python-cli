@@ -91,6 +91,10 @@ class MainTestCase(utils.TestCase):
             self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
+            self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_called_once_with(
+                ANY, cert=None, proxies={}, stream=False, timeout=60, verify=True,
+            )
+
     def test_400_response(self):
         response = Response()
         response.status_code = 400
@@ -117,6 +121,10 @@ class MainTestCase(utils.TestCase):
 
             self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
+
+            self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_called_once_with(
+                ANY, cert=None, proxies={}, stream=False, timeout=60, verify=True,
+            )
 
     def test_401_response(self):
         response = Response()
@@ -164,6 +172,10 @@ class MainTestCase(utils.TestCase):
             self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
+            self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_called_once_with(
+                ANY, cert=None, proxies={}, stream=False, timeout=60, verify=True,
+            )
+
     @log_capture()
     def test_500_response_without_offline_logging(self, logs):
         logging.disable(logging.NOTSET)
@@ -206,6 +218,10 @@ class MainTestCase(utils.TestCase):
 
             self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
+
+            self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_called_once_with(
+                ANY, cert=None, proxies={}, stream=False, timeout=60, verify=True,
+            )
 
     @log_capture()
     def test_requests_exception(self, logs):
@@ -264,6 +280,10 @@ class MainTestCase(utils.TestCase):
             self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
+            self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_called_once_with(
+                ANY, cert=None, proxies={}, stream=False, timeout=60, verify=True,
+            )
+
     @log_capture()
     def test_requests_exception_without_offline_logging(self, logs):
         logging.disable(logging.NOTSET)
@@ -298,6 +318,10 @@ class MainTestCase(utils.TestCase):
             self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
+            self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_called_once_with(
+                ANY, cert=None, proxies={}, stream=False, timeout=60, verify=True,
+            )
+
     @log_capture()
     def test_invalid_api_key(self, logs):
         logging.disable(logging.NOTSET)
@@ -327,6 +351,8 @@ class MainTestCase(utils.TestCase):
 
         self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
+
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_not_called()
 
     def test_nonascii_hostname(self):
         response = Response()
@@ -427,6 +453,10 @@ class MainTestCase(utils.TestCase):
 
                 self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
                 self.patched['wakatime.offlinequeue.Queue.pop'].assert_called_once_with()
+
+                headers = self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].call_args[0][0].headers
+                expected_tz = u(bytes('\xab', 'utf-16') if is_py3 else '\xab').encode('utf-8')
+                self.assertEquals(headers.get('TimeZone'), expected_tz)
 
     def test_tzlocal_exception(self):
         response = Response()
@@ -537,6 +567,10 @@ class MainTestCase(utils.TestCase):
             self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
+            self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_called_once_with(
+                ANY, cert=None, proxies={}, stream=False, timeout=60, verify=True,
+            )
+
     @log_capture()
     def test_unhandled_exception(self, logs):
         logging.disable(logging.NOTSET)
@@ -562,6 +596,8 @@ class MainTestCase(utils.TestCase):
             self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
             self.patched['wakatime.session_cache.SessionCache.get'].assert_not_called()
+
+            self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_not_called()
 
     def test_large_file_skips_lines_count(self):
         response = Response()
@@ -611,3 +647,7 @@ class MainTestCase(utils.TestCase):
             self.assertEquals(heartbeat[key], val)
         self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
+
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_called_once_with(
+            ANY, cert=None, proxies={}, stream=False, timeout=60, verify=True,
+        )
