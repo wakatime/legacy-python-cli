@@ -3,9 +3,11 @@ History
 -------
 
 
-8.0.2 (unreleased)
+8.0.2 (2017-05-24)
 ++++++++++++++++++
 
+- Only treat proxy string as NTLM proxy after unable to connect with HTTPS and
+  SOCKS proxy.
 - Support running automated tests on Linux, OS X, and Windows.
 
 
