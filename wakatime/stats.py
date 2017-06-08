@@ -327,18 +327,11 @@ def customize_lexer_priority(file_name, accuracy, lexer):
     return (accuracy, priority, lexer)
 
 
-EXTENSION_CACHE = {}
 def extensions_in_same_folder(file_name):
     """Returns a list of file extensions from the same folder as file_name."""
-    global EXTENSION_CACHE
-
-    if file_name in EXTENSION_CACHE:
-        return EXTENSION_CACHE[file_name]
 
     directory = os.path.dirname(file_name)
     files = os.listdir(directory)
     extensions = list(zip(*map(os.path.splitext, files)))[1]
     extensions = set([ext.lower() for ext in extensions])
-
-    EXTENSION_CACHE[file_name] = extensions
     return extensions
