@@ -3,6 +3,14 @@ History
 -------
 
 
+8.0.4 (Unreleased)
+++++++++++++++++++
+
+- Upgrade pytz to v2017.2.
+- Upgrade requests to v2.18.4.
+- Upgrade tzlocal to v1.4.
+
+
 8.0.3 (2017-06-08)
 ++++++++++++++++++
 
