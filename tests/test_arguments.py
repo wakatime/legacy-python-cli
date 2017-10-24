@@ -82,6 +82,23 @@ class ArgumentsTestCase(utils.TestCase):
             self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_called_once_with()
 
+    def test_argument_parsing_strips_quotes(self):
+        response = Response()
+        response.status_code = 500
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        now = u(int(time.time()))
+        config = 'tests/samples/configs/good_config.cfg'
+        entity = 'tests/samples/codefiles/python.py'
+        plugin = '"abcplugin\\"withquotes"'
+        args = ['--file', '"' + entity + '"', '--config', config, '--time', now, '--plugin', plugin]
+
+        retval = execute(args)
+        self.assertEquals(retval, API_ERROR)
+
+        expected = 'abcplugin"withquotes'
+        self.assertEqual(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][2], expected)
+
     def test_lineno_and_cursorpos(self):
         response = Response()
         response.status_code = 0
@@ -509,7 +526,7 @@ class ArgumentsTestCase(utils.TestCase):
         args = ['--file', entity, '--config', config, '--time', now, '--alternate-language', 'JAVA']
 
         retval = execute(args)
-        self.assertEquals(retval, 102)
+        self.assertEquals(retval, API_ERROR)
 
         language = u('Java')
         self.assertEqual(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].get('language'), language)
