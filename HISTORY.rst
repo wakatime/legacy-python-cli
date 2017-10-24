@@ -3,9 +3,11 @@ History
 -------
 
 
-8.0.4 (Unreleased)
+8.0.4 (2017-10-23)
 ++++++++++++++++++
 
+- Allow passing string arguments wrapped in extra quotes for plugins which
+  cannot properly escape spaces in arguments.
 - Upgrade pytz to v2017.2.
 - Upgrade requests to v2.18.4.
 - Upgrade tzlocal to v1.4.
