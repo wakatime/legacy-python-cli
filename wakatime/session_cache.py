@@ -40,7 +40,6 @@ class SessionCache(object):
         ''')
         return (conn, c)
 
-
     def save(self, session):
         """Saves a requests.Session object for the next heartbeat process.
         """
@@ -58,7 +57,6 @@ class SessionCache(object):
             conn.close()
         except:  # pragma: nocover
             log.traceback(logging.DEBUG)
-
 
     def get(self):
         """Returns a requests.Session object.
@@ -91,7 +89,6 @@ class SessionCache(object):
             log.traceback(logging.DEBUG)
 
         return session if session is not None else requests.session()
-
 
     def delete(self):
         """Clears all cached Session objects.
