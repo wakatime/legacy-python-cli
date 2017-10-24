@@ -93,7 +93,7 @@ def parseArguments():
     parser.add_argument('--alternate-project', dest='alternate_project',
             help='optional alternate project name; auto-discovered project '+
                  'takes priority')
-    parser.add_argument('--alternate-language',  dest='alternate_language',
+    parser.add_argument('--alternate-language', dest='alternate_language',
             help=argparse.SUPPRESS)
     parser.add_argument('--language', dest='language',
             help='optional language name; if valid, takes priority over '+
@@ -223,9 +223,9 @@ def parseArguments():
         is_valid = not not re.match(pattern, args.proxy, re.I)
         if not is_valid:
             parser.error('Invalid proxy. Must be in format ' +
-                            'https://user:pass@host:port or ' +
-                            'socks5://user:pass@host:port or ' +
-                            'domain\\user:pass.')
+                         'https://user:pass@host:port or ' +
+                         'socks5://user:pass@host:port or ' +
+                         'domain\\user:pass.')
     if configs.has_option('settings', 'no_ssl_verify'):
         args.nosslverify = configs.getboolean('settings', 'no_ssl_verify')
     if not args.verbose and configs.has_option('settings', 'verbose'):
