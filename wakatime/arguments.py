@@ -34,6 +34,14 @@ class FileAction(argparse.Action):
         setattr(namespace, self.dest, values)
 
 
+class StoreWithoutQuotes(argparse.Action):
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        if values.startswith('"'):
+            values = re.sub(r'\\"', '"', values.strip('"'))
+        setattr(namespace, self.dest, values)
+
+
 def parseArguments():
     """Parse command line arguments and configs from ~/.wakatime.cfg.
     Command line arguments take precedence over config file settings.
@@ -56,7 +64,7 @@ def parseArguments():
             action='store_true',
             help='when set, tells api this heartbeat was triggered from '+
                  'writing to a file')
-    parser.add_argument('--plugin', dest='plugin',
+    parser.add_argument('--plugin', dest='plugin', action=StoreWithoutQuotes,
             help='optional text editor plugin name and version '+
                  'for User-Agent header')
     parser.add_argument('--time', dest='timestamp', metavar='time',
