@@ -3,6 +3,12 @@ History
 -------
 
 
+8.0.5 (2017-10-29)
+++++++++++++++++++
+
+- Use WAKATIME_HOME env variable for offline and session caching. #102
+
+
 8.0.4 (2017-10-23)
 ++++++++++++++++++
 
