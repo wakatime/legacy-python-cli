@@ -11,6 +11,7 @@ import shutil
 import sys
 import uuid
 from testfixtures import log_capture
+from wakatime.arguments import parseArguments
 from wakatime.compat import u
 from wakatime.constants import (
     API_ERROR,
@@ -620,3 +621,24 @@ class ArgumentsTestCase(utils.TestCase):
 
                 self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
                 self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
+
+    def test_uses_wakatime_home_env_variable(self):
+        with utils.TemporaryDirectory() as tempdir:
+            entity = 'tests/samples/codefiles/twolinefile.txt'
+            shutil.copy(entity, os.path.join(tempdir, 'twolinefile.txt'))
+            entity = os.path.realpath(os.path.join(tempdir, 'twolinefile.txt'))
+            key = str(uuid.uuid4())
+            config = 'tests/samples/configs/good_config.cfg'
+            logfile = os.path.realpath(os.path.join(tempdir, '.wakatime.log'))
+
+            args = ['--file', entity, '--key', key, '--config', config]
+
+            with utils.mock.patch.object(sys, 'argv', ['wakatime'] + args):
+                args, configs = parseArguments()
+                self.assertEquals(args.logfile, None)
+
+                with utils.mock.patch('os.environ.get') as mock_env:
+                    mock_env.return_value = os.path.realpath(tempdir)
+
+                    args, configs = parseArguments()
+                    self.assertEquals(args.logfile, logfile)

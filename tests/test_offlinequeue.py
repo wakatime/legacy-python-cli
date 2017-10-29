@@ -199,12 +199,14 @@ class OfflineQueueTestCase(utils.TestCase):
 
                 class CustomResponse(Response):
                     count = 0
+
                     @property
                     def status_code(self):
                         if self.count > 2:
                             return 401
                         self.count += 1
                         return 201
+
                     @status_code.setter
                     def status_code(self, value):
                         pass
@@ -254,12 +256,14 @@ class OfflineQueueTestCase(utils.TestCase):
 
                 class CustomResponse(Response):
                     count = 0
+
                     @property
                     def status_code(self):
                         if self.count > 2:
                             return 500
                         self.count += 1
                         return 201
+
                     @status_code.setter
                     def status_code(self, value):
                         pass
@@ -354,11 +358,23 @@ class OfflineQueueTestCase(utils.TestCase):
                 saved_heartbeat = queue.pop()
                 self.assertEquals(None, saved_heartbeat)
 
-    def test_get_db_file(self):
+    def test_uses_home_folder_by_default(self):
         queue = Queue()
         db_file = queue.get_db_file()
         expected = os.path.join(os.path.expanduser('~'), '.wakatime.db')
         self.assertEquals(db_file, expected)
+
+    def test_uses_wakatime_home_env_variable(self):
+        queue = Queue()
+
+        with utils.TemporaryDirectory() as tempdir:
+            expected = os.path.realpath(os.path.join(tempdir, '.wakatime.db'))
+
+            with utils.mock.patch('os.environ.get') as mock_env:
+                mock_env.return_value = os.path.realpath(tempdir)
+
+                actual = queue.get_db_file()
+                self.assertEquals(actual, expected)
 
     @log_capture()
     def test_heartbeat_saved_when_requests_raises_exception(self, logs):

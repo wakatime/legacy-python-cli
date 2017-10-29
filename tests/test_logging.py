@@ -101,7 +101,7 @@ class LoggingTestCase(utils.TestCase):
             config = 'tests/samples/configs/good_config.cfg'
             shutil.copy(config, os.path.join(tempdir, '.wakatime.cfg'))
             config = os.path.realpath(os.path.join(tempdir, '.wakatime.cfg'))
-            logfile = os.path.realpath(os.path.join(tempdir, '.wakatime.log'))
+            expected_logfile = os.path.realpath(os.path.join(tempdir, '.wakatime.log'))
 
             with utils.mock.patch('wakatime.main.os.environ.get') as mock_env:
                 mock_env.return_value = tempdir
@@ -116,8 +116,8 @@ class LoggingTestCase(utils.TestCase):
                 self.assertEquals(sys.stderr.getvalue(), '')
 
                 self.assertEquals(logging.WARNING, logging.getLogger('WakaTime').level)
-                actual_logfile = os.path.realpath(logging.getLogger('WakaTime').handlers[0].baseFilename)
-                self.assertEquals(logfile, actual_logfile)
+                logfile = os.path.realpath(logging.getLogger('WakaTime').handlers[0].baseFilename)
+                self.assertEquals(logfile, expected_logfile)
                 logs.check()
 
     @log_capture()

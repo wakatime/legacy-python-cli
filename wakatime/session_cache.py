@@ -30,14 +30,21 @@ log = logging.getLogger('WakaTime')
 
 
 class SessionCache(object):
-    DB_FILE = os.path.join(os.path.expanduser('~'), '.wakatime.db')
+    db_file = '.wakatime.db'
+    table_name = 'session'
+
+    def get_db_file(self):
+        home = '~'
+        if os.environ.get('WAKATIME_HOME'):
+            home = os.environ.get('WAKATIME_HOME')
+        return os.path.join(os.path.expanduser(home), '.wakatime.db')
 
     def connect(self):
-        conn = sqlite3.connect(self.DB_FILE, isolation_level=None)
+        conn = sqlite3.connect(self.get_db_file(), isolation_level=None)
         c = conn.cursor()
-        c.execute('''CREATE TABLE IF NOT EXISTS session (
+        c.execute('''CREATE TABLE IF NOT EXISTS {0} (
             value BLOB)
-        ''')
+        '''.format(self.table_name))
         return (conn, c)
 
     def save(self, session):
@@ -48,11 +55,11 @@ class SessionCache(object):
             return
         try:
             conn, c = self.connect()
-            c.execute('DELETE FROM session')
+            c.execute('DELETE FROM {0}'.format(self.table_name))
             values = {
                 'value': sqlite3.Binary(pickle.dumps(session, protocol=2)),
             }
-            c.execute('INSERT INTO session VALUES (:value)', values)
+            c.execute('INSERT INTO {0} VALUES (:value)'.format(self.table_name), values)
             conn.commit()
             conn.close()
         except:  # pragma: nocover
@@ -76,7 +83,7 @@ class SessionCache(object):
         session = None
         try:
             c.execute('BEGIN IMMEDIATE')
-            c.execute('SELECT value FROM session LIMIT 1')
+            c.execute('SELECT value FROM {0} LIMIT 1'.format(self.table_name))
             row = c.fetchone()
             if row is not None:
                 session = pickle.loads(row[0])
@@ -98,7 +105,7 @@ class SessionCache(object):
             return
         try:
             conn, c = self.connect()
-            c.execute('DELETE FROM session')
+            c.execute('DELETE FROM {0}'.format(self.table_name))
             conn.commit()
             conn.close()
         except:
