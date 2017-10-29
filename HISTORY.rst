@@ -6,7 +6,8 @@ History
 8.0.5 (2017-10-29)
 ++++++++++++++++++
 
-- Use WAKATIME_HOME env variable for offline and session caching. #102
+- Use WAKATIME_HOME env variable for offline and session caching.
+  `#102 <https://github.com/wakatime/wakatime/issues/102>`_
 
 
 8.0.4 (2017-10-23)
@@ -36,7 +37,8 @@ History
 8.0.1 (2017-05-05)
 ++++++++++++++++++
 
-- Ability to disable SSL cert verification. #90
+- Ability to disable SSL cert verification.
+  `#90 <https://github.com/wakatime/wakatime/issues/90>`_
 - Disable line count stats for files larger than 2MB to improve performance.
 - Print error saying Python needs upgrading when requests can't be imported.
 
@@ -45,7 +47,8 @@ History
 ++++++++++++++++++
 
 - Config file not needed when passing api key via command line.
-- Allow colons in [projectmap] config section. #83
+- Allow colons in [projectmap] config section.
+  `#83 <https://github.com/wakatime/wakatime/issues/83>`_
 - When unable to detect language and debug mode turned on, log any tracebacks.
 - Increase priority of F# and TypeScript languages.
 
@@ -59,7 +62,8 @@ History
 7.0.3 (2017-02-26)
 ++++++++++++++++++
 
-- Ability to prioritize common languages over uncommon lanuages. #81
+- Ability to prioritize common languages over uncommon lanuages.
+  `#81 <https://github.com/wakatime/wakatime/issues/81>`_
 
 
 7.0.2 (2017-02-20)
@@ -91,7 +95,8 @@ History
 6.2.3 (2017-02-15)
 ++++++++++++++++++
 
-- Support NTLM proxy format like domain\\user:pass. #23
+- Support NTLM proxy format like domain\\user:pass.
+  `#23 <https://github.com/wakatime/wakatime/issues/23>`_
 - Upgrade pytz to v2016.10.
 - Upgrade requests to v2.13.0.
 - Upgrade pysocks to v1.6.6.
@@ -112,8 +117,10 @@ History
 6.2.0 (2016-10-24)
 ++++++++++++++++++
 
-- New WAKATIME_HOME env variable for setting path to config and log files. #67
-- Improve debug warning message from unsupported dependency parsers. #65
+- New WAKATIME_HOME env variable for setting path to config and log files.
+  `#67 <https://github.com/wakatime/wakatime/issues/67>`_
+- Improve debug warning message from unsupported dependency parsers.
+  `#65 <https://github.com/wakatime/wakatime/issues/65>`_
 
 
 6.1.0 (2016-10-11)
