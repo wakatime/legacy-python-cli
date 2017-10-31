@@ -203,7 +203,6 @@ class ConfigsTestCase(utils.TestCase):
             expected = ''
             self.assertEquals(log_output, expected)
 
-
             self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
             self.patched['wakatime.session_cache.SessionCache.get'].assert_not_called()
             self.patched['wakatime.session_cache.SessionCache.delete'].assert_not_called()
@@ -261,9 +260,9 @@ class ConfigsTestCase(utils.TestCase):
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
         with utils.TemporaryDirectory() as tempdir:
-            entity = 'tests/samples/codefiles/twolinefile.txt'
-            shutil.copy(entity, os.path.join(tempdir, 'twolinefile.txt'))
-            entity = os.path.realpath(os.path.join(tempdir, 'twolinefile.txt'))
+            entity = 'tests/samples/codefiles/python.py'
+            shutil.copy(entity, os.path.join(tempdir, 'python.py'))
+            entity = os.path.realpath(os.path.join(tempdir, 'python.py'))
             now = u(int(time.time()))
             config = 'tests/samples/configs/paranoid.cfg'
             key = str(uuid.uuid4())
@@ -280,25 +279,19 @@ class ConfigsTestCase(utils.TestCase):
             self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
 
             heartbeat = {
-                'language': 'Text only',
-                'lines': 2,
-                'entity': 'HIDDEN.txt',
+                'language': 'Python',
+                'entity': 'HIDDEN.py',
                 'project': os.path.basename(os.path.abspath('.')),
                 'time': float(now),
                 'type': 'file',
             }
-            stats = {
-                u('cursorpos'): None,
-                u('dependencies'): [],
-                u('language'): u('Text only'),
-                u('lineno'): None,
-                u('lines'): 2,
-            }
 
-            self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(ANY, ANY, None)
-            for key, val in self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].items():
-                self.assertEquals(heartbeat[key], val)
-            self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
+            self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_called_once_with(
+                ANY, cert=None, proxies={}, stream=False, timeout=60, verify=True,
+            )
+            body = self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].call_args[0][0].body
+            for key, val in json.loads(body).items():
+                self.assertEquals(val, heartbeat.get(key))
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
     def test_hide_all_filenames_from_cli_arg(self):
@@ -307,9 +300,9 @@ class ConfigsTestCase(utils.TestCase):
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
         with utils.TemporaryDirectory() as tempdir:
-            entity = 'tests/samples/codefiles/twolinefile.txt'
-            shutil.copy(entity, os.path.join(tempdir, 'twolinefile.txt'))
-            entity = os.path.realpath(os.path.join(tempdir, 'twolinefile.txt'))
+            entity = 'tests/samples/codefiles/python.py'
+            shutil.copy(entity, os.path.join(tempdir, 'python.py'))
+            entity = os.path.realpath(os.path.join(tempdir, 'python.py'))
             now = u(int(time.time()))
             config = 'tests/samples/configs/good_config.cfg'
             key = str(uuid.uuid4())
@@ -326,25 +319,19 @@ class ConfigsTestCase(utils.TestCase):
             self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
 
             heartbeat = {
-                'language': 'Text only',
-                'lines': 2,
-                'entity': 'HIDDEN.txt',
+                'language': 'Python',
+                'entity': 'HIDDEN.py',
                 'project': os.path.basename(os.path.abspath('.')),
                 'time': float(now),
                 'type': 'file',
             }
-            stats = {
-                u('cursorpos'): None,
-                u('dependencies'): [],
-                u('language'): u('Text only'),
-                u('lineno'): None,
-                u('lines'): 2,
-            }
 
-            self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(ANY, ANY, None)
-            for key, val in self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].items():
-                self.assertEquals(heartbeat[key], val)
-            self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
+            self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_called_once_with(
+                ANY, cert=None, proxies={}, stream=False, timeout=60, verify=True,
+            )
+            body = self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].call_args[0][0].body
+            for key, val in json.loads(body).items():
+                self.assertEquals(val, heartbeat.get(key))
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
     def test_hide_matching_filenames(self):
@@ -353,9 +340,9 @@ class ConfigsTestCase(utils.TestCase):
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
         with utils.TemporaryDirectory() as tempdir:
-            entity = 'tests/samples/codefiles/twolinefile.txt'
-            shutil.copy(entity, os.path.join(tempdir, 'twolinefile.txt'))
-            entity = os.path.realpath(os.path.join(tempdir, 'twolinefile.txt'))
+            entity = 'tests/samples/codefiles/python.py'
+            shutil.copy(entity, os.path.join(tempdir, 'python.py'))
+            entity = os.path.realpath(os.path.join(tempdir, 'python.py'))
             now = u(int(time.time()))
             config = 'tests/samples/configs/hide_file_names.cfg'
             key = str(uuid.uuid4())
@@ -372,25 +359,19 @@ class ConfigsTestCase(utils.TestCase):
             self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
 
             heartbeat = {
-                'language': 'Text only',
-                'lines': 2,
-                'entity': 'HIDDEN.txt',
+                'language': 'Python',
+                'entity': 'HIDDEN.py',
                 'project': os.path.basename(os.path.abspath('.')),
                 'time': float(now),
                 'type': 'file',
             }
-            stats = {
-                u('cursorpos'): None,
-                u('dependencies'): [],
-                u('language'): u('Text only'),
-                u('lineno'): None,
-                u('lines'): 2,
-            }
 
-            self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(ANY, ANY, None)
-            for key, val in self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].items():
-                self.assertEquals(heartbeat[key], val)
-            self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
+            self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_called_once_with(
+                ANY, cert=None, proxies={}, stream=False, timeout=60, verify=True,
+            )
+            body = self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].call_args[0][0].body
+            for key, val in json.loads(body).items():
+                self.assertEquals(val, heartbeat.get(key))
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
     def test_does_not_hide_unmatching_filenames(self):
@@ -399,12 +380,13 @@ class ConfigsTestCase(utils.TestCase):
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
         with utils.TemporaryDirectory() as tempdir:
-            entity = 'tests/samples/codefiles/emptyfile.txt'
-            shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
-            entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
+            entity = 'tests/samples/codefiles/python.py'
+            shutil.copy(entity, os.path.join(tempdir, 'python.py'))
+            entity = os.path.realpath(os.path.join(tempdir, 'python.py'))
             now = u(int(time.time()))
-            config = 'tests/samples/configs/hide_file_names.cfg'
+            config = 'tests/samples/configs/hide_file_names_not_python.cfg'
             key = str(uuid.uuid4())
+            dependencies = ['sqlalchemy', 'jinja', 'simplejson', 'flask', 'app', 'django', 'pygments', 'unittest', 'mock']
 
             args = ['--file', entity, '--key', key, '--config', config, '--time', now, '--logfile', '~/.wakatime.log']
 
@@ -418,24 +400,28 @@ class ConfigsTestCase(utils.TestCase):
             self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
 
             heartbeat = {
-                'language': 'Text only',
-                'lines': 0,
+                'language': 'Python',
+                'lines': 37,
                 'entity': entity,
                 'project': os.path.basename(os.path.abspath('.')),
+                'dependencies': dependencies,
                 'time': float(now),
                 'type': 'file',
             }
             stats = {
                 u('cursorpos'): None,
-                u('dependencies'): [],
-                u('language'): u('Text only'),
+                u('dependencies'): dependencies,
+                u('language'): u('Python'),
                 u('lineno'): None,
-                u('lines'): 0,
+                u('lines'): 37,
             }
 
             self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(ANY, ANY, None)
             for key, val in self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].items():
-                self.assertEquals(heartbeat[key], val)
+                if key == 'dependencies':
+                    self.assertEquals(sorted(heartbeat[key]), sorted(val))
+                else:
+                    self.assertEquals(heartbeat[key], val)
             self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
