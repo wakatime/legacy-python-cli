@@ -398,6 +398,7 @@ class ConfigsTestCase(utils.TestCase):
             self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
             self.patched['wakatime.session_cache.SessionCache.delete'].assert_called_once_with()
             self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
+            self.maxDiff = 10000
 
             heartbeat = {
                 'language': 'Python',
@@ -408,21 +409,16 @@ class ConfigsTestCase(utils.TestCase):
                 'time': float(now),
                 'type': 'file',
             }
-            stats = {
-                u('cursorpos'): None,
-                u('dependencies'): dependencies,
-                u('language'): u('Python'),
-                u('lineno'): None,
-                u('lines'): 37,
-            }
 
-            self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(ANY, ANY, None)
-            for key, val in self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].items():
+            self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_called_once_with(
+                ANY, cert=None, proxies={}, stream=False, timeout=60, verify=True,
+            )
+            body = self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].call_args[0][0].body
+            for key, val in json.loads(body).items():
                 if key == 'dependencies':
-                    self.assertEquals(sorted(heartbeat[key]), sorted(val))
+                    self.assertEquals(sorted(val), sorted(heartbeat[key]))
                 else:
-                    self.assertEquals(heartbeat[key], val)
-            self.assertEquals(stats, json.loads(self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][1]))
+                    self.assertEquals(val, heartbeat.get(key))
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
     @log_capture()
