@@ -228,8 +228,6 @@ def send_heartbeat(project=None, branch=None, hostname=None, stats={}, key=None,
                 queue = Queue()
                 queue.push(data, json.dumps(stats), plugin)
                 log.warn(exception_data)
-            session_cache.delete()
-            return API_ERROR
 
     else:
         code = response.status_code if response is not None else None
