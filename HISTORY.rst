@@ -3,6 +3,13 @@ History
 -------
 
 
+9.0.0 (2017-11-04)
+++++++++++++++++++
+
+- Detect project and branch names from git submodules.
+  `#105 <https://github.com/wakatime/wakatime/issues/105>`_
+
+
 8.0.5 (2017-10-29)
 ++++++++++++++++++
 
