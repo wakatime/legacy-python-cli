@@ -291,16 +291,20 @@ class ProjectTestCase(utils.TestCase):
                 with utils.mock.patch('wakatime.projects.subversion.Popen') as mock_popen:
                     stdout = open('tests/samples/output/svn').read()
                     stderr = ''
+
                     class Dynamic(object):
                         def __init__(self):
                             self.called = 0
+
                         def communicate(self):
                             self.called += 1
                             if self.called == 2:
                                 return (stdout, stderr)
+
                         def wait(self):
                             if self.called == 1:
                                 return 0
+
                     mock_popen.return_value = Dynamic()
 
                     execute(args)
@@ -346,6 +350,111 @@ class ProjectTestCase(utils.TestCase):
 
             self.assertEquals('hg', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
             self.assertEquals('default', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['branch'])
+
+    def test_git_submodule_detected(self):
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        tempdir = tempfile.mkdtemp()
+        shutil.copytree('tests/samples/projects/git-with-submodule', os.path.join(tempdir, 'git'))
+        shutil.move(os.path.join(tempdir, 'git', 'dot_git'), os.path.join(tempdir, 'git', '.git'))
+        shutil.move(os.path.join(tempdir, 'git', 'asubmodule', 'dot_git'), os.path.join(tempdir, 'git', 'asubmodule', '.git'))
+
+        now = u(int(time.time()))
+        entity = os.path.join(tempdir, 'git', 'asubmodule', 'emptyfile.txt')
+        config = 'tests/samples/configs/good_config.cfg'
+
+        args = ['--file', entity, '--config', config, '--time', now]
+
+        execute(args)
+
+        self.assertEquals('asubmodule', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
+        self.assertNotIn('asubbranch', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0])
+
+    def test_git_submodule_detected_and_enabled_globally(self):
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        tempdir = tempfile.mkdtemp()
+        shutil.copytree('tests/samples/projects/git-with-submodule', os.path.join(tempdir, 'git'))
+        shutil.move(os.path.join(tempdir, 'git', 'dot_git'), os.path.join(tempdir, 'git', '.git'))
+        shutil.move(os.path.join(tempdir, 'git', 'asubmodule', 'dot_git'), os.path.join(tempdir, 'git', 'asubmodule', '.git'))
+
+        now = u(int(time.time()))
+        entity = os.path.join(tempdir, 'git', 'asubmodule', 'emptyfile.txt')
+        config = 'tests/samples/configs/git-submodules-enabled.cfg'
+
+        args = ['--file', entity, '--config', config, '--time', now]
+
+        execute(args)
+
+        self.assertEquals('asubmodule', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
+        self.assertNotIn('asubbranch', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0])
+
+    def test_git_submodule_detected_but_disabled_globally(self):
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        tempdir = tempfile.mkdtemp()
+        shutil.copytree('tests/samples/projects/git-with-submodule', os.path.join(tempdir, 'git'))
+        shutil.move(os.path.join(tempdir, 'git', 'dot_git'), os.path.join(tempdir, 'git', '.git'))
+        shutil.move(os.path.join(tempdir, 'git', 'asubmodule', 'dot_git'), os.path.join(tempdir, 'git', 'asubmodule', '.git'))
+
+        now = u(int(time.time()))
+        entity = os.path.join(tempdir, 'git', 'asubmodule', 'emptyfile.txt')
+        config = 'tests/samples/configs/git-submodules-disabled.cfg'
+
+        args = ['--file', entity, '--config', config, '--time', now]
+
+        execute(args)
+
+        self.assertEquals('git', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
+        self.assertNotIn('master', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0])
+
+    def test_git_submodule_detected_but_disabled_using_regex(self):
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        tempdir = tempfile.mkdtemp()
+        shutil.copytree('tests/samples/projects/git-with-submodule', os.path.join(tempdir, 'git'))
+        shutil.move(os.path.join(tempdir, 'git', 'dot_git'), os.path.join(tempdir, 'git', '.git'))
+        shutil.move(os.path.join(tempdir, 'git', 'asubmodule', 'dot_git'), os.path.join(tempdir, 'git', 'asubmodule', '.git'))
+
+        now = u(int(time.time()))
+        entity = os.path.join(tempdir, 'git', 'asubmodule', 'emptyfile.txt')
+        config = 'tests/samples/configs/git-submodules-disabled-using-regex.cfg'
+
+        args = ['--file', entity, '--config', config, '--time', now]
+
+        execute(args)
+
+        self.assertEquals('git', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
+        self.assertNotIn('master', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0])
+
+    def test_git_submodule_detected_but_enabled_using_regex(self):
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        tempdir = tempfile.mkdtemp()
+        shutil.copytree('tests/samples/projects/git-with-submodule', os.path.join(tempdir, 'git'))
+        shutil.move(os.path.join(tempdir, 'git', 'dot_git'), os.path.join(tempdir, 'git', '.git'))
+        shutil.move(os.path.join(tempdir, 'git', 'asubmodule', 'dot_git'), os.path.join(tempdir, 'git', 'asubmodule', '.git'))
+
+        now = u(int(time.time()))
+        entity = os.path.join(tempdir, 'git', 'asubmodule', 'emptyfile.txt')
+        config = 'tests/samples/configs/git-submodules-enabled-using-regex.cfg'
+
+        args = ['--file', entity, '--config', config, '--time', now]
+
+        execute(args)
+
+        self.assertEquals('asubmodule', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
+        self.assertNotIn('asubbranch', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0])
 
     @log_capture()
     def test_project_map(self, logs):

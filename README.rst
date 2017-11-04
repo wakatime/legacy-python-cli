@@ -80,6 +80,8 @@ format. An example config file with all available options::
     [projectmap]
     projects/foo = new project name
     ^/home/user/projects/bar(\d+)/ = project{0}
+    [git]
+    disable_submodules = false
 
 For commonly used configuration options, see examples in the `FAQ <https://wakatime.com/faq>`_.
 
