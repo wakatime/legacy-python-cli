@@ -3,6 +3,13 @@ History
 -------
 
 
+9.0.1 (2017-11-07)
+++++++++++++++++++
+
+- Fix bug causing 401 response when hidefilenames is enabled.
+  `#106 <https://github.com/wakatime/wakatime/issues/106>`_
+
+
 9.0.0 (2017-11-04)
 ++++++++++++++++++
 
