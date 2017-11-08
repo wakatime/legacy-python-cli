@@ -4,6 +4,7 @@
 from wakatime.main import execute
 from wakatime.packages import requests
 
+import base64
 import logging
 import os
 import time
@@ -345,9 +346,8 @@ class ConfigsTestCase(utils.TestCase):
             entity = os.path.realpath(os.path.join(tempdir, 'python.py'))
             now = u(int(time.time()))
             config = 'tests/samples/configs/hide_file_names.cfg'
-            key = str(uuid.uuid4())
 
-            args = ['--file', entity, '--key', key, '--config', config, '--time', now, '--logfile', '~/.wakatime.log']
+            args = ['--file', entity, '--config', config, '--time', now, '--logfile', '~/.wakatime.log']
 
             retval = execute(args)
             self.assertEquals(retval, API_ERROR)
@@ -373,6 +373,11 @@ class ConfigsTestCase(utils.TestCase):
             for key, val in json.loads(body).items():
                 self.assertEquals(val, heartbeat.get(key))
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
+
+            headers = self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].call_args[0][0].headers
+            key = '033c47c9-0441-4eb5-8b3f-b51f27b31049'
+            expected = u('Basic {0}').format(u(base64.b64encode(str.encode(key) if is_py3 else key)))
+            self.assertEquals(headers.get('Authorization'), expected)
 
     def test_does_not_hide_unmatching_filenames(self):
         response = Response()
