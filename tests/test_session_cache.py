@@ -33,7 +33,7 @@ class SessionCacheTestCase(utils.TestCase):
         with utils.NamedTemporaryFile() as fh:
             cache = SessionCache()
 
-            with utils.mock.patch('wakatime.session_cache.SessionCache.get_db_file') as mock_dbfile:
+            with utils.mock.patch('wakatime.session_cache.SessionCache._get_db_file') as mock_dbfile:
                 mock_dbfile.return_value = fh.name
 
                 session = cache.get()
@@ -49,7 +49,7 @@ class SessionCacheTestCase(utils.TestCase):
         with utils.NamedTemporaryFile() as fh:
             cache = SessionCache()
 
-            with utils.mock.patch('wakatime.session_cache.SessionCache.get_db_file') as mock_dbfile:
+            with utils.mock.patch('wakatime.session_cache.SessionCache._get_db_file') as mock_dbfile:
                 mock_dbfile.return_value = fh.name
 
                 with utils.mock.patch('wakatime.session_cache.SessionCache.connect') as mock_connect:
@@ -69,12 +69,12 @@ class SessionCacheTestCase(utils.TestCase):
             expected = os.path.realpath(os.path.join(os.path.expanduser('~'), '.wakatime.db'))
 
             cache = SessionCache()
-            actual = cache.get_db_file()
+            actual = cache._get_db_file()
             self.assertEquals(actual, expected)
 
             with utils.mock.patch('os.environ.get') as mock_env:
                 mock_env.return_value = os.path.realpath(tempdir)
 
                 expected = os.path.realpath(os.path.join(tempdir, '.wakatime.db'))
-                actual = cache.get_db_file()
+                actual = cache._get_db_file()
                 self.assertEquals(actual, expected)

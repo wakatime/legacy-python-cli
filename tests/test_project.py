@@ -14,10 +14,11 @@ import tempfile
 import time
 from testfixtures import log_capture
 from wakatime.compat import u
-from wakatime.constants import API_ERROR
+from wakatime.constants import API_ERROR, SUCCESS
 from wakatime.exceptions import NotYetImplemented
 from wakatime.projects.base import BaseProject
 from . import utils
+from .utils import ANY, json
 
 
 class ProjectTestCase(utils.TestCase):
@@ -31,6 +32,40 @@ class ProjectTestCase(utils.TestCase):
         ['wakatime.session_cache.SessionCache.get', requests.session],
         ['wakatime.session_cache.SessionCache.connect', None],
     ]
+
+    def shared(self, expected_project='', expected_branch=ANY, entity='', config='good_config.cfg', extra_args=[]):
+        response = Response()
+        response.status_code = 201
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        config = os.path.join('tests/samples/configs', config)
+        if not os.path.exists(entity):
+            entity = os.path.realpath(os.path.join('tests/samples', entity))
+
+        now = u(int(time.time()))
+        args = ['--file', entity, '--config', config, '--time', now] + extra_args
+
+        retval = execute(args)
+        self.assertEquals(retval, SUCCESS)
+        self.assertNothingPrinted()
+
+        heartbeat = {
+            'language': ANY,
+            'lines': ANY,
+            'entity': os.path.realpath(entity),
+            'project': expected_project,
+            'branch': expected_branch,
+            'dependencies': ANY,
+            'time': float(now),
+            'type': 'file',
+            'is_write': False,
+            'user_agent': ANY,
+        }
+        self.assertHeartbeatSent(heartbeat)
+
+        self.assertHeartbeatNotSavedOffline()
+        self.assertOfflineHeartbeatsSynced()
+        self.assertSessionCacheSaved()
 
     def test_project_base(self):
         path = 'tests/samples/codefiles/see.h'
@@ -110,98 +145,63 @@ class ProjectTestCase(utils.TestCase):
         args = ['--file', entity, '--config', config, '--time', now, '--alternate-project', 'alt-project']
         execute(args)
 
-        calls = self.patched['wakatime.offlinequeue.Queue.push'].call_args_list
-        self.assertEquals(None, calls[0][0][0].get('project'))
-        self.assertEquals('alt-project', calls[1][0][0]['project'])
+        calls = self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].call_args_list
+
+        body = calls[0][0][0].body
+        data = json.loads(body)[0]
+        self.assertEquals(None, data.get('project'))
+
+        body = calls[1][0][0].body
+        data = json.loads(body)[0]
+        self.assertEquals('alt-project', data['project'])
 
     def test_wakatime_project_file(self):
-        response = Response()
-        response.status_code = 0
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
-
-        now = u(int(time.time()))
-        entity = 'tests/samples/projects/wakatime_project_file/emptyfile.txt'
-        config = 'tests/samples/configs/good_config.cfg'
-
-        args = ['--file', entity, '--config', config, '--time', now]
-
-        execute(args)
-
-        self.assertEquals('waka-project-file', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
+        self.shared(
+            expected_project='waka-project-file',
+            entity='projects/wakatime_project_file/emptyfile.txt',
+        )
 
     def test_git_project_detected(self):
-        response = Response()
-        response.status_code = 0
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
-
         tempdir = tempfile.mkdtemp()
         shutil.copytree('tests/samples/projects/git', os.path.join(tempdir, 'git'))
         shutil.move(os.path.join(tempdir, 'git', 'dot_git'), os.path.join(tempdir, 'git', '.git'))
 
-        now = u(int(time.time()))
-        entity = os.path.join(tempdir, 'git', 'emptyfile.txt')
-        config = 'tests/samples/configs/good_config.cfg'
-
-        args = ['--file', entity, '--config', config, '--time', now]
-
-        execute(args)
-
-        self.assertEquals('git', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
-        self.assertEquals('master', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['branch'])
+        self.shared(
+            expected_project='git',
+            expected_branch='master',
+            entity=os.path.join(tempdir, 'git', 'emptyfile.txt'),
+        )
 
     def test_ioerror_when_reading_git_branch(self):
-        response = Response()
-        response.status_code = 0
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
-
         tempdir = tempfile.mkdtemp()
         shutil.copytree('tests/samples/projects/git', os.path.join(tempdir, 'git'))
         shutil.move(os.path.join(tempdir, 'git', 'dot_git'), os.path.join(tempdir, 'git', '.git'))
 
-        now = u(int(time.time()))
         entity = os.path.join(tempdir, 'git', 'emptyfile.txt')
-        config = 'tests/samples/configs/good_config.cfg'
-
-        args = ['--file', entity, '--config', config, '--time', now]
 
         with utils.mock.patch('wakatime.projects.git.open') as mock_open:
             mock_open.side_effect = IOError('')
-            execute(args)
 
-        self.assertEquals('git', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
-        self.assertEquals('master', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].get('branch'))
+            self.shared(
+                expected_project='git',
+                expected_branch='master',
+                entity=entity,
+            )
 
     def test_git_detached_head_not_used_as_branch(self):
-        response = Response()
-        response.status_code = 0
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
-
         tempdir = tempfile.mkdtemp()
         shutil.copytree('tests/samples/projects/git-with-detached-head', os.path.join(tempdir, 'git'))
         shutil.move(os.path.join(tempdir, 'git', 'dot_git'), os.path.join(tempdir, 'git', '.git'))
 
-        now = u(int(time.time()))
         entity = os.path.join(tempdir, 'git', 'emptyfile.txt')
-        config = 'tests/samples/configs/good_config.cfg'
 
-        args = ['--file', entity, '--config', config, '--time', now]
-
-        execute(args)
-
-        self.assertEquals('git', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
-        self.assertNotIn('branch', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0])
+        self.shared(
+            expected_project='git',
+            expected_branch=None,
+            entity=entity,
+        )
 
     def test_svn_project_detected(self):
-        response = Response()
-        response.status_code = 0
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
-
-        now = u(int(time.time()))
-        entity = 'tests/samples/projects/svn/afolder/emptyfile.txt'
-        config = 'tests/samples/configs/good_config.cfg'
-
-        args = ['--file', entity, '--config', config, '--time', now]
-
         with utils.mock.patch('wakatime.projects.git.Git.process') as mock_git:
             mock_git.return_value = False
 
@@ -213,24 +213,15 @@ class ProjectTestCase(utils.TestCase):
                     stderr = ''
                     mock_popen.return_value = utils.DynamicIterable((stdout, stderr), max_calls=1)
 
-                    execute(args)
-
-        expected = None if platform.system() == 'Windows' else 'svn'
-        self.assertEquals(expected, self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0].get('project'))
+                    expected = None if platform.system() == 'Windows' else 'svn'
+                    self.shared(
+                        expected_project=expected,
+                        entity='projects/svn/afolder/emptyfile.txt',
+                    )
 
     def test_svn_exception_handled(self):
-        response = Response()
-        response.status_code = 0
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
-
         with utils.mock.patch('wakatime.projects.git.Git.process') as mock_git:
             mock_git.return_value = False
-
-            now = u(int(time.time()))
-            entity = 'tests/samples/projects/svn/afolder/emptyfile.txt'
-            config = 'tests/samples/configs/good_config.cfg'
-
-            args = ['--file', entity, '--config', config, '--time', now]
 
             with utils.mock.patch('wakatime.projects.subversion.Subversion._has_xcode_tools') as mock_has_xcode:
                 mock_has_xcode.return_value = True
@@ -241,21 +232,12 @@ class ProjectTestCase(utils.TestCase):
                     with utils.mock.patch('wakatime.projects.subversion.Popen.communicate') as mock_communicate:
                         mock_communicate.side_effect = OSError('')
 
-                        execute(args)
-
-            self.assertNotIn('project', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0])
+                        self.shared(
+                            expected_project=None,
+                            entity='projects/svn/afolder/emptyfile.txt',
+                        )
 
     def test_svn_on_mac_without_xcode_tools_installed(self):
-        response = Response()
-        response.status_code = 0
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
-
-        now = u(int(time.time()))
-        entity = 'tests/samples/projects/svn/afolder/emptyfile.txt'
-        config = 'tests/samples/configs/good_config.cfg'
-
-        args = ['--file', entity, '--config', config, '--time', now]
-
         with utils.mock.patch('wakatime.projects.git.Git.process') as mock_git:
             mock_git.return_value = False
 
@@ -267,9 +249,10 @@ class ProjectTestCase(utils.TestCase):
                     stderr = ''
                     mock_popen.return_value = utils.DynamicIterable((stdout, stderr), raise_on_calls=[OSError('')])
 
-                    execute(args)
-
-            self.assertNotIn('project', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0])
+                    self.shared(
+                        expected_project=None,
+                        entity='projects/svn/afolder/emptyfile.txt',
+                    )
 
     def test_svn_on_mac_with_xcode_tools_installed(self):
         response = Response()
@@ -352,109 +335,78 @@ class ProjectTestCase(utils.TestCase):
             self.assertEquals('default', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['branch'])
 
     def test_git_submodule_detected(self):
-        response = Response()
-        response.status_code = 0
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
-
         tempdir = tempfile.mkdtemp()
         shutil.copytree('tests/samples/projects/git-with-submodule', os.path.join(tempdir, 'git'))
         shutil.move(os.path.join(tempdir, 'git', 'dot_git'), os.path.join(tempdir, 'git', '.git'))
         shutil.move(os.path.join(tempdir, 'git', 'asubmodule', 'dot_git'), os.path.join(tempdir, 'git', 'asubmodule', '.git'))
 
-        now = u(int(time.time()))
         entity = os.path.join(tempdir, 'git', 'asubmodule', 'emptyfile.txt')
-        config = 'tests/samples/configs/good_config.cfg'
 
-        args = ['--file', entity, '--config', config, '--time', now]
-
-        execute(args)
-
-        self.assertEquals('asubmodule', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
-        self.assertNotIn('asubbranch', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0])
+        self.shared(
+            expected_project='asubmodule',
+            expected_branch='asubbranch',
+            entity=entity,
+        )
 
     def test_git_submodule_detected_and_enabled_globally(self):
-        response = Response()
-        response.status_code = 0
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
-
         tempdir = tempfile.mkdtemp()
         shutil.copytree('tests/samples/projects/git-with-submodule', os.path.join(tempdir, 'git'))
         shutil.move(os.path.join(tempdir, 'git', 'dot_git'), os.path.join(tempdir, 'git', '.git'))
         shutil.move(os.path.join(tempdir, 'git', 'asubmodule', 'dot_git'), os.path.join(tempdir, 'git', 'asubmodule', '.git'))
 
-        now = u(int(time.time()))
         entity = os.path.join(tempdir, 'git', 'asubmodule', 'emptyfile.txt')
-        config = 'tests/samples/configs/git-submodules-enabled.cfg'
 
-        args = ['--file', entity, '--config', config, '--time', now]
-
-        execute(args)
-
-        self.assertEquals('asubmodule', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
-        self.assertNotIn('asubbranch', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0])
+        self.shared(
+            expected_project='asubmodule',
+            expected_branch='asubbranch',
+            entity=entity,
+            config='git-submodules-enabled.cfg',
+        )
 
     def test_git_submodule_detected_but_disabled_globally(self):
-        response = Response()
-        response.status_code = 0
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
-
         tempdir = tempfile.mkdtemp()
         shutil.copytree('tests/samples/projects/git-with-submodule', os.path.join(tempdir, 'git'))
         shutil.move(os.path.join(tempdir, 'git', 'dot_git'), os.path.join(tempdir, 'git', '.git'))
         shutil.move(os.path.join(tempdir, 'git', 'asubmodule', 'dot_git'), os.path.join(tempdir, 'git', 'asubmodule', '.git'))
 
-        now = u(int(time.time()))
         entity = os.path.join(tempdir, 'git', 'asubmodule', 'emptyfile.txt')
-        config = 'tests/samples/configs/git-submodules-disabled.cfg'
 
-        args = ['--file', entity, '--config', config, '--time', now]
-
-        execute(args)
-
-        self.assertEquals('git', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
-        self.assertNotIn('master', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0])
+        self.shared(
+            expected_project='git',
+            expected_branch='master',
+            entity=entity,
+            config='git-submodules-disabled.cfg',
+        )
 
     def test_git_submodule_detected_but_disabled_using_regex(self):
-        response = Response()
-        response.status_code = 0
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
-
         tempdir = tempfile.mkdtemp()
         shutil.copytree('tests/samples/projects/git-with-submodule', os.path.join(tempdir, 'git'))
         shutil.move(os.path.join(tempdir, 'git', 'dot_git'), os.path.join(tempdir, 'git', '.git'))
         shutil.move(os.path.join(tempdir, 'git', 'asubmodule', 'dot_git'), os.path.join(tempdir, 'git', 'asubmodule', '.git'))
 
-        now = u(int(time.time()))
         entity = os.path.join(tempdir, 'git', 'asubmodule', 'emptyfile.txt')
-        config = 'tests/samples/configs/git-submodules-disabled-using-regex.cfg'
 
-        args = ['--file', entity, '--config', config, '--time', now]
-
-        execute(args)
-
-        self.assertEquals('git', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
-        self.assertNotIn('master', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0])
+        self.shared(
+            expected_project='git',
+            expected_branch='master',
+            entity=entity,
+            config='git-submodules-disabled-using-regex.cfg',
+        )
 
     def test_git_submodule_detected_but_enabled_using_regex(self):
-        response = Response()
-        response.status_code = 0
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
-
         tempdir = tempfile.mkdtemp()
         shutil.copytree('tests/samples/projects/git-with-submodule', os.path.join(tempdir, 'git'))
         shutil.move(os.path.join(tempdir, 'git', 'dot_git'), os.path.join(tempdir, 'git', '.git'))
         shutil.move(os.path.join(tempdir, 'git', 'asubmodule', 'dot_git'), os.path.join(tempdir, 'git', 'asubmodule', '.git'))
 
-        now = u(int(time.time()))
         entity = os.path.join(tempdir, 'git', 'asubmodule', 'emptyfile.txt')
-        config = 'tests/samples/configs/git-submodules-enabled-using-regex.cfg'
 
-        args = ['--file', entity, '--config', config, '--time', now]
-
-        execute(args)
-
-        self.assertEquals('asubmodule', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
-        self.assertNotIn('asubbranch', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0])
+        self.shared(
+            expected_project='asubmodule',
+            expected_branch='asubbranch',
+            entity=entity,
+            config='git-submodules-enabled-using-regex.cfg',
+        )
 
     @log_capture()
     def test_project_map(self, logs):
