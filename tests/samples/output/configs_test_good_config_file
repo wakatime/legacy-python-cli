@@ -1,5 +1,5 @@
 Traceback (most recent call last):
-  File "{file}", line {lineno}, in parseArguments
+  File "{file}", line {lineno}, in parse_arguments
     args.timeout = int(configs.get('settings', 'timeout'))
 ValueError: invalid literal for int() with base 10: 'abc'
 

@@ -174,7 +174,7 @@ class ProxyTestCase(utils.TestCase):
             self.patched['wakatime.session_cache.SessionCache.delete'].assert_called_once_with()
             self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
 
-            self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(ANY, ANY, None)
+            self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(ANY)
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
             expected_calls = [
@@ -212,7 +212,7 @@ class ProxyTestCase(utils.TestCase):
             self.patched['wakatime.session_cache.SessionCache.delete'].assert_called_once_with()
             self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
 
-            self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(ANY, ANY, None)
+            self.patched['wakatime.offlinequeue.Queue.push'].assert_called_once_with(ANY)
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
             expected_calls = [
