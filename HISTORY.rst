@@ -3,6 +3,13 @@ History
 -------
 
 
+10.0.1 (2017-11-09)
++++++++++++++++++++
+
+- Parse array of results from bulk heartbeats endpoint, only saving heartbeats
+  to local offline cache when they were not accepted by the api.
+
+
 10.0.0 (2017-11-08)
 +++++++++++++++++++
 
