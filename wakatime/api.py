@@ -16,12 +16,7 @@ import sys
 import traceback
 
 from .compat import u, is_py3, json
-from .constants import (
-    API_ERROR,
-    AUTH_ERROR,
-    SUCCESS,
-    UNKNOWN_ERROR,
-)
+from .constants import API_ERROR, AUTH_ERROR, SUCCESS, UNKNOWN_ERROR
 
 from .offlinequeue import Queue
 from .packages.requests.exceptions import RequestException
