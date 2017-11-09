@@ -3,6 +3,13 @@ History
 -------
 
 
+10.0.0 (2017-11-08)
++++++++++++++++++++
+
+- Upload multiple heartbeats to bulk endpoint for improved network performance.
+  `#107 <https://github.com/wakatime/wakatime/issues/107>`_
+
+
 9.0.1 (2017-11-07)
 ++++++++++++++++++
 
