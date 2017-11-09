@@ -8,13 +8,15 @@ from wakatime.packages import requests
 import logging
 import os
 import sqlite3
+import shutil
 import time
+import uuid
 from testfixtures import log_capture
 from wakatime.compat import u
 from wakatime.constants import SUCCESS
 from wakatime.packages.requests.models import Response
 from . import utils
-from .utils import json
+from .utils import ANY, json
 
 
 class OfflineQueueTestCase(utils.TestCase):
@@ -158,6 +160,163 @@ class OfflineQueueTestCase(utils.TestCase):
                 self.assertEquals(data.get('entity'), os.path.abspath(entity2))
                 self.assertEquals(data.get('project'), project2)
                 self.assertEquals(u(int(data.get('time'))), now2)
+
+    @log_capture()
+    def test_heartbeats_sent_not_saved_from_bulk_response(self, logs):
+        logging.disable(logging.NOTSET)
+
+        with utils.NamedTemporaryFile() as fh:
+            with utils.mock.patch('wakatime.offlinequeue.Queue._get_db_file') as mock_db_file:
+                mock_db_file.return_value = fh.name
+
+                entities = [
+                    'emptyfile.txt',
+                    'twolinefile.txt',
+                    'python.py',
+                    'go.go',
+                ]
+
+                with utils.TemporaryDirectory() as tempdir:
+                    for entity in entities:
+                        shutil.copy(os.path.join('tests/samples/codefiles', entity), os.path.join(tempdir, entity))
+
+                    now = u(int(time.time()))
+                    key = str(uuid.uuid4())
+                    args = ['--file', os.path.join(tempdir, entities[0]), '--key', key, '--config', 'tests/samples/configs/good_config.cfg', '--time', now, '--extra-heartbeats']
+
+                    class CustomResponse(Response):
+
+                        @property
+                        def status_code(self):
+                            return 202
+
+                        @status_code.setter
+                        def status_code(self, value):
+                            pass
+
+                        @property
+                        def text(self):
+                            return '[[{"id":1},201], [{"error":"error 2"},500], [{"id":3},201], [{"error":4},500]]'
+
+                    response = CustomResponse()
+                    self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+                    with utils.mock.patch('wakatime.main.sys.stdin') as mock_stdin:
+                        heartbeats = json.dumps([{
+                            'timestamp': now,
+                            'entity': os.path.join(tempdir, entity),
+                            'entity_type': 'file',
+                            'is_write': False,
+                        } for entity in entities[1:]])
+                        mock_stdin.readline.return_value = heartbeats
+
+                        with utils.mock.patch('wakatime.offlinequeue.Queue.pop') as mock_pop:
+                            mock_pop.return_value = None
+
+                            retval = execute(args)
+
+                        self.assertEquals(retval, SUCCESS)
+                        self.assertNothingPrinted()
+
+                        heartbeat = {
+                            'entity': os.path.realpath(os.path.join(tempdir, entities[0])),
+                            'language': ANY,
+                            'lines': ANY,
+                            'project': ANY,
+                            'time': ANY,
+                            'type': 'file',
+                            'is_write': ANY,
+                            'user_agent': ANY,
+                            'dependencies': ANY,
+                        }
+                        extra_heartbeats = [{
+                            'entity': os.path.realpath(os.path.join(tempdir, entity)),
+                            'language': ANY,
+                            'lines': ANY,
+                            'project': ANY,
+                            'branch': ANY,
+                            'time': ANY,
+                            'is_write': ANY,
+                            'type': 'file',
+                            'dependencies': ANY,
+                            'user_agent': ANY,
+                        } for entity in entities[1:]]
+                        self.assertHeartbeatSent(heartbeat, extra_heartbeats=extra_heartbeats)
+
+                        self.assertSessionCacheSaved()
+
+                        queue = Queue(None, None)
+                        self.assertEquals(queue._get_db_file(), fh.name)
+                        saved_heartbeats = queue.pop_many()
+                        self.assertNothingPrinted()
+                        self.assertNothingLogged(logs)
+
+                        # make sure only heartbeats with error code responses were saved
+                        self.assertEquals(len(saved_heartbeats), 2)
+                        self.assertEquals(saved_heartbeats[0].entity, os.path.realpath(os.path.join(tempdir, entities[1])))
+                        self.assertEquals(saved_heartbeats[1].entity, os.path.realpath(os.path.join(tempdir, entities[3])))
+
+    @log_capture()
+    def test_offline_heartbeats_sent_after_partial_success_from_bulk_response(self, logs):
+        logging.disable(logging.NOTSET)
+
+        with utils.NamedTemporaryFile() as fh:
+            with utils.mock.patch('wakatime.offlinequeue.Queue._get_db_file') as mock_db_file:
+                mock_db_file.return_value = fh.name
+
+                entities = [
+                    'emptyfile.txt',
+                    'twolinefile.txt',
+                    'python.py',
+                    'go.go',
+                ]
+
+                with utils.TemporaryDirectory() as tempdir:
+                    for entity in entities:
+                        shutil.copy(os.path.join('tests/samples/codefiles', entity), os.path.join(tempdir, entity))
+
+                    now = u(int(time.time()))
+                    key = str(uuid.uuid4())
+                    args = ['--file', os.path.join(tempdir, entities[0]), '--key', key, '--config', 'tests/samples/configs/good_config.cfg', '--time', now, '--extra-heartbeats']
+
+                    class CustomResponse(Response):
+
+                        @property
+                        def status_code(self):
+                            return 202
+
+                        @status_code.setter
+                        def status_code(self, value):
+                            pass
+
+                        @property
+                        def text(self):
+                            return '[[{"id":1},201], [{"error":"error 2"},500], [{"id":3},201], [{"error":4},500]]'
+
+                    response = CustomResponse()
+                    self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+                    with utils.mock.patch('wakatime.main.sys.stdin') as mock_stdin:
+                        heartbeats = json.dumps([{
+                            'timestamp': now,
+                            'entity': os.path.join(tempdir, entity),
+                            'entity_type': 'file',
+                            'is_write': False,
+                        } for entity in entities[1:]])
+                        mock_stdin.readline.return_value = heartbeats
+
+                        retval = execute(args)
+                        self.assertEquals(retval, SUCCESS)
+                        self.assertNothingPrinted()
+
+                        queue = Queue(None, None)
+                        self.assertEquals(queue._get_db_file(), fh.name)
+                        saved_heartbeats = queue.pop_many()
+                        self.assertNothingPrinted()
+                        self.assertNothingLogged(logs)
+
+                        # make sure all offline heartbeats were sent, so queue should only have 1 heartbeat left from the second 500 response
+                        self.assertEquals(len(saved_heartbeats), 1)
 
     def test_auth_error_when_sending_offline_heartbeats(self):
         with utils.NamedTemporaryFile() as fh:

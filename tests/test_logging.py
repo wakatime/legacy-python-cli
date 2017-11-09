@@ -147,7 +147,7 @@ class LoggingTestCase(utils.TestCase):
         self.assertEquals(output[1], expected)
         self.assertEquals(output[2], u('WakaTime DEBUG Sending heartbeats to api at https://api.wakatime.com/api/v1/users/current/heartbeats.bulk'))
         self.assertIn('Python', output[3])
-        self.assertIn('response_code', output[4])
+        self.assertIn('response_code', output[5])
 
     @log_capture()
     def test_exception_traceback_logged_in_debug_mode(self, logs):
