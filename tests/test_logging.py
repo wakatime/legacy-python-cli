@@ -145,7 +145,7 @@ class LoggingTestCase(utils.TestCase):
         if self.isPy35OrNewer:
             expected = u('WakaTime WARNING Regex error (unbalanced parenthesis at position 15) for exclude pattern: \\(invalid regex)')
         self.assertEquals(output[1], expected)
-        self.assertEquals(output[2], u('WakaTime DEBUG Sending heartbeats to api at https://api.wakatime.com/api/v1/heartbeats.bulk'))
+        self.assertEquals(output[2], u('WakaTime DEBUG Sending heartbeats to api at https://api.wakatime.com/api/v1/users/current/heartbeats.bulk'))
         self.assertIn('Python', output[3])
         self.assertIn('response_code', output[4])
 

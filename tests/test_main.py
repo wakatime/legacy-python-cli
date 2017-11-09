@@ -219,7 +219,7 @@ class MainTestCase(utils.TestCase):
             actual = self.getLogOutput(logs)
             expected = 'Parsing dependencies not supported for special.TextParser'
             self.assertIn(expected, actual)
-            expected = 'WakaTime DEBUG Sending heartbeats to api at https://api.wakatime.com/api/v1/heartbeats.bulk'
+            expected = 'WakaTime DEBUG Sending heartbeats to api at https://api.wakatime.com/api/v1/users/current/heartbeats.bulk'
             self.assertIn(expected, actual)
             expected = "RequestException': u'requests exception'"
             if is_py3:
