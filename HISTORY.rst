@@ -3,6 +3,13 @@ History
 -------
 
 
+10.0.2 (2017-11-15)
++++++++++++++++++++
+
+- Limit bulk syncing to 5 heartbeats per request.
+  `#109 <https://github.com/wakatime/wakatime/issues/109>`_
+
+
 10.0.1 (2017-11-09)
 +++++++++++++++++++
 
