@@ -91,7 +91,7 @@ class TestCase(unittest.TestCase):
                 if isinstance(heartbeat.get(key), list):
                     self.assertListsEqual(heartbeat.get(key), body[0].get(key), u('Expected heartbeat to be sent with {0}={1}, instead {0}={2}').format(u(key), u(heartbeat.get(key)), u(body[0].get(key))))
                 else:
-                    self.assertEquals(heartbeat.get(key), body[0].get(key), u('Expected heartbeat to be sent with {1} {0}={2}, instead {3} {0}={4}').format(u(key), type(heartbeat.get(key)), u(heartbeat.get(key)), type(body[0].get(key)), u(body[0].get(key))))
+                    self.assertEquals(heartbeat.get(key), body[0].get(key), u('Expected heartbeat to be sent with {1} {0}={2}, instead {3} {0}={4}').format(u(key), type(heartbeat.get(key)).__name__, u(heartbeat.get(key)), type(body[0].get(key)).__name__, u(body[0].get(key))))
 
         if extra_heartbeats:
             for i in range(len(extra_heartbeats)):
@@ -100,7 +100,7 @@ class TestCase(unittest.TestCase):
                     if isinstance(extra_heartbeats[i].get(key), list):
                         self.assertListsEqual(extra_heartbeats[i].get(key), body[i + 1].get(key), u('Expected extra heartbeat {3} to be sent with {0}={1}, instead {0}={2}').format(u(key), u(extra_heartbeats[i].get(key)), u(body[i + 1].get(key)), i))
                     else:
-                        self.assertEquals(extra_heartbeats[i].get(key), body[i + 1].get(key), u('Expected extra heartbeat {5} to be sent with {1} {0}={2}, instead {3} {0}={4}').format(u(key), type(extra_heartbeats[i].get(key)), u(extra_heartbeats[i].get(key)), type(body[i + 1].get(key)), u(body[i + 1].get(key)), i))
+                        self.assertEquals(extra_heartbeats[i].get(key), body[i + 1].get(key), u('Expected extra heartbeat {5} to be sent with {1} {0}={2}, instead {3} {0}={4}').format(u(key), type(extra_heartbeats[i].get(key)).__name__, u(extra_heartbeats[i].get(key)), type(body[i + 1].get(key)).__name__, u(body[i + 1].get(key)), i))
 
     def assertSessionCacheUntouched(self):
         self.patched['wakatime.session_cache.SessionCache.delete'].assert_not_called()

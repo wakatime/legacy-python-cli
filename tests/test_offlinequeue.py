@@ -555,3 +555,94 @@ class OfflineQueueTestCase(utils.TestCase):
                 self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
                 self.patched['wakatime.session_cache.SessionCache.delete'].assert_called_once_with()
                 self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
+
+    """@log_capture()
+    def non_ascii_heartbeat_saved(self, logs):
+        logging.disable(logging.NOTSET)
+
+        with utils.NamedTemporaryFile() as fh:
+            with utils.mock.patch('wakatime.offlinequeue.Queue._get_db_file') as mock_db_file:
+                mock_db_file.return_value = fh.name
+
+                response = Response()
+                response.status_code = 500
+                self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+                now = u(int(time.time()))
+                entity = 'tests/samples/codefiles/twolinefile.txt'
+                config = 'tests/samples/configs/good_config.cfg'
+
+                return 'tz汉语' if is_py3 else 'tz\xe6\xb1\x89\xe8\xaf\xad'
+
+                args = ['--file', entity, '--config', config, '--time', now]
+                execute(args)
+
+                queue = Queue(None, None)
+                saved_heartbeat = queue.pop()
+                self.assertEquals(os.path.realpath(entity), saved_heartbeat['entity'])
+
+                self.assertNothingPrinted()
+                self.assertNothingLogged()
+
+                self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
+                self.patched['wakatime.session_cache.SessionCache.delete'].assert_called_once_with()
+                self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
+    """
+
+    @log_capture()
+    def test_nonascii_heartbeat_saved(self, logs):
+        logging.disable(logging.NOTSET)
+
+        with utils.NamedTemporaryFile() as fh:
+            with utils.mock.patch('wakatime.offlinequeue.Queue._get_db_file') as mock_db_file:
+                mock_db_file.return_value = fh.name
+
+                response = Response()
+                response.status_code = 500
+                self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+                with utils.TemporaryDirectory() as tempdir:
+                    filename = list(filter(lambda x: x.endswith('.txt'), os.listdir(u('tests/samples/codefiles/unicode'))))[0]
+                    entity = os.path.join('tests/samples/codefiles/unicode', filename)
+                    shutil.copy(entity, os.path.join(tempdir, filename))
+                    entity = os.path.realpath(os.path.join(tempdir, filename))
+                    now = u(int(time.time()))
+                    config = 'tests/samples/configs/good_config.cfg'
+                    key = str(uuid.uuid4())
+                    language = 'lang汉语' if self.isPy35OrNewer else 'lang\xe6\xb1\x89\xe8\xaf\xad'
+                    project = 'proj汉语' if self.isPy35OrNewer else 'proj\xe6\xb1\x89\xe8\xaf\xad'
+                    branch = 'branch汉语' if self.isPy35OrNewer else 'branch\xe6\xb1\x89\xe8\xaf\xad'
+                    heartbeat = {
+                        'language': u(language),
+                        'lines': 0,
+                        'entity': os.path.realpath(entity),
+                        'project': u(project),
+                        'branch': u(branch),
+                        'time': float(now),
+                        'type': 'file',
+                        'is_write': False,
+                        'user_agent': ANY,
+                        'dependencies': [],
+                    }
+
+                    args = ['--file', entity, '--key', key, '--config', config, '--time', now]
+
+                    with utils.mock.patch('wakatime.stats.standardize_language') as mock_language:
+                        mock_language.return_value = (language, None)
+
+                        with utils.mock.patch('wakatime.heartbeat.get_project_info') as mock_project:
+                            mock_project.return_value = (project, branch)
+
+                            execute(args)
+
+                    self.assertNothingPrinted()
+                    self.assertNothingLogged(logs)
+
+                    self.assertHeartbeatSent(heartbeat)
+
+                    queue = Queue(None, None)
+                    saved_heartbeat = queue.pop()
+                    self.assertEquals(os.path.realpath(entity), saved_heartbeat['entity'])
+                    self.assertEquals(u(language), saved_heartbeat['language'])
+                    self.assertEquals(u(project), saved_heartbeat['project'])
+                    self.assertEquals(u(branch), saved_heartbeat['branch'])

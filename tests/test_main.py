@@ -485,6 +485,47 @@ class MainTestCase(utils.TestCase):
             self.assertSessionCacheSaved()
 
     @log_capture()
+    def test_nonascii_filename_saved_when_offline(self, logs):
+        logging.disable(logging.NOTSET)
+
+        response = Response()
+        response.status_code = 500
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        with utils.TemporaryDirectory() as tempdir:
+            filename = list(filter(lambda x: x.endswith('.txt'), os.listdir(u('tests/samples/codefiles/unicode'))))[0]
+            entity = os.path.join('tests/samples/codefiles/unicode', filename)
+            shutil.copy(entity, os.path.join(tempdir, filename))
+            entity = os.path.realpath(os.path.join(tempdir, filename))
+            now = u(int(time.time()))
+            config = 'tests/samples/configs/good_config.cfg'
+            key = str(uuid.uuid4())
+            heartbeat = {
+                'language': 'Text only',
+                'lines': 0,
+                'entity': os.path.realpath(entity),
+                'project': None,
+                'time': float(now),
+                'type': 'file',
+                'is_write': False,
+                'user_agent': ANY,
+                'dependencies': [],
+            }
+
+            args = ['--file', entity, '--key', key, '--config', config, '--time', now]
+
+            retval = execute(args)
+            self.assertEquals(retval, API_ERROR)
+            self.assertNothingPrinted()
+            self.assertNothingLogged(logs)
+
+            self.assertHeartbeatSent(heartbeat)
+
+            self.assertHeartbeatSavedOffline()
+            self.assertOfflineHeartbeatsNotSynced()
+            self.assertSessionCacheDeleted()
+
+    @log_capture()
     def test_unhandled_exception(self, logs):
         logging.disable(logging.NOTSET)
 
