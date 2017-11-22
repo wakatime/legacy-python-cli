@@ -556,39 +556,6 @@ class OfflineQueueTestCase(utils.TestCase):
                 self.patched['wakatime.session_cache.SessionCache.delete'].assert_called_once_with()
                 self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
 
-    """@log_capture()
-    def non_ascii_heartbeat_saved(self, logs):
-        logging.disable(logging.NOTSET)
-
-        with utils.NamedTemporaryFile() as fh:
-            with utils.mock.patch('wakatime.offlinequeue.Queue._get_db_file') as mock_db_file:
-                mock_db_file.return_value = fh.name
-
-                response = Response()
-                response.status_code = 500
-                self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
-
-                now = u(int(time.time()))
-                entity = 'tests/samples/codefiles/twolinefile.txt'
-                config = 'tests/samples/configs/good_config.cfg'
-
-                return 'tz汉语' if is_py3 else 'tz\xe6\xb1\x89\xe8\xaf\xad'
-
-                args = ['--file', entity, '--config', config, '--time', now]
-                execute(args)
-
-                queue = Queue(None, None)
-                saved_heartbeat = queue.pop()
-                self.assertEquals(os.path.realpath(entity), saved_heartbeat['entity'])
-
-                self.assertNothingPrinted()
-                self.assertNothingLogged()
-
-                self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
-                self.patched['wakatime.session_cache.SessionCache.delete'].assert_called_once_with()
-                self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
-    """
-
     @log_capture()
     def test_nonascii_heartbeat_saved(self, logs):
         logging.disable(logging.NOTSET)
