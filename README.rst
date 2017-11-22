@@ -1,6 +1,3 @@
-WakaTime
-========
-
 .. image:: https://travis-ci.org/wakatime/wakatime.svg
     :target: https://travis-ci.org/wakatime/wakatime
     :alt: Tests
@@ -21,6 +18,9 @@ WakaTime
     :target: https://wakaslack.herokuapp.com
     :alt: Slack
 
+
+WakaTime
+========
 
 Command line interface to `WakaTime <https://wakatime.com/>`_ used by all WakaTime `text editor plugins <https://wakatime.com/editors>`_.
 
