@@ -179,25 +179,23 @@ def send_heartbeats(heartbeats, args, configs, use_ntlm_proxy=False):
 
 
 def handle_result(h, code, content, args, configs):
-    if code == requests.codes.created or code == requests.codes.accepted:
-        return
-
-    if args.offline:
-        if code == 400:
+    if code != requests.codes.created and code != requests.codes.accepted:
+        if args.offline:
+            if code == 400:
+                log.error({
+                    'response_code': code,
+                    'response_content': content,
+                })
+            else:
+                if log.isEnabledFor(logging.DEBUG):
+                    log.warn({
+                        'response_code': code,
+                        'response_content': content,
+                    })
+                queue = Queue(args, configs)
+                queue.push_many(h)
+        else:
             log.error({
                 'response_code': code,
                 'response_content': content,
             })
-        else:
-            if log.isEnabledFor(logging.DEBUG):
-                log.warn({
-                    'response_code': code,
-                    'response_content': content,
-                })
-            queue = Queue(args, configs)
-            queue.push_many(h)
-    else:
-        log.error({
-            'response_code': code,
-            'response_content': content,
-        })
