@@ -3,6 +3,13 @@ History
 -------
 
 
+10.0.3 (2017-11-22)
++++++++++++++++++++
+
+- Support saving unicode heartbeats when working offline.
+  `#112 <https://github.com/wakatime/wakatime/issues/112>`_
+
+
 10.0.2 (2017-11-15)
 +++++++++++++++++++
 
