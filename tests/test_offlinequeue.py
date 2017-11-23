@@ -526,7 +526,7 @@ class OfflineQueueTestCase(TestCase):
                 self.assertEquals(None, saved_heartbeat)
 
     @log_capture()
-    def test_push_handles_exception_on_query(self, logs):
+    def test_push_handles_exception_on_execute(self, logs):
         logging.disable(logging.NOTSET)
 
         with NamedTemporaryFile() as fh:
@@ -541,14 +541,87 @@ class OfflineQueueTestCase(TestCase):
                 entity = 'tests/samples/codefiles/twolinefile.txt'
                 config = 'tests/samples/configs/good_config.cfg'
 
-                mock_exec = mock.MagicMock()
-                mock_exec.execute.side_effect = sqlite3.Error('')
-
                 mock_conn = mock.MagicMock()
-                mock_conn.execute.side_effect = sqlite3.Error('')
+
+                mock_c = mock.MagicMock()
+                mock_c.execute.side_effect = sqlite3.Error('')
 
                 with mock.patch('wakatime.offlinequeue.Queue.connect') as mock_connect:
-                    mock_connect.return_value = (mock_conn, mock_exec)
+                    mock_connect.return_value = (mock_conn, mock_c)
+
+                    args = ['--file', entity, '--config', config, '--time', now]
+                    execute(args)
+
+                    response.status_code = 201
+                    execute(args)
+
+                queue = Queue(None, None)
+                saved_heartbeat = queue.pop()
+                self.assertEquals(None, saved_heartbeat)
+
+                self.assertNothingPrinted()
+
+    @log_capture()
+    def test_push_handles_exception_on_commit(self, logs):
+        logging.disable(logging.NOTSET)
+
+        with NamedTemporaryFile() as fh:
+            with mock.patch('wakatime.offlinequeue.Queue._get_db_file') as mock_db_file:
+                mock_db_file.return_value = fh.name
+
+                response = Response()
+                response.status_code = 500
+                self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+                now = u(int(time.time()))
+                entity = 'tests/samples/codefiles/twolinefile.txt'
+                config = 'tests/samples/configs/good_config.cfg'
+
+                mock_conn = mock.MagicMock()
+                mock_conn.commit.side_effect = sqlite3.Error('')
+
+                mock_c = mock.MagicMock()
+                mock_c.fetchone.return_value = None
+
+                with mock.patch('wakatime.offlinequeue.Queue.connect') as mock_connect:
+                    mock_connect.return_value = (mock_conn, mock_c)
+
+                    args = ['--file', entity, '--config', config, '--time', now]
+                    execute(args)
+
+                    response.status_code = 201
+                    execute(args)
+
+                queue = Queue(None, None)
+                saved_heartbeat = queue.pop()
+                self.assertEquals(None, saved_heartbeat)
+
+                self.assertNothingPrinted()
+
+    @log_capture()
+    def test_push_handles_exception_on_close(self, logs):
+        logging.disable(logging.NOTSET)
+
+        with NamedTemporaryFile() as fh:
+            with mock.patch('wakatime.offlinequeue.Queue._get_db_file') as mock_db_file:
+                mock_db_file.return_value = fh.name
+
+                response = Response()
+                response.status_code = 500
+                self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+                now = u(int(time.time()))
+                entity = 'tests/samples/codefiles/twolinefile.txt'
+                config = 'tests/samples/configs/good_config.cfg'
+
+                mock_conn = mock.MagicMock()
+                mock_conn.close.side_effect = sqlite3.Error('')
+
+                mock_c = mock.MagicMock()
+                mock_c.fetchone.return_value = None
+
+                with mock.patch('wakatime.offlinequeue.Queue.connect') as mock_connect:
+                    mock_connect.return_value = (mock_conn, mock_c)
 
                     args = ['--file', entity, '--config', config, '--time', now]
                     execute(args)
