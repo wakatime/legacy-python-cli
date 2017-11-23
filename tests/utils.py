@@ -150,6 +150,12 @@ class TestCase(unittest.TestCase):
             return True
         return (sys.version_info[0] >= 3 and sys.version_info[1] >= 5)
 
+    @property
+    def isPy33OrNewer(self):
+        if sys.version_info[0] > 3:
+            return True
+        return (sys.version_info[0] >= 3 and sys.version_info[1] >= 3)
+
 
 try:
     # Python >= 3

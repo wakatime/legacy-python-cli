@@ -190,7 +190,7 @@ class ProjectTestCase(TestCase):
 
         self.assertNothingPrinted()
         actual = self.getLogOutput(logs)
-        expected = 'OSError' if self.isPy35OrNewer else 'IOError'
+        expected = 'OSError' if self.isPy33OrNewer else 'IOError'
         self.assertIn(expected, actual)
 
     def test_git_detached_head_not_used_as_branch(self):
@@ -350,7 +350,7 @@ class ProjectTestCase(TestCase):
 
             self.assertNothingPrinted()
             actual = self.getLogOutput(logs)
-            expected = 'OSError' if self.isPy35OrNewer else 'IOError'
+            expected = 'OSError' if self.isPy33OrNewer else 'IOError'
             self.assertIn(expected, actual)
 
     def test_git_submodule_detected(self):
@@ -503,7 +503,7 @@ class ProjectTestCase(TestCase):
             self.assertIsNone(result)
             self.assertNothingPrinted()
             actual = self.getLogOutput(logs)
-            expected = 'OSError' if self.isPy35OrNewer else 'IOError'
+            expected = 'OSError' if self.isPy33OrNewer else 'IOError'
             self.assertIn(expected, actual)
 
     @log_capture()
