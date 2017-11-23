@@ -5,6 +5,8 @@ import static com.googlecode.javacv.jna.highgui.cvReleaseCapture;
 import javax.servlet.*;
 import com.colorfulwolf.webcamapplet.gui.ImagePanel;
 import com.foobar.*;
+import package com.apackage.something;
+import namespace com.anamespace.other;
 
 public class Hello extends GenericServlet {
     public void service(final ServletRequest request, final ServletResponse response)

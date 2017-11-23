@@ -236,9 +236,12 @@ class DependenciesTestCase(TestCase):
             expected_dependencies=[
                 'colorfulwolf.webcamapplet',
                 'foobar',
+                'googlecode.javacv',
+                'apackage.something',
+                'anamespace.other',
             ],
             expected_language='Java',
-            expected_lines=20,
+            expected_lines=22,
             entity='java.java',
         )
 
