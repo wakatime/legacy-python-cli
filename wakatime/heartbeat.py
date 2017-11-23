@@ -62,7 +62,7 @@ class Heartbeat(object):
                 return
             if self.type == 'file':
                 self.entity = format_file_path(self.entity)
-            if self.type == 'file' and not os.path.isfile(self.entity):
+            if self.type == 'file' and (not self.entity or not os.path.isfile(self.entity)):
                 self.skip = u('File does not exist; ignoring this heartbeat.')
                 return
 
