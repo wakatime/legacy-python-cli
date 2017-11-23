@@ -3,6 +3,13 @@ History
 -------
 
 
+10.0.4 (2017-11-23)
++++++++++++++++++++
+
+- Improve Java dependency detection.
+- Skip null or missing heartbeats from extra heartbeats argument.
+
+
 10.0.3 (2017-11-22)
 +++++++++++++++++++
 
