@@ -810,6 +810,126 @@ class ArgumentsTestCase(TestCase):
                 self.assertSessionCacheSaved()
 
     @log_capture()
+    def test_extra_heartbeats_with_null_heartbeat(self, logs):
+        logging.disable(logging.NOTSET)
+
+        response = CustomResponse()
+        response.response_text = '[[{"id":1},201], [{"id":1},201]]'
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        now1 = u(int(time.time()))
+        project1 = os.path.basename(os.path.abspath('.'))
+        project_not_used = 'xyz'
+        entity1 = os.path.abspath('tests/samples/codefiles/emptyfile.txt')
+        entity2 = os.path.abspath('tests/samples/codefiles/twolinefile.txt')
+        config = 'tests/samples/configs/good_config.cfg'
+        args = ['--time', now1, '--file', entity1, '--config', config, '--extra-heartbeats']
+
+        with mock.patch('wakatime.main.sys.stdin') as mock_stdin:
+            now2 = int(time.time())
+            heartbeats = json.dumps([
+                None,
+                {
+                    'timestamp': now2,
+                    'entity': entity2,
+                    'entity_type': 'file',
+                    'alternate_project': project_not_used,
+                    'is_write': True,
+                },
+            ])
+            mock_stdin.readline.return_value = heartbeats
+
+            retval = execute(args)
+
+            self.assertEquals(retval, SUCCESS)
+            self.assertNothingPrinted()
+            self.assertNothingLogged(logs)
+
+            heartbeat = {
+                'language': 'Text only',
+                'lines': 0,
+                'entity': entity1,
+                'project': project1,
+                'branch': ANY,
+                'time': float(now1),
+                'is_write': False,
+                'type': 'file',
+                'dependencies': [],
+                'user_agent': ANY,
+            }
+            extra_heartbeats = [{
+                'language': 'Text only',
+                'lines': 2,
+                'entity': entity2,
+                'project': ANY,
+                'branch': ANY,
+                'time': float(now2),
+                'is_write': True,
+                'type': 'file',
+                'dependencies': [],
+                'user_agent': ANY,
+            }]
+            self.assertHeartbeatSent(heartbeat, extra_heartbeats=extra_heartbeats)
+
+            self.assertHeartbeatNotSavedOffline()
+            self.assertOfflineHeartbeatsSynced()
+            self.assertSessionCacheSaved()
+
+    @log_capture()
+    def test_extra_heartbeats_with_skipped_heartbeat(self, logs):
+        logging.disable(logging.NOTSET)
+
+        response = CustomResponse()
+        response.response_text = '[[{"id":1},201], [{"id":1},201]]'
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        now1 = u(int(time.time()))
+        project_not_used = 'xyz'
+        entity1 = os.path.abspath('tests/samples/codefiles/emptyfile.txt')
+        entity2 = os.path.abspath('tests/samples/codefiles/twolinefile.txt')
+        config = 'tests/samples/configs/good_config.cfg'
+        args = ['--time', now1, '--file', entity1, '--config', config, '--extra-heartbeats', '--exclude', 'twoline']
+
+        with mock.patch('wakatime.main.sys.stdin') as mock_stdin:
+            now2 = int(time.time())
+            heartbeats = json.dumps([
+                {
+                    'timestamp': now2,
+                    'entity': entity2,
+                    'entity_type': 'file',
+                    'alternate_project': project_not_used,
+                    'is_write': True,
+                },
+            ])
+            mock_stdin.readline.return_value = heartbeats
+
+            retval = execute(args)
+
+            self.assertEquals(retval, SUCCESS)
+            self.assertNothingPrinted()
+            actual = self.getLogOutput(logs)
+            expected = 'WakaTime WARNING Results from api not matching heartbeats sent.'
+            self.assertIn(expected, actual)
+
+            heartbeat = {
+                'language': 'Text only',
+                'lines': 0,
+                'entity': entity1,
+                'project': ANY,
+                'branch': ANY,
+                'time': float(now1),
+                'is_write': False,
+                'type': 'file',
+                'dependencies': [],
+                'user_agent': ANY,
+            }
+            self.assertHeartbeatSent(heartbeat)
+
+            self.assertHeartbeatNotSavedOffline()
+            self.assertOfflineHeartbeatsSynced()
+            self.assertSessionCacheSaved()
+
+    @log_capture()
     def test_uses_wakatime_home_env_variable(self, logs):
         logging.disable(logging.NOTSET)
         with TemporaryDirectory() as tempdir:
