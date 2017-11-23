@@ -30,7 +30,7 @@ log = logging.getLogger('WakaTime')
 
 try:
     from .packages import requests
-except ImportError:
+except ImportError:  # pragma: nocover
     log.traceback(logging.ERROR)
     print(traceback.format_exc())
     log.error('Please upgrade Python to the latest version.')
@@ -167,12 +167,12 @@ def _process_server_results(heartbeats, code, content, results, args, configs):
         try:
             c = results[i][1]
         except:
+            log.traceback(logging.WARNING)
             c = 0
         try:
             text = json.dumps(results[i][0])
         except:
-            if log.isEnabledFor(logging.DEBUG):
-                log.traceback(logging.WARNING)
+            log.traceback(logging.WARNING)
             text = ''
         if not _success(c):
             _handle_unsent_heartbeats([heartbeats[i]], c, text, args, configs)
@@ -212,8 +212,7 @@ def _get_results(response):
         try:
             results = response.json()
         except:
-            if log.isEnabledFor(logging.DEBUG):
-                log.traceback(logging.WARNING)
+            log.traceback(logging.WARNING)
     return results
 
 

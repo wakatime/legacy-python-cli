@@ -632,3 +632,87 @@ class OfflineQueueTestCase(utils.TestCase):
                     self.assertEquals(u(language), saved_heartbeat['language'])
                     self.assertEquals(u(project), saved_heartbeat['project'])
                     self.assertEquals(u(branch), saved_heartbeat['branch'])
+
+    @log_capture()
+    def test_heartbeat_saved_when_bulk_result_json_decode_error(self, logs):
+        logging.disable(logging.NOTSET)
+
+        with utils.NamedTemporaryFile() as fh:
+            with utils.mock.patch('wakatime.offlinequeue.Queue._get_db_file') as mock_db_file:
+                mock_db_file.return_value = fh.name
+
+                response = CustomResponse()
+                response.response_text = '[[{id":1}]]'
+                self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+                now = u(int(time.time()))
+                entity = 'tests/samples/codefiles/twolinefile.txt'
+                config = 'tests/samples/configs/good_config.cfg'
+
+                args = ['--file', entity, '--config', config, '--time', now]
+                execute(args)
+
+                queue = Queue(None, None)
+                saved_heartbeat = queue.pop()
+                self.assertEquals(os.path.realpath(entity), saved_heartbeat['entity'])
+
+                self.assertNothingPrinted()
+                expected = 'JSONDecodeError'
+                actual = self.getLogOutput(logs)
+                self.assertIn(expected, actual)
+
+    @log_capture()
+    def test_heartbeat_saved_from_result_type_error(self, logs):
+        logging.disable(logging.NOTSET)
+
+        with utils.NamedTemporaryFile() as fh:
+            with utils.mock.patch('wakatime.offlinequeue.Queue._get_db_file') as mock_db_file:
+                mock_db_file.return_value = fh.name
+
+                response = CustomResponse()
+                response.response_text = '[0]'
+                self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+                now = u(int(time.time()))
+                entity = 'tests/samples/codefiles/twolinefile.txt'
+                config = 'tests/samples/configs/good_config.cfg'
+
+                args = ['--file', entity, '--config', config, '--time', now]
+                execute(args)
+
+                queue = Queue(None, None)
+                saved_heartbeat = queue.pop()
+                self.assertEquals(os.path.realpath(entity), saved_heartbeat['entity'])
+
+                self.assertNothingPrinted()
+                expected = 'TypeError'
+                actual = self.getLogOutput(logs)
+                self.assertIn(expected, actual)
+
+    @log_capture()
+    def test_heartbeat_saved_from_result_index_error(self, logs):
+        logging.disable(logging.NOTSET)
+
+        with utils.NamedTemporaryFile() as fh:
+            with utils.mock.patch('wakatime.offlinequeue.Queue._get_db_file') as mock_db_file:
+                mock_db_file.return_value = fh.name
+
+                response = CustomResponse()
+                response.response_text = '[[{"id":1}]]'
+                self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+                now = u(int(time.time()))
+                entity = 'tests/samples/codefiles/twolinefile.txt'
+                config = 'tests/samples/configs/good_config.cfg'
+
+                args = ['--file', entity, '--config', config, '--time', now]
+                execute(args)
+
+                queue = Queue(None, None)
+                saved_heartbeat = queue.pop()
+                self.assertEquals(os.path.realpath(entity), saved_heartbeat['entity'])
+
+                self.assertNothingPrinted()
+                expected = 'IndexError'
+                actual = self.getLogOutput(logs)
+                self.assertIn(expected, actual)
