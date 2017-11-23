@@ -20,11 +20,10 @@ from wakatime.constants import (
     SUCCESS,
 )
 from wakatime.packages.requests.models import Response
-from . import utils
-from .utils import ANY
+from .utils import mock, ANY, CustomResponse, TemporaryDirectory, TestCase
 
 
-class ConfigsTestCase(utils.TestCase):
+class ConfigsTestCase(TestCase):
     patch_these = [
         'wakatime.packages.requests.adapters.HTTPAdapter.send',
         'wakatime.offlinequeue.Queue.push',
@@ -37,20 +36,18 @@ class ConfigsTestCase(utils.TestCase):
     ]
 
     def test_config_file_not_passed_in_command_line_args(self):
-        response = Response()
-        response.status_code = 201
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
-        with utils.TemporaryDirectory() as tempdir:
+        with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
             shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
             args = ['--file', entity, '--logfile', '~/.wakatime.log']
 
-            with utils.mock.patch('wakatime.configs.os.environ.get') as mock_env:
+            with mock.patch('wakatime.configs.os.environ.get') as mock_env:
                 mock_env.return_value = None
 
-                with utils.mock.patch('wakatime.configs.open') as mock_open:
+                with mock.patch('wakatime.configs.open') as mock_open:
                     mock_open.side_effect = IOError('')
 
                     with self.assertRaises(SystemExit) as e:
@@ -67,11 +64,9 @@ class ConfigsTestCase(utils.TestCase):
     def test_config_file_from_env(self, logs):
         logging.disable(logging.NOTSET)
 
-        response = Response()
-        response.status_code = 201
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
-        with utils.TemporaryDirectory() as tempdir:
+        with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
             shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
@@ -79,7 +74,7 @@ class ConfigsTestCase(utils.TestCase):
             shutil.copy(config, os.path.join(tempdir, '.wakatime.cfg'))
             config = os.path.realpath(os.path.join(tempdir, '.wakatime.cfg'))
 
-            with utils.mock.patch('wakatime.configs.os.environ.get') as mock_env:
+            with mock.patch('wakatime.configs.os.environ.get') as mock_env:
                 mock_env.return_value = tempdir
 
                 args = ['--file', entity, '--logfile', '~/.wakatime.log']
@@ -100,7 +95,7 @@ class ConfigsTestCase(utils.TestCase):
     def test_missing_config_file(self):
         config = 'foo'
 
-        with utils.TemporaryDirectory() as tempdir:
+        with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
             shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
@@ -119,11 +114,9 @@ class ConfigsTestCase(utils.TestCase):
         self.patched['wakatime.session_cache.SessionCache.get'].assert_not_called()
 
     def test_good_config_file(self):
-        response = Response()
-        response.status_code = 201
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
-        with utils.TemporaryDirectory() as tempdir:
+        with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
             shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
@@ -150,11 +143,9 @@ class ConfigsTestCase(utils.TestCase):
             apikey = XXX
         """
 
-        response = Response()
-        response.status_code = 201
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
-        with utils.TemporaryDirectory() as tempdir:
+        with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
             shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
@@ -177,7 +168,7 @@ class ConfigsTestCase(utils.TestCase):
     def test_bad_config_file(self, logs):
         logging.disable(logging.NOTSET)
 
-        with utils.TemporaryDirectory() as tempdir:
+        with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
             shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
@@ -206,11 +197,9 @@ class ConfigsTestCase(utils.TestCase):
     def test_non_hidden_filename(self, logs):
         logging.disable(logging.NOTSET)
 
-        response = Response()
-        response.status_code = 201
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
-        with utils.TemporaryDirectory() as tempdir:
+        with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/twolinefile.txt'
             shutil.copy(entity, os.path.join(tempdir, 'twolinefile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'twolinefile.txt'))
@@ -246,11 +235,9 @@ class ConfigsTestCase(utils.TestCase):
             self.assertSessionCacheSaved()
 
     def test_hide_all_filenames(self):
-        response = Response()
-        response.status_code = 201
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
-        with utils.TemporaryDirectory() as tempdir:
+        with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/python.py'
             shutil.copy(entity, os.path.join(tempdir, 'python.py'))
             entity = os.path.realpath(os.path.join(tempdir, 'python.py'))
@@ -283,11 +270,9 @@ class ConfigsTestCase(utils.TestCase):
             self.assertSessionCacheSaved()
 
     def test_hide_all_filenames_from_cli_arg(self):
-        response = Response()
-        response.status_code = 201
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
-        with utils.TemporaryDirectory() as tempdir:
+        with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/python.py'
             shutil.copy(entity, os.path.join(tempdir, 'python.py'))
             entity = os.path.realpath(os.path.join(tempdir, 'python.py'))
@@ -320,11 +305,9 @@ class ConfigsTestCase(utils.TestCase):
             self.assertSessionCacheSaved()
 
     def test_hide_matching_filenames(self):
-        response = Response()
-        response.status_code = 201
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
-        with utils.TemporaryDirectory() as tempdir:
+        with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/python.py'
             shutil.copy(entity, os.path.join(tempdir, 'python.py'))
             entity = os.path.realpath(os.path.join(tempdir, 'python.py'))
@@ -360,11 +343,9 @@ class ConfigsTestCase(utils.TestCase):
             self.assertSessionCacheSaved()
 
     def test_does_not_hide_unmatching_filenames(self):
-        response = Response()
-        response.status_code = 201
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
-        with utils.TemporaryDirectory() as tempdir:
+        with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/python.py'
             shutil.copy(entity, os.path.join(tempdir, 'python.py'))
             entity = os.path.realpath(os.path.join(tempdir, 'python.py'))
@@ -401,11 +382,9 @@ class ConfigsTestCase(utils.TestCase):
     def test_does_not_hide_filenames_from_invalid_regex(self, logs):
         logging.disable(logging.NOTSET)
 
-        response = Response()
-        response.status_code = 201
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
-        with utils.TemporaryDirectory() as tempdir:
+        with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
             shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
@@ -453,7 +432,7 @@ class ConfigsTestCase(utils.TestCase):
         response.status_code = 0
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
-        with utils.TemporaryDirectory() as tempdir:
+        with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
             shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
@@ -474,11 +453,9 @@ class ConfigsTestCase(utils.TestCase):
             self.assertSessionCacheUntouched()
 
     def test_hostname_set_from_config_file(self):
-        response = Response()
-        response.status_code = 201
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
-        with utils.TemporaryDirectory() as tempdir:
+        with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
             shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
@@ -500,11 +477,9 @@ class ConfigsTestCase(utils.TestCase):
             self.assertSessionCacheSaved()
 
     def test_no_ssl_verify_from_config_file(self):
-        response = Response()
-        response.status_code = 201
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
-        with utils.TemporaryDirectory() as tempdir:
+        with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
             shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))

@@ -14,13 +14,11 @@ from wakatime.constants import SUCCESS
 from wakatime.exceptions import NotYetImplemented
 from wakatime.dependencies import DependencyParser, TokenParser
 from wakatime.packages.pygments.lexers import ClassNotFound, PythonLexer
-from wakatime.packages.requests.models import Response
 from wakatime.stats import get_lexer_by_name
-from . import utils
-from .utils import ANY
+from .utils import mock, ANY, CustomResponse, TemporaryDirectory, TestCase
 
 
-class DependenciesTestCase(utils.TestCase):
+class DependenciesTestCase(TestCase):
     patch_these = [
         'wakatime.packages.requests.adapters.HTTPAdapter.send',
         'wakatime.offlinequeue.Queue.push',
@@ -33,13 +31,11 @@ class DependenciesTestCase(utils.TestCase):
     ]
 
     def shared(self, expected_dependencies=[], expected_language=ANY, expected_lines=ANY, entity='', config='good_config.cfg', extra_args=[]):
-        response = Response()
-        response.status_code = 201
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         config = os.path.join('tests/samples/configs', config)
 
-        with utils.TemporaryDirectory() as tempdir:
+        with TemporaryDirectory() as tempdir:
             shutil.copy(os.path.join('tests/samples/codefiles', entity), os.path.join(tempdir, os.path.basename(entity)))
             entity = os.path.realpath(os.path.join(tempdir, os.path.basename(entity)))
 
@@ -74,7 +70,7 @@ class DependenciesTestCase(utils.TestCase):
             parser = TokenParser(source_file)
             parser.parse()
 
-        with utils.mock.patch('wakatime.dependencies.TokenParser._extract_tokens') as mock_extract_tokens:
+        with mock.patch('wakatime.dependencies.TokenParser._extract_tokens') as mock_extract_tokens:
             source_file = 'tests/samples/codefiles/see.h'
             parser = TokenParser(source_file)
             parser.tokens
@@ -144,7 +140,7 @@ class DependenciesTestCase(utils.TestCase):
         log = logging.getLogger('WakaTime')
         log.setLevel(logging.DEBUG)
 
-        with utils.mock.patch('wakatime.dependencies.import_module') as mock_import:
+        with mock.patch('wakatime.dependencies.import_module') as mock_import:
             mock_import.side_effect = ImportError('foo')
 
             lexer = PythonLexer
@@ -164,7 +160,7 @@ class DependenciesTestCase(utils.TestCase):
         self.assertEquals(dependencies, expected)
 
     def test_io_error_suppressed_when_parsing_dependencies(self):
-        with utils.mock.patch('wakatime.dependencies.open') as mock_open:
+        with mock.patch('wakatime.dependencies.open') as mock_open:
             mock_open.side_effect = IOError('')
 
             self.shared(
@@ -179,10 +175,10 @@ class DependenciesTestCase(utils.TestCase):
             get_lexer_by_name(None)
 
     def test_classnotfound_error_suppressed_when_parsing_dependencies(self):
-        with utils.mock.patch('wakatime.stats.guess_lexer_using_filename') as mock_guess:
+        with mock.patch('wakatime.stats.guess_lexer_using_filename') as mock_guess:
             mock_guess.return_value = (None, None)
 
-            with utils.mock.patch('wakatime.stats.get_filetype_from_buffer') as mock_filetype:
+            with mock.patch('wakatime.stats.get_filetype_from_buffer') as mock_filetype:
                 mock_filetype.return_value = 'foo'
 
                 self.shared(
@@ -338,7 +334,7 @@ class DependenciesTestCase(utils.TestCase):
         )
 
     def test_dependencies_still_detected_when_alternate_language_used(self):
-        with utils.mock.patch('wakatime.stats.smart_guess_lexer') as mock_guess_lexer:
+        with mock.patch('wakatime.stats.smart_guess_lexer') as mock_guess_lexer:
             mock_guess_lexer.return_value = None
 
             self.shared(

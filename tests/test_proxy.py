@@ -11,9 +11,10 @@ import sys
 from testfixtures import log_capture
 from wakatime.compat import u
 from wakatime.constants import API_ERROR, SUCCESS
-from wakatime.packages.requests.models import Response
 from wakatime.packages.requests.exceptions import RequestException
+from wakatime.packages.requests.models import Response
 from . import utils
+from .utils import CustomResponse
 
 try:
     from mock import ANY, call
@@ -34,8 +35,7 @@ class ProxyTestCase(utils.TestCase):
     ]
 
     def test_proxy_without_protocol(self):
-        response = Response()
-        response.status_code = 201
+        response = CustomResponse()
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
         with utils.TemporaryDirectory() as tempdir:
@@ -61,8 +61,7 @@ class ProxyTestCase(utils.TestCase):
             self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_called_once_with(ANY, cert=None, proxies={'https': proxy}, stream=False, timeout=60, verify=True)
 
     def test_https_proxy(self):
-        response = Response()
-        response.status_code = 201
+        response = CustomResponse()
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
         with utils.TemporaryDirectory() as tempdir:
@@ -88,8 +87,7 @@ class ProxyTestCase(utils.TestCase):
             self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_called_once_with(ANY, cert=None, proxies={'https': proxy}, stream=False, timeout=60, verify=True)
 
     def test_socks_proxy(self):
-        response = Response()
-        response.status_code = 201
+        response = CustomResponse()
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
         with utils.TemporaryDirectory() as tempdir:
@@ -225,8 +223,7 @@ class ProxyTestCase(utils.TestCase):
     def test_invalid_proxy(self, logs):
         logging.disable(logging.NOTSET)
 
-        response = Response()
-        response.status_code = 201
+        response = CustomResponse()
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
         with utils.TemporaryDirectory() as tempdir:

@@ -6,6 +6,7 @@ import sys
 import tempfile
 
 from wakatime.compat import u
+from wakatime.packages.requests.models import Response
 
 
 try:
@@ -134,6 +135,9 @@ class TestCase(unittest.TestCase):
         self.assertEquals(sys.stdout.getvalue(), '')
         self.assertEquals(sys.stderr.getvalue(), '')
 
+    def getPrintedOutput(self):
+        return sys.stdout.getvalue() or '' + sys.stderr.getvalue() or ''
+
     def assertNothingLogged(self, logs):
         self.assertEquals(self.getLogOutput(logs), '')
 
@@ -219,3 +223,31 @@ class DynamicIterable(object):
 
     def next(self):
         return self.__next__()
+
+
+class CustomResponse(Response):
+    response_code = 201
+    response_text = '[[{"id":1},201]]'
+    limit = 0
+    second_response_code = 0
+    second_response_text = None
+
+    _count = 0
+
+    @property
+    def status_code(self):
+        if self.limit and self._count > self.limit:
+            return self.second_response_code
+        self._count += 1
+        return self.response_code
+
+    @status_code.setter
+    def status_code(self, value):
+        pass
+
+    @property
+    def text(self):
+        if self.limit and self._count > self.limit:
+            return self.second_response_text if self.second_response_text is not None else self.response_text
+        self._count += 1
+        return self.response_text

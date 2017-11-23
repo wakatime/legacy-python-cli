@@ -18,20 +18,10 @@ from wakatime.constants import (
     SUCCESS,
 )
 from wakatime.utils import get_user_agent
-from wakatime.packages.requests.models import Response
-from . import utils
-
-try:
-    from .packages import simplejson as json
-except (ImportError, SyntaxError):
-    import json
-try:
-    from mock import ANY
-except ImportError:
-    from unittest.mock import ANY
+from .utils import mock, json, ANY, CustomResponse, TemporaryDirectory, TestCase
 
 
-class ArgumentsTestCase(utils.TestCase):
+class ArgumentsTestCase(TestCase):
     patch_these = [
         'wakatime.packages.requests.adapters.HTTPAdapter.send',
         'wakatime.offlinequeue.Queue.push',
@@ -43,7 +33,9 @@ class ArgumentsTestCase(utils.TestCase):
         ['wakatime.session_cache.SessionCache.connect', None],
     ]
 
-    def test_help_contents(self):
+    @log_capture()
+    def test_help_contents(self, logs):
+        logging.disable(logging.NOTSET)
         args = ['--help']
         with self.assertRaises(SystemExit) as e:
             execute(args)
@@ -52,16 +44,17 @@ class ArgumentsTestCase(utils.TestCase):
         expected_stdout = open('tests/samples/output/test_help_contents').read()
         self.assertEquals(sys.stdout.getvalue(), expected_stdout)
         self.assertEquals(sys.stderr.getvalue(), '')
+        self.assertNothingLogged(logs)
 
         self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
-    def test_argument_parsing(self):
-        response = Response()
-        response.status_code = 201
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+    @log_capture()
+    def test_argument_parsing(self, logs):
+        logging.disable(logging.NOTSET)
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
-        with utils.TemporaryDirectory() as tempdir:
+        with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/twolinefile.txt'
             shutil.copy(entity, os.path.join(tempdir, 'twolinefile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'twolinefile.txt'))
@@ -72,8 +65,8 @@ class ArgumentsTestCase(utils.TestCase):
 
             retval = execute(args)
             self.assertEquals(retval, SUCCESS)
-            self.assertEquals(sys.stdout.getvalue(), '')
-            self.assertEquals(sys.stderr.getvalue(), '')
+            self.assertNothingPrinted()
+            self.assertNothingLogged(logs)
 
             self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
             self.patched['wakatime.session_cache.SessionCache.delete'].assert_not_called()
@@ -86,9 +79,7 @@ class ArgumentsTestCase(utils.TestCase):
     def test_argument_parsing_strips_quotes(self, logs):
         logging.disable(logging.NOTSET)
 
-        response = Response()
-        response.status_code = 201
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         now = u(int(time.time()))
         config = 'tests/samples/configs/good_config.cfg'
@@ -125,10 +116,7 @@ class ArgumentsTestCase(utils.TestCase):
     @log_capture()
     def test_lineno_and_cursorpos(self, logs):
         logging.disable(logging.NOTSET)
-
-        response = Response()
-        response.status_code = 201
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         entity = 'tests/samples/codefiles/twolinefile.txt'
         config = 'tests/samples/configs/good_config.cfg'
@@ -162,12 +150,12 @@ class ArgumentsTestCase(utils.TestCase):
         self.assertOfflineHeartbeatsSynced()
         self.assertSessionCacheSaved()
 
-    def test_invalid_timeout_passed_via_command_line(self):
-        response = Response()
-        response.status_code = 201
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+    @log_capture()
+    def test_invalid_timeout_passed_via_command_line(self, logs):
+        logging.disable(logging.NOTSET)
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
-        with utils.TemporaryDirectory() as tempdir:
+        with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/twolinefile.txt'
             shutil.copy(entity, os.path.join(tempdir, 'twolinefile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'twolinefile.txt'))
@@ -178,6 +166,7 @@ class ArgumentsTestCase(utils.TestCase):
             with self.assertRaises(SystemExit) as e:
                 execute(args)
 
+            self.assertNothingLogged(logs)
             self.assertEquals(int(str(e.exception)), 2)
             self.assertEquals(sys.stdout.getvalue(), '')
             expected_stderr = open('tests/samples/output/main_test_timeout_passed_via_command_line').read()
@@ -191,9 +180,7 @@ class ArgumentsTestCase(utils.TestCase):
     def test_missing_entity_file(self, logs):
         logging.disable(logging.NOTSET)
 
-        response = Response()
-        response.status_code = 201
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         entity = 'tests/samples/codefiles/missingfile.txt'
 
@@ -216,9 +203,7 @@ class ArgumentsTestCase(utils.TestCase):
     def test_missing_entity_argument(self, logs):
         logging.disable(logging.NOTSET)
 
-        response = Response()
-        response.status_code = 201
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         config = 'tests/samples/configs/good_config.cfg'
         args = ['--config', config]
@@ -246,9 +231,7 @@ class ArgumentsTestCase(utils.TestCase):
     def test_missing_api_key(self, logs):
         logging.disable(logging.NOTSET)
 
-        response = Response()
-        response.status_code = 201
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         config = 'tests/samples/configs/missing_api_key.cfg'
         args = ['--config', config]
@@ -276,9 +259,7 @@ class ArgumentsTestCase(utils.TestCase):
     def test_invalid_api_key(self, logs):
         logging.disable(logging.NOTSET)
 
-        response = Response()
-        response.status_code = 201
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         key = 'an-invalid-key'
         args = ['--key', key]
@@ -306,11 +287,9 @@ class ArgumentsTestCase(utils.TestCase):
     def test_api_key_passed_via_command_line(self, logs):
         logging.disable(logging.NOTSET)
 
-        response = Response()
-        response.status_code = 201
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
-        with utils.TemporaryDirectory() as tempdir:
+        with TemporaryDirectory() as tempdir:
             filename = list(filter(lambda x: x.endswith('.txt'), os.listdir(u('tests/samples/codefiles/unicode'))))[0]
             entity = os.path.join('tests/samples/codefiles/unicode', filename)
             shutil.copy(entity, os.path.join(tempdir, filename))
@@ -344,12 +323,12 @@ class ArgumentsTestCase(utils.TestCase):
             self.assertOfflineHeartbeatsSynced()
             self.assertSessionCacheSaved()
 
-    def test_proxy_argument(self):
-        response = Response()
-        response.status_code = 201
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+    @log_capture()
+    def test_proxy_argument(self, logs):
+        logging.disable(logging.NOTSET)
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
-        with utils.TemporaryDirectory() as tempdir:
+        with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
             shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
@@ -359,8 +338,8 @@ class ArgumentsTestCase(utils.TestCase):
             args = ['--file', entity, '--config', config, '--proxy', proxy]
             retval = execute(args)
             self.assertEquals(retval, SUCCESS)
-            self.assertEquals(sys.stdout.getvalue(), '')
-            self.assertEquals(sys.stderr.getvalue(), '')
+            self.assertNothingPrinted()
+            self.assertNothingLogged(logs)
 
             self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
             self.patched['wakatime.session_cache.SessionCache.delete'].assert_not_called()
@@ -371,12 +350,12 @@ class ArgumentsTestCase(utils.TestCase):
 
             self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_called_once_with(ANY, cert=None, proxies={'https': proxy}, stream=False, timeout=60, verify=True)
 
-    def test_disable_ssl_verify_argument(self):
-        response = Response()
-        response.status_code = 201
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+    @log_capture()
+    def test_disable_ssl_verify_argument(self, logs):
+        logging.disable(logging.NOTSET)
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
-        with utils.TemporaryDirectory() as tempdir:
+        with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
             shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
@@ -385,8 +364,8 @@ class ArgumentsTestCase(utils.TestCase):
             args = ['--file', entity, '--config', config, '--no-ssl-verify']
             retval = execute(args)
             self.assertEquals(retval, SUCCESS)
-            self.assertEquals(sys.stdout.getvalue(), '')
-            self.assertEquals(sys.stderr.getvalue(), '')
+            self.assertNothingPrinted()
+            self.assertNothingLogged(logs)
 
             self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
             self.patched['wakatime.session_cache.SessionCache.delete'].assert_not_called()
@@ -401,11 +380,9 @@ class ArgumentsTestCase(utils.TestCase):
     def test_write_argument(self, logs):
         logging.disable(logging.NOTSET)
 
-        response = Response()
-        response.status_code = 201
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
-        with utils.TemporaryDirectory() as tempdir:
+        with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
             shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
@@ -442,9 +419,7 @@ class ArgumentsTestCase(utils.TestCase):
     def test_entity_type_domain(self, logs):
         logging.disable(logging.NOTSET)
 
-        response = Response()
-        response.status_code = 201
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         entity = 'google.com'
         config = 'tests/samples/configs/good_config.cfg'
@@ -479,9 +454,7 @@ class ArgumentsTestCase(utils.TestCase):
     def test_entity_type_app(self, logs):
         logging.disable(logging.NOTSET)
 
-        response = Response()
-        response.status_code = 201
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         entity = 'Firefox'
         config = 'tests/samples/configs/good_config.cfg'
@@ -516,9 +489,7 @@ class ArgumentsTestCase(utils.TestCase):
     def test_old_alternate_language_argument_still_supported(self, logs):
         logging.disable(logging.NOTSET)
 
-        response = Response()
-        response.status_code = 201
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         language = 'Java'
         now = u(int(time.time()))
@@ -555,8 +526,8 @@ class ArgumentsTestCase(utils.TestCase):
     def test_extra_heartbeats_alternate_project_not_used(self, logs):
         logging.disable(logging.NOTSET)
 
-        response = Response()
-        response.status_code = 201
+        response = CustomResponse()
+        response.response_text = '[[{"id":1},201], [{"id":1},201]]'
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
         now1 = u(int(time.time()))
@@ -567,7 +538,7 @@ class ArgumentsTestCase(utils.TestCase):
         config = 'tests/samples/configs/good_config.cfg'
         args = ['--time', now1, '--file', entity1, '--config', config, '--extra-heartbeats']
 
-        with utils.mock.patch('wakatime.main.sys.stdin') as mock_stdin:
+        with mock.patch('wakatime.main.sys.stdin') as mock_stdin:
             now2 = int(time.time())
             heartbeats = json.dumps([{
                 'timestamp': now2,
@@ -618,8 +589,8 @@ class ArgumentsTestCase(utils.TestCase):
     def test_extra_heartbeats_using_project_from_editor(self, logs):
         logging.disable(logging.NOTSET)
 
-        response = Response()
-        response.status_code = 201
+        response = CustomResponse()
+        response.response_text = '[[{"id":1},201], [{"id":1},201]]'
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
         now1 = u(int(time.time()))
@@ -630,7 +601,7 @@ class ArgumentsTestCase(utils.TestCase):
         config = 'tests/samples/configs/good_config.cfg'
         args = ['--time', now1, '--file', entity1, '--config', config, '--extra-heartbeats']
 
-        with utils.mock.patch('wakatime.main.sys.stdin') as mock_stdin:
+        with mock.patch('wakatime.main.sys.stdin') as mock_stdin:
             now2 = int(time.time())
             heartbeats = json.dumps([{
                 'timestamp': now2,
@@ -681,11 +652,11 @@ class ArgumentsTestCase(utils.TestCase):
     def test_extra_heartbeats_when_project_not_detected(self, logs):
         logging.disable(logging.NOTSET)
 
-        response = Response()
-        response.status_code = 201
+        response = CustomResponse()
+        response.response_text = '[[{"id":1},201], [{"id":1},201]]'
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
-        with utils.TemporaryDirectory() as tempdir:
+        with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/twolinefile.txt'
             shutil.copy(entity, os.path.join(tempdir, 'twolinefile.txt'))
 
@@ -696,7 +667,7 @@ class ArgumentsTestCase(utils.TestCase):
             config = 'tests/samples/configs/good_config.cfg'
             args = ['--time', now1, '--file', entity1, '--config', config, '--extra-heartbeats']
 
-            with utils.mock.patch('wakatime.main.sys.stdin') as mock_stdin:
+            with mock.patch('wakatime.main.sys.stdin') as mock_stdin:
                 now2 = int(time.time())
                 heartbeats = json.dumps([{
                     'timestamp': now2,
@@ -745,11 +716,11 @@ class ArgumentsTestCase(utils.TestCase):
     def test_extra_heartbeats_when_project_not_detected_alternate_project_used(self, logs):
         logging.disable(logging.NOTSET)
 
-        response = Response()
-        response.status_code = 201
+        response = CustomResponse()
+        response.response_text = '[[{"id":1},201], [{"id":1},201]]'
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
-        with utils.TemporaryDirectory() as tempdir:
+        with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/twolinefile.txt'
             shutil.copy(entity, os.path.join(tempdir, 'twolinefile.txt'))
 
@@ -761,7 +732,7 @@ class ArgumentsTestCase(utils.TestCase):
             config = 'tests/samples/configs/good_config.cfg'
             args = ['--time', now1, '--file', entity1, '--config', config, '--extra-heartbeats']
 
-            with utils.mock.patch('wakatime.main.sys.stdin') as mock_stdin:
+            with mock.patch('wakatime.main.sys.stdin') as mock_stdin:
                 now2 = int(time.time())
                 heartbeats = json.dumps([{
                     'timestamp': now2,
@@ -811,11 +782,9 @@ class ArgumentsTestCase(utils.TestCase):
     def test_extra_heartbeats_with_malformed_json(self, logs):
         logging.disable(logging.NOTSET)
 
-        response = Response()
-        response.status_code = 201
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
-        with utils.TemporaryDirectory() as tempdir:
+        with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/twolinefile.txt'
             shutil.copy(entity, os.path.join(tempdir, 'twolinefile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'twolinefile.txt'))
@@ -824,7 +793,7 @@ class ArgumentsTestCase(utils.TestCase):
             config = 'tests/samples/configs/good_config.cfg'
             args = ['--file', entity, '--config', config, '--extra-heartbeats']
 
-            with utils.mock.patch('wakatime.main.sys.stdin') as mock_stdin:
+            with mock.patch('wakatime.main.sys.stdin') as mock_stdin:
                 heartbeats = '[{foobar}]'
                 mock_stdin.readline.return_value = heartbeats
 
@@ -840,8 +809,10 @@ class ArgumentsTestCase(utils.TestCase):
                 self.assertOfflineHeartbeatsSynced()
                 self.assertSessionCacheSaved()
 
-    def test_uses_wakatime_home_env_variable(self):
-        with utils.TemporaryDirectory() as tempdir:
+    @log_capture()
+    def test_uses_wakatime_home_env_variable(self, logs):
+        logging.disable(logging.NOTSET)
+        with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/twolinefile.txt'
             shutil.copy(entity, os.path.join(tempdir, 'twolinefile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'twolinefile.txt'))
@@ -851,12 +822,14 @@ class ArgumentsTestCase(utils.TestCase):
 
             args = ['--file', entity, '--key', key, '--config', config]
 
-            with utils.mock.patch.object(sys, 'argv', ['wakatime'] + args):
+            with mock.patch.object(sys, 'argv', ['wakatime'] + args):
                 args, configs = parse_arguments()
                 self.assertEquals(args.logfile, None)
 
-                with utils.mock.patch('os.environ.get') as mock_env:
+                with mock.patch('os.environ.get') as mock_env:
                     mock_env.return_value = os.path.realpath(tempdir)
 
                     args, configs = parse_arguments()
                     self.assertEquals(args.logfile, logfile)
+                    self.assertNothingPrinted()
+                    self.assertNothingLogged(logs)

@@ -8,10 +8,9 @@ import os
 import time
 from wakatime.compat import u
 from wakatime.constants import SUCCESS
-from wakatime.packages.requests.models import Response
 from wakatime.stats import guess_language
 from . import utils
-from .utils import ANY
+from .utils import ANY, CustomResponse
 
 
 class LanguagesTestCase(utils.TestCase):
@@ -27,9 +26,7 @@ class LanguagesTestCase(utils.TestCase):
     ]
 
     def shared(self, expected_language='', entity='', extra_args=[]):
-        response = Response()
-        response.status_code = 201
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         config = 'tests/samples/configs/good_config.cfg'
         entity = os.path.join('tests/samples/codefiles', entity)

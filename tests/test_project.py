@@ -18,7 +18,7 @@ from wakatime.constants import API_ERROR, SUCCESS
 from wakatime.exceptions import NotYetImplemented
 from wakatime.projects.base import BaseProject
 from . import utils
-from .utils import ANY, json
+from .utils import ANY, CustomResponse, json
 
 
 class ProjectTestCase(utils.TestCase):
@@ -34,9 +34,7 @@ class ProjectTestCase(utils.TestCase):
     ]
 
     def shared(self, expected_project='', expected_branch=ANY, entity='', config='good_config.cfg', extra_args=[]):
-        response = Response()
-        response.status_code = 201
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         config = os.path.join('tests/samples/configs', config)
         if not os.path.exists(entity):

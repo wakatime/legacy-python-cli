@@ -13,10 +13,10 @@ import time
 import uuid
 from testfixtures import log_capture
 from wakatime.compat import u
-from wakatime.constants import SUCCESS
+from wakatime.constants import API_ERROR, AUTH_ERROR, SUCCESS
 from wakatime.packages.requests.models import Response
 from . import utils
-from .utils import ANY, json
+from .utils import ANY, json, CustomResponse
 
 
 class OfflineQueueTestCase(utils.TestCase):
@@ -84,7 +84,9 @@ class OfflineQueueTestCase(utils.TestCase):
                 args = ['--file', entity, '--config', config, '--time', now]
                 execute(args)
 
-                response.status_code = 201
+                response = CustomResponse()
+                response.response_text = '[[{"id":1},201], [{"id":1},201], [{"id":1},201]]'
+                self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
                 execute(args)
 
                 queue = Queue(None, None)
@@ -121,7 +123,10 @@ class OfflineQueueTestCase(utils.TestCase):
                 entity3 = 'tests/samples/codefiles/python.py'
                 project3 = 'proj3'
                 args = ['--file', entity3, '--config', config, '--time', now3, '--project', project3]
-                response.status_code = 201
+
+                response = CustomResponse()
+                response.response_text = '[[{"id":1},201], [{"id":1},201], [{"id":1},201]]'
+                self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
                 execute(args)
 
                 # offline queue should be empty
@@ -184,21 +189,9 @@ class OfflineQueueTestCase(utils.TestCase):
                     key = str(uuid.uuid4())
                     args = ['--file', os.path.join(tempdir, entities[0]), '--key', key, '--config', 'tests/samples/configs/good_config.cfg', '--time', now, '--extra-heartbeats']
 
-                    class CustomResponse(Response):
-
-                        @property
-                        def status_code(self):
-                            return 202
-
-                        @status_code.setter
-                        def status_code(self, value):
-                            pass
-
-                        @property
-                        def text(self):
-                            return '[[{"id":1},201], [{"error":"error 2"},500], [{"id":3},201], [{"error":4},500]]'
-
                     response = CustomResponse()
+                    response.response_code = 202
+                    response.response_text = '[[{"id":1},201], [{"error":"error 2"},500], [{"id":3},201], [{"error":4},500]]'
                     self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
                     with utils.mock.patch('wakatime.main.sys.stdin') as mock_stdin:
@@ -279,21 +272,64 @@ class OfflineQueueTestCase(utils.TestCase):
                     key = str(uuid.uuid4())
                     args = ['--file', os.path.join(tempdir, entities[0]), '--key', key, '--config', 'tests/samples/configs/good_config.cfg', '--time', now, '--extra-heartbeats']
 
-                    class CustomResponse(Response):
+                    response = CustomResponse()
+                    response.response_code = 202
+                    response.response_text = '[[{"id":1},201], [{"error":"error 2"},500], [{"id":3},201], [{"error":4},500]]'
+                    self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
-                        @property
-                        def status_code(self):
-                            return 202
+                    with utils.mock.patch('wakatime.main.sys.stdin') as mock_stdin:
+                        heartbeats = json.dumps([{
+                            'timestamp': now,
+                            'entity': os.path.join(tempdir, entity),
+                            'entity_type': 'file',
+                            'is_write': False,
+                        } for entity in entities[1:]])
+                        mock_stdin.readline.return_value = heartbeats
 
-                        @status_code.setter
-                        def status_code(self, value):
-                            pass
+                        retval = execute(args)
+                        self.assertEquals(retval, SUCCESS)
+                        self.assertNothingPrinted()
 
-                        @property
-                        def text(self):
-                            return '[[{"id":1},201], [{"error":"error 2"},500], [{"id":3},201], [{"error":4},500]]'
+                        expected = 'WakaTime WARNING Results from api not matching heartbeats sent.'
+                        actual = self.getLogOutput(logs)
+                        self.assertEquals(actual, expected)
+
+                        queue = Queue(None, None)
+                        self.assertEquals(queue._get_db_file(), fh.name)
+                        saved_heartbeats = queue.pop_many()
+                        self.assertNothingPrinted()
+
+                        # make sure all offline heartbeats were sent, so queue should only have 1 heartbeat left from the second 500 response
+                        self.assertEquals(len(saved_heartbeats), 1)
+
+    @log_capture()
+    def test_leftover_heartbeats_saved_when_bulk_response_not_matching_length(self, logs):
+        logging.disable(logging.NOTSET)
+
+        with utils.NamedTemporaryFile() as fh:
+            with utils.mock.patch('wakatime.offlinequeue.Queue._get_db_file') as mock_db_file:
+                mock_db_file.return_value = fh.name
+
+                entities = [
+                    'emptyfile.txt',
+                    'twolinefile.txt',
+                    'python.py',
+                    'go.go',
+                    'java.java',
+                    'php.php',
+                ]
+
+                with utils.TemporaryDirectory() as tempdir:
+                    for entity in entities:
+                        shutil.copy(os.path.join('tests/samples/codefiles', entity), os.path.join(tempdir, entity))
+
+                    now = u(int(time.time()))
+                    key = str(uuid.uuid4())
+                    args = ['--file', os.path.join(tempdir, entities[0]), '--key', key, '--config', 'tests/samples/configs/good_config.cfg', '--time', now, '--extra-heartbeats']
 
                     response = CustomResponse()
+                    response.response_code = 202
+                    response.response_text = '[[{"id":1},201], [{"id":3},201]]'
                     self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
                     with utils.mock.patch('wakatime.main.sys.stdin') as mock_stdin:
@@ -313,10 +349,13 @@ class OfflineQueueTestCase(utils.TestCase):
                         self.assertEquals(queue._get_db_file(), fh.name)
                         saved_heartbeats = queue.pop_many()
                         self.assertNothingPrinted()
-                        self.assertNothingLogged(logs)
 
-                        # make sure all offline heartbeats were sent, so queue should only have 1 heartbeat left from the second 500 response
-                        self.assertEquals(len(saved_heartbeats), 1)
+                        expected = "WakaTime WARNING Missing 4 results from api.\nWakaTime WARNING Missing 2 results from api."
+                        actual = self.getLogOutput(logs)
+                        self.assertEquals(actual, expected)
+
+                        # make sure extra heartbeats not matching server response were saved
+                        self.assertEquals(len(saved_heartbeats), 2)
 
     def test_auth_error_when_sending_offline_heartbeats(self):
         with utils.NamedTemporaryFile() as fh:
@@ -349,30 +388,20 @@ class OfflineQueueTestCase(utils.TestCase):
                 project3 = 'proj3'
                 args = ['--file', entity3, '--config', config, '--time', now3, '--project', project3]
 
-                class CustomResponse(Response):
-                    count = 0
-
-                    @property
-                    def status_code(self):
-                        if self.count > 2:
-                            return 401
-                        self.count += 1
-                        return 201
-
-                    @status_code.setter
-                    def status_code(self, value):
-                        pass
                 response = CustomResponse()
+                response.second_response_code = 401
+                response.limit = 2
+                response.response_text = '[[{"id":1},201], [{"id":1},201], [{"id":1},201]]'
                 self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
                 retval = execute(args)
-                self.assertEquals(retval, SUCCESS)
+                self.assertEquals(retval, AUTH_ERROR)
 
-                # offline queue should be empty
+                # offline queue should still have saved heartbeats
                 queue = Queue(None, None)
-                saved_heartbeat = queue.pop()
+                saved_heartbeats = queue.pop_many()
                 self.assertNothingPrinted()
-                self.assertIsNone(saved_heartbeat)
+                self.assertEquals(len(saved_heartbeats), 2)
 
     def test_500_error_when_sending_offline_heartbeats(self):
         with utils.NamedTemporaryFile() as fh:
@@ -405,30 +434,20 @@ class OfflineQueueTestCase(utils.TestCase):
                 project3 = 'proj3'
                 args = ['--file', entity3, '--config', config, '--time', now3, '--project', project3]
 
-                class CustomResponse(Response):
-                    count = 0
-
-                    @property
-                    def status_code(self):
-                        if self.count > 2:
-                            return 500
-                        self.count += 1
-                        return 201
-
-                    @status_code.setter
-                    def status_code(self, value):
-                        pass
                 response = CustomResponse()
+                response.second_response_code = 500
+                response.limit = 2
+                response.response_text = '[[{"id":1},201], [{"id":1},201], [{"id":1},201]]'
                 self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
                 retval = execute(args)
-                self.assertEquals(retval, SUCCESS)
+                self.assertEquals(retval, API_ERROR)
 
-                # offline queue should be empty
+                # offline queue should still have saved heartbeats
                 queue = Queue(None, None)
-                saved_heartbeat = queue.pop()
+                saved_heartbeats = queue.pop_many()
                 self.assertNothingPrinted()
-                self.assertIsNone(saved_heartbeat)
+                self.assertEquals(len(saved_heartbeats), 2)
 
     def test_empty_project_can_be_saved(self):
         with utils.NamedTemporaryFile() as fh:

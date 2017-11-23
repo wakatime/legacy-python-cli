@@ -161,7 +161,7 @@ def _process_server_results(heartbeats, code, content, results, args, configs):
 
     for i in range(len(results)):
         if len(heartbeats) <= i:
-            log.debug('Results from server do not match heartbeats sent.')
+            log.warn('Results from api not matching heartbeats sent.')
             break
 
         try:
@@ -176,6 +176,12 @@ def _process_server_results(heartbeats, code, content, results, args, configs):
             text = ''
         if not _success(c):
             _handle_unsent_heartbeats([heartbeats[i]], c, text, args, configs)
+
+    leftover = len(heartbeats) - len(results)
+    if leftover > 0:
+        log.warn('Missing {0} results from api.'.format(leftover))
+        start = len(heartbeats) - leftover
+        _handle_unsent_heartbeats(heartbeats[start:], code, content, args, configs)
 
 
 def _handle_unsent_heartbeats(heartbeats, code, content, args, configs):

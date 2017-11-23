@@ -22,7 +22,7 @@ from wakatime.packages import tzlocal
 from wakatime.packages.requests.exceptions import RequestException
 from wakatime.packages.requests.models import Response
 from . import utils
-from .utils import ANY
+from .utils import ANY, CustomResponse
 
 
 class MainTestCase(utils.TestCase):
@@ -266,9 +266,7 @@ class MainTestCase(utils.TestCase):
     def test_invalid_api_key(self, logs):
         logging.disable(logging.NOTSET)
 
-        response = Response()
-        response.status_code = 201
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         config = 'tests/samples/configs/missing_api_key.cfg'
         args = ['--config', config, '--key', 'invalid-api-key']
@@ -291,9 +289,7 @@ class MainTestCase(utils.TestCase):
         self.assertSessionCacheUntouched()
 
     def test_nonascii_hostname(self):
-        response = Response()
-        response.status_code = 201
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with utils.TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
@@ -320,9 +316,7 @@ class MainTestCase(utils.TestCase):
                 self.assertSessionCacheSaved()
 
     def test_nonascii_timezone(self):
-        response = Response()
-        response.status_code = 201
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with utils.TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
@@ -354,9 +348,7 @@ class MainTestCase(utils.TestCase):
                 self.assertSessionCacheSaved()
 
     def test_timezone_with_invalid_encoding(self):
-        response = Response()
-        response.status_code = 201
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with utils.TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
@@ -391,9 +383,7 @@ class MainTestCase(utils.TestCase):
                 self.assertSessionCacheSaved()
 
     def test_tzlocal_exception(self):
-        response = Response()
-        response.status_code = 201
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with utils.TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
@@ -419,9 +409,7 @@ class MainTestCase(utils.TestCase):
                 self.assertSessionCacheSaved()
 
     def test_timezone_header(self):
-        response = Response()
-        response.status_code = 201
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with utils.TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
@@ -447,9 +435,7 @@ class MainTestCase(utils.TestCase):
     def test_nonascii_filename(self, logs):
         logging.disable(logging.NOTSET)
 
-        response = Response()
-        response.status_code = 201
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with utils.TemporaryDirectory() as tempdir:
             filename = list(filter(lambda x: x.endswith('.txt'), os.listdir(u('tests/samples/codefiles/unicode'))))[0]
