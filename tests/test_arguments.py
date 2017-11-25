@@ -527,7 +527,7 @@ class ArgumentsTestCase(TestCase):
         logging.disable(logging.NOTSET)
 
         response = CustomResponse()
-        response.response_text = '[[{"id":1},201], [{"id":1},201]]'
+        response.response_text = '{"responses": [[null, 201], [null,201]]}'
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
         now1 = u(int(time.time()))
@@ -590,7 +590,7 @@ class ArgumentsTestCase(TestCase):
         logging.disable(logging.NOTSET)
 
         response = CustomResponse()
-        response.response_text = '[[{"id":1},201], [{"id":1},201]]'
+        response.response_text = '{"responses": [[null, 201], [null,201]]}'
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
         now1 = u(int(time.time()))
@@ -653,7 +653,7 @@ class ArgumentsTestCase(TestCase):
         logging.disable(logging.NOTSET)
 
         response = CustomResponse()
-        response.response_text = '[[{"id":1},201], [{"id":1},201]]'
+        response.response_text = '{"responses": [[null, 201], [null,201]]}'
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
         with TemporaryDirectory() as tempdir:
@@ -717,7 +717,7 @@ class ArgumentsTestCase(TestCase):
         logging.disable(logging.NOTSET)
 
         response = CustomResponse()
-        response.response_text = '[[{"id":1},201], [{"id":1},201]]'
+        response.response_text = '{"responses": [[null, 201], [null,201]]}'
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
         with TemporaryDirectory() as tempdir:
@@ -814,7 +814,7 @@ class ArgumentsTestCase(TestCase):
         logging.disable(logging.NOTSET)
 
         response = CustomResponse()
-        response.response_text = '[[{"id":1},201], [{"id":1},201]]'
+        response.response_text = '{"responses": [[null, 201], [null,201]]}'
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
         now1 = u(int(time.time()))
@@ -880,7 +880,7 @@ class ArgumentsTestCase(TestCase):
         logging.disable(logging.NOTSET)
 
         response = CustomResponse()
-        response.response_text = '[[{"id":1},201], [{"id":1},201]]'
+        response.response_text = '{"responses": [[null, 201], [null,201]]}'
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
         now1 = u(int(time.time()))

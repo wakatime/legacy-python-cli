@@ -84,7 +84,7 @@ class OfflineQueueTestCase(TestCase):
                 execute(args)
 
                 response = CustomResponse()
-                response.response_text = '[[{"id":1},201], [{"id":1},201], [{"id":1},201]]'
+                response.response_text = '{"responses": [[null,201], [null,201], [null,201]]}'
                 self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
                 execute(args)
 
@@ -124,7 +124,7 @@ class OfflineQueueTestCase(TestCase):
                 args = ['--file', entity3, '--config', config, '--time', now3, '--project', project3]
 
                 response = CustomResponse()
-                response.response_text = '[[{"id":1},201], [{"id":1},201], [{"id":1},201]]'
+                response.response_text = '{"responses": [[null,201], [null,201], [null,201]]}'
                 self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
                 execute(args)
 
@@ -190,7 +190,7 @@ class OfflineQueueTestCase(TestCase):
 
                     response = CustomResponse()
                     response.response_code = 202
-                    response.response_text = '[[{"id":1},201], [{"error":"error 2"},500], [{"id":3},201], [{"error":4},500]]'
+                    response.response_text = '{"responses": [[null,201], [null,500], [null,201], [null, 500]]}'
                     self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
                     with mock.patch('wakatime.main.sys.stdin') as mock_stdin:
@@ -273,7 +273,7 @@ class OfflineQueueTestCase(TestCase):
 
                     response = CustomResponse()
                     response.response_code = 202
-                    response.response_text = '[[{"id":1},201], [{"error":"error 2"},500], [{"id":3},201], [{"error":4},500]]'
+                    response.response_text = '{"responses": [[null,201], [null,500], [null,201], [null, 500]]}'
                     self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
                     with mock.patch('wakatime.main.sys.stdin') as mock_stdin:
@@ -328,7 +328,7 @@ class OfflineQueueTestCase(TestCase):
 
                     response = CustomResponse()
                     response.response_code = 202
-                    response.response_text = '[[{"id":1},201], [{"id":3},201]]'
+                    response.response_text = '{"responses": [[null,201], [null,201]]}'
                     self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
                     with mock.patch('wakatime.main.sys.stdin') as mock_stdin:
@@ -390,7 +390,7 @@ class OfflineQueueTestCase(TestCase):
                 response = CustomResponse()
                 response.second_response_code = 401
                 response.limit = 2
-                response.response_text = '[[{"id":1},201], [{"id":1},201], [{"id":1},201]]'
+                response.response_text = '{"responses": [[null,201], [null,201], [null,201]]}'
                 self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
                 retval = execute(args)
@@ -436,7 +436,7 @@ class OfflineQueueTestCase(TestCase):
                 response = CustomResponse()
                 response.second_response_code = 500
                 response.limit = 2
-                response.response_text = '[[{"id":1},201], [{"id":1},201], [{"id":1},201]]'
+                response.response_text = '{"responses": [[null,201], [null,201], [null,201]]}'
                 self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
                 retval = execute(args)
@@ -751,7 +751,7 @@ class OfflineQueueTestCase(TestCase):
                 mock_db_file.return_value = fh.name
 
                 response = CustomResponse()
-                response.response_text = '[[{id":1}]]'
+                response.response_text = '{"responses": [[{id":1},201]]}'
                 self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
                 now = u(int(time.time()))
@@ -779,7 +779,7 @@ class OfflineQueueTestCase(TestCase):
                 mock_db_file.return_value = fh.name
 
                 response = CustomResponse()
-                response.response_text = '[0]'
+                response.response_text = '{"responses": [1]}'
                 self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
                 now = u(int(time.time()))
@@ -807,7 +807,7 @@ class OfflineQueueTestCase(TestCase):
                 mock_db_file.return_value = fh.name
 
                 response = CustomResponse()
-                response.response_text = '[[{"id":1}]]'
+                response.response_text = '{"responses": [[{"id":1}]]}'
                 self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
 
                 now = u(int(time.time()))

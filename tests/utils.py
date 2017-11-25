@@ -233,7 +233,7 @@ class DynamicIterable(object):
 
 class CustomResponse(Response):
     response_code = 201
-    response_text = '[[{"id":1},201]]'
+    response_text = '{"responses": [[null,201]]}'
     limit = 0
     second_response_code = 0
     second_response_text = None
