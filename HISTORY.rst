@@ -3,6 +3,12 @@ History
 -------
 
 
+10.0.5 (2017-11-24)
++++++++++++++++++++
+
+- Fix bug that caused heartbeats to be cached locally instead of sent to API.
+
+
 10.0.4 (2017-11-23)
 +++++++++++++++++++
 
