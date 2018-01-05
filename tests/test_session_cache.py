@@ -25,7 +25,7 @@ class SessionCacheTestCase(utils.TestCase):
             version = ''
             plugin = ''
             verbose = False
-            logfile = ''
+            log_file = ''
         self.args = MockArgs()
         setup_logging(self.args, self.args.version)
 

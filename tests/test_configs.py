@@ -42,7 +42,7 @@ class ConfigsTestCase(TestCase):
             entity = 'tests/samples/codefiles/emptyfile.txt'
             shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
-            args = ['--file', entity, '--logfile', '~/.wakatime.log']
+            args = ['--file', entity, '--log-file', '~/.wakatime.log']
 
             with mock.patch('wakatime.configs.os.environ.get') as mock_env:
                 mock_env.return_value = None
@@ -77,7 +77,7 @@ class ConfigsTestCase(TestCase):
             with mock.patch('wakatime.configs.os.environ.get') as mock_env:
                 mock_env.return_value = tempdir
 
-                args = ['--file', entity, '--logfile', '~/.wakatime.log']
+                args = ['--file', entity, '--log-file', '~/.wakatime.log']
                 retval = execute(args)
                 self.assertEquals(retval, SUCCESS)
                 expected_stdout = open('tests/samples/output/configs_test_good_config_file').read()
@@ -100,7 +100,7 @@ class ConfigsTestCase(TestCase):
             shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
 
-            args = ['--file', entity, '--config', config, '--logfile', '~/.wakatime.log']
+            args = ['--file', entity, '--config', config, '--log-file', '~/.wakatime.log']
             with self.assertRaises(SystemExit) as e:
                 execute(args)
 
@@ -122,7 +122,7 @@ class ConfigsTestCase(TestCase):
             entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
 
             config = 'tests/samples/configs/has_everything.cfg'
-            args = ['--file', entity, '--config', config, '--logfile', '~/.wakatime.log']
+            args = ['--file', entity, '--config', config, '--log-file', '~/.wakatime.log']
             retval = execute(args)
             self.assertEquals(retval, SUCCESS)
             expected_stdout = open('tests/samples/output/configs_test_good_config_file').read()
@@ -151,7 +151,7 @@ class ConfigsTestCase(TestCase):
             entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
 
             config = 'tests/samples/configs/sample_alternate_apikey.cfg'
-            args = ['--file', entity, '--config', config, '--logfile', '~/.wakatime.log']
+            args = ['--file', entity, '--config', config, '--log-file', '~/.wakatime.log']
             retval = execute(args)
             self.assertEquals(retval, SUCCESS)
             self.assertEquals(sys.stdout.getvalue(), '')
@@ -174,7 +174,7 @@ class ConfigsTestCase(TestCase):
             entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
 
             config = 'tests/samples/configs/bad_config.cfg'
-            args = ['--file', entity, '--config', config, '--logfile', '~/.wakatime.log']
+            args = ['--file', entity, '--config', config, '--log-file', '~/.wakatime.log']
 
             with self.assertRaises(SystemExit) as e:
                 execute(args)
@@ -207,7 +207,7 @@ class ConfigsTestCase(TestCase):
             config = 'tests/samples/configs/good_config.cfg'
             key = str(uuid.uuid4())
 
-            args = ['--file', entity, '--key', key, '--config', config, '--time', now, '--logfile', '~/.wakatime.log']
+            args = ['--file', entity, '--key', key, '--config', config, '--time', now, '--log-file', '~/.wakatime.log']
 
             retval = execute(args)
             self.assertEquals(retval, SUCCESS)
@@ -246,7 +246,42 @@ class ConfigsTestCase(TestCase):
             key = u(uuid.uuid4())
             project = 'abcxyz'
 
-            args = ['--file', entity, '--key', key, '--config', config, '--time', now, '--logfile', '~/.wakatime.log', '--alternate-project', project]
+            args = ['--file', entity, '--key', key, '--config', config, '--time', now, '--log-file', '~/.wakatime.log', '--alternate-project', project]
+
+            retval = execute(args)
+            self.assertEquals(retval, SUCCESS)
+            self.assertNothingPrinted()
+
+            heartbeat = {
+                'language': 'Python',
+                'lines': None,
+                'entity': 'HIDDEN.py',
+                'project': project,
+                'time': float(now),
+                'is_write': False,
+                'type': 'file',
+                'dependencies': None,
+                'user_agent': ANY,
+            }
+            self.assertHeartbeatSent(heartbeat)
+
+            self.assertHeartbeatNotSavedOffline()
+            self.assertOfflineHeartbeatsSynced()
+            self.assertSessionCacheSaved()
+
+    def test_legacy_hidefilenames_config_supported(self):
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+
+        with TemporaryDirectory() as tempdir:
+            entity = 'tests/samples/codefiles/python.py'
+            shutil.copy(entity, os.path.join(tempdir, 'python.py'))
+            entity = os.path.realpath(os.path.join(tempdir, 'python.py'))
+            now = u(int(time.time()))
+            config = 'tests/samples/configs/paranoid_legacy.cfg'
+            key = u(uuid.uuid4())
+            project = 'abcxyz'
+
+            args = ['--file', entity, '--key', key, '--config', config, '--time', now, '--log-file', '~/.wakatime.log', '--alternate-project', project]
 
             retval = execute(args)
             self.assertEquals(retval, SUCCESS)
@@ -281,7 +316,7 @@ class ConfigsTestCase(TestCase):
             key = str(uuid.uuid4())
             project = 'abcxyz'
 
-            args = ['--file', entity, '--key', key, '--config', config, '--time', now, '--hidefilenames', '--logfile', '~/.wakatime.log', '--alternate-project', project]
+            args = ['--file', entity, '--key', key, '--config', config, '--time', now, '--hide-filenames', '--log-file', '~/.wakatime.log', '--alternate-project', project]
 
             retval = execute(args)
             self.assertEquals(retval, SUCCESS)
@@ -316,7 +351,7 @@ class ConfigsTestCase(TestCase):
             key = '033c47c9-0441-4eb5-8b3f-b51f27b31049'
             project = 'abcxyz'
 
-            args = ['--file', entity, '--key', key, '--config', config, '--time', now, '--logfile', '~/.wakatime.log', '--alternate-project', project]
+            args = ['--file', entity, '--key', key, '--config', config, '--time', now, '--log-file', '~/.wakatime.log', '--alternate-project', project]
 
             retval = execute(args)
             self.assertEquals(retval, SUCCESS)
@@ -355,7 +390,7 @@ class ConfigsTestCase(TestCase):
             dependencies = ['sqlalchemy', 'jinja', 'simplejson', 'flask', 'app', 'django', 'pygments', 'unittest', 'mock']
             project = 'abcxyz'
 
-            args = ['--file', entity, '--key', key, '--config', config, '--time', now, '--logfile', '~/.wakatime.log', '--alternate-project', project]
+            args = ['--file', entity, '--key', key, '--config', config, '--time', now, '--log-file', '~/.wakatime.log', '--alternate-project', project]
 
             retval = execute(args)
             self.assertEquals(retval, SUCCESS)
@@ -392,7 +427,7 @@ class ConfigsTestCase(TestCase):
             config = 'tests/samples/configs/invalid_hide_file_names.cfg'
             key = str(uuid.uuid4())
 
-            args = ['--file', entity, '--key', key, '--config', config, '--time', now, '--logfile', '~/.wakatime.log']
+            args = ['--file', entity, '--key', key, '--config', config, '--time', now, '--log-file', '~/.wakatime.log']
 
             retval = execute(args)
             self.assertEquals(retval, SUCCESS)
@@ -438,7 +473,7 @@ class ConfigsTestCase(TestCase):
             entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
             config = 'tests/samples/configs/good_config.cfg'
 
-            args = ['--file', entity, '--config', config, '--exclude', 'empty', '--verbose', '--logfile', '~/.wakatime.log']
+            args = ['--file', entity, '--config', config, '--exclude', 'empty', '--verbose', '--log-file', '~/.wakatime.log']
             retval = execute(args)
             self.assertEquals(retval, SUCCESS)
             self.assertNothingPrinted()
@@ -452,6 +487,77 @@ class ConfigsTestCase(TestCase):
             self.assertOfflineHeartbeatsSynced()
             self.assertSessionCacheUntouched()
 
+    @log_capture()
+    def test_exclude_file_without_project_file(self, logs):
+        logging.disable(logging.NOTSET)
+
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        with TemporaryDirectory() as tempdir:
+            entity = 'tests/samples/codefiles/emptyfile.txt'
+            shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
+            entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
+            config = 'tests/samples/configs/include_only_with_project_file.cfg'
+
+            args = ['--file', entity, '--config', config, '--verbose', '--log-file', '~/.wakatime.log']
+            retval = execute(args)
+            self.assertEquals(retval, SUCCESS)
+            self.assertNothingPrinted()
+            actual = self.getLogOutput(logs)
+            expected = 'WakaTime DEBUG Skipping because missing .wakatime-project file in parent path.'
+            self.assertEquals(actual, expected)
+
+            self.assertHeartbeatNotSent()
+
+            self.assertHeartbeatNotSavedOffline()
+            self.assertOfflineHeartbeatsSynced()
+            self.assertSessionCacheUntouched()
+
+    @log_capture()
+    def test_include_file_with_project_file(self, logs):
+        logging.disable(logging.NOTSET)
+
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+
+        with TemporaryDirectory() as tempdir:
+            entity = 'tests/samples/codefiles/emptyfile.txt'
+            shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
+            entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
+            config = 'tests/samples/configs/include_only_with_project_file.cfg'
+            project = 'abcxyz'
+            now = u(int(time.time()))
+
+            with open(os.path.join(tempdir, '.wakatime-project'), 'w'):
+                pass
+
+            args = ['--file', entity, '--config', config, '--time', now, '--verbose', '--log-file', '~/.wakatime.log', '--project', project]
+            retval = execute(args)
+
+            self.assertEquals(retval, SUCCESS)
+            self.assertNothingPrinted()
+
+            heartbeat = {
+                'language': 'Text only',
+                'lines': 0,
+                'entity': os.path.realpath(entity),
+                'project': project,
+                'branch': ANY,
+                'cursorpos': None,
+                'lineno': None,
+                'time': float(now),
+                'is_write': False,
+                'type': 'file',
+                'dependencies': [],
+                'user_agent': ANY,
+            }
+            self.assertHeartbeatSent(heartbeat)
+
+            self.assertHeartbeatNotSavedOffline()
+            self.assertOfflineHeartbeatsSynced()
+            self.assertSessionCacheSaved()
+
     def test_hostname_set_from_config_file(self):
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
@@ -462,7 +568,7 @@ class ConfigsTestCase(TestCase):
 
             hostname = 'fromcfgfile'
             config = 'tests/samples/configs/has_everything.cfg'
-            args = ['--file', entity, '--config', config, '--timeout', '15', '--logfile', '~/.wakatime.log']
+            args = ['--file', entity, '--config', config, '--timeout', '15', '--log-file', '~/.wakatime.log']
             retval = execute(args)
             self.assertEquals(retval, SUCCESS)
             self.assertNothingPrinted()
@@ -485,7 +591,7 @@ class ConfigsTestCase(TestCase):
             entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
 
             config = 'tests/samples/configs/has_ssl_verify_disabled.cfg'
-            args = ['--file', entity, '--config', config, '--timeout', '15', '--logfile', '~/.wakatime.log']
+            args = ['--file', entity, '--config', config, '--timeout', '15', '--log-file', '~/.wakatime.log']
             retval = execute(args)
             self.assertEquals(retval, SUCCESS)
             self.assertNothingPrinted()

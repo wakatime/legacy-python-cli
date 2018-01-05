@@ -163,7 +163,7 @@ class MainTestCase(utils.TestCase):
                 'dependencies': [],
             }
 
-            args = ['--file', entity, '--key', key, '--disableoffline',
+            args = ['--file', entity, '--key', key, '--disable-offline',
                     '--config', 'tests/samples/configs/good_config.cfg', '--time', now]
 
             retval = execute(args)
@@ -244,7 +244,7 @@ class MainTestCase(utils.TestCase):
             now = u(int(time.time()))
             key = str(uuid.uuid4())
 
-            args = ['--file', entity, '--key', key, '--disableoffline',
+            args = ['--file', entity, '--key', key, '--disable-offline',
                     '--config', 'tests/samples/configs/good_config.cfg', '--time', now]
 
             retval = execute(args)

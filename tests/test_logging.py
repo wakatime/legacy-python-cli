@@ -69,7 +69,7 @@ class LoggingTestCase(utils.TestCase):
             entity = 'tests/samples/codefiles/python.py'
             config = 'tests/samples/configs/good_config.cfg'
             logfile = os.path.realpath(fh.name)
-            args = ['--file', entity, '--config', config, '--time', now, '--logfile', logfile]
+            args = ['--file', entity, '--config', config, '--time', now, '--log-file', logfile]
 
             execute(args)
 

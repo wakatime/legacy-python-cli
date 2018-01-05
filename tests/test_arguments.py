@@ -12,13 +12,16 @@ import sys
 import uuid
 from testfixtures import log_capture
 from wakatime.arguments import parse_arguments
-from wakatime.compat import u
+from wakatime.compat import u, is_py3
 from wakatime.constants import (
+    API_ERROR,
     AUTH_ERROR,
     SUCCESS,
 )
+from wakatime.packages.requests.exceptions import RequestException
+from wakatime.packages.requests.models import Response
 from wakatime.utils import get_user_agent
-from .utils import mock, json, ANY, CustomResponse, TemporaryDirectory, TestCase
+from .utils import mock, json, ANY, CustomResponse, TemporaryDirectory, TestCase, NamedTemporaryFile
 
 
 class ArgumentsTestCase(TestCase):
@@ -944,12 +947,103 @@ class ArgumentsTestCase(TestCase):
 
             with mock.patch.object(sys, 'argv', ['wakatime'] + args):
                 args, configs = parse_arguments()
-                self.assertEquals(args.logfile, None)
+                self.assertEquals(args.log_file, None)
 
                 with mock.patch('os.environ.get') as mock_env:
                     mock_env.return_value = os.path.realpath(tempdir)
 
                     args, configs = parse_arguments()
-                    self.assertEquals(args.logfile, logfile)
+                    self.assertEquals(args.log_file, logfile)
                     self.assertNothingPrinted()
                     self.assertNothingLogged(logs)
+
+    @log_capture()
+    def test_legacy_disableoffline_arg_supported(self, logs):
+        logging.disable(logging.NOTSET)
+
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].side_effect = RequestException('requests exception')
+
+        with TemporaryDirectory() as tempdir:
+            entity = 'tests/samples/codefiles/twolinefile.txt'
+            shutil.copy(entity, os.path.join(tempdir, 'twolinefile.txt'))
+            entity = os.path.realpath(os.path.join(tempdir, 'twolinefile.txt'))
+            now = u(int(time.time()))
+            key = str(uuid.uuid4())
+
+            args = ['--file', entity, '--key', key, '--disableoffline',
+                    '--config', 'tests/samples/configs/good_config.cfg', '--time', now]
+
+            retval = execute(args)
+            self.assertEquals(retval, API_ERROR)
+            self.assertNothingPrinted()
+
+            log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
+            expected = "WakaTime ERROR {'RequestException': u'requests exception'}"
+            if is_py3:
+                expected = "WakaTime ERROR {'RequestException': 'requests exception'}"
+            self.assertEquals(expected, log_output)
+
+            self.assertHeartbeatSent()
+            self.assertHeartbeatNotSavedOffline()
+            self.assertOfflineHeartbeatsNotSynced()
+            self.assertSessionCacheDeleted()
+
+    def test_legacy_hidefilenames_arg_supported(self):
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+
+        with TemporaryDirectory() as tempdir:
+            entity = 'tests/samples/codefiles/python.py'
+            shutil.copy(entity, os.path.join(tempdir, 'python.py'))
+            entity = os.path.realpath(os.path.join(tempdir, 'python.py'))
+            now = u(int(time.time()))
+            config = 'tests/samples/configs/good_config.cfg'
+            key = str(uuid.uuid4())
+            project = 'abcxyz'
+
+            args = ['--file', entity, '--key', key, '--config', config, '--time', now, '--hidefilenames', '--logfile', '~/.wakatime.log', '--alternate-project', project]
+
+            retval = execute(args)
+            self.assertEquals(retval, SUCCESS)
+            self.assertNothingPrinted()
+
+            heartbeat = {
+                'language': 'Python',
+                'lines': None,
+                'entity': 'HIDDEN.py',
+                'project': project,
+                'time': float(now),
+                'is_write': False,
+                'type': 'file',
+                'dependencies': None,
+                'user_agent': ANY,
+            }
+            self.assertHeartbeatSent(heartbeat)
+
+            self.assertHeartbeatNotSavedOffline()
+            self.assertOfflineHeartbeatsSynced()
+            self.assertSessionCacheSaved()
+
+    @log_capture()
+    def test_deprecated_logfile_arg_supported(self, logs):
+        logging.disable(logging.NOTSET)
+
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        with NamedTemporaryFile() as fh:
+            now = u(int(time.time()))
+            entity = 'tests/samples/codefiles/python.py'
+            config = 'tests/samples/configs/good_config.cfg'
+            logfile = os.path.realpath(fh.name)
+            args = ['--file', entity, '--config', config, '--time', now, '--logfile', logfile]
+
+            execute(args)
+
+            retval = execute(args)
+            self.assertEquals(retval, 102)
+            self.assertNothingPrinted()
+
+            self.assertEquals(logging.WARNING, logging.getLogger('WakaTime').level)
+            self.assertEquals(logfile, logging.getLogger('WakaTime').handlers[0].baseFilename)
+            logs.check()

@@ -60,7 +60,7 @@ format. An example config file with all available options::
     [settings]
     debug = false
     api_key = your-api-key
-    hidefilenames = false
+    hide_filenames = false
     exclude =
         ^COMMIT_EDITMSG$
         ^TAG_EDITMSG$
@@ -68,6 +68,7 @@ format. An example config file with all available options::
         ^/etc/
     include =
         .*
+    only_include_with_project_file = false
     offline = true
     proxy = https://user:pass@localhost:8080
     no_ssl_verify = false
