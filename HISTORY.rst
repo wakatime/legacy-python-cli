@@ -3,6 +3,13 @@ History
 -------
 
 
+10.1.0 (2018-01-04)
++++++++++++++++++++
+
+- Ability to only track folders containing a .wakatime-project file using new
+  include_only_with_project_file argument and config option.
+
+
 10.0.5 (2017-11-24)
 +++++++++++++++++++
 
