@@ -16,6 +16,9 @@ from ..compat import u
 class PhpParser(TokenParser):
     state = None
     parens = 0
+    exclude = [
+        r'^app$',
+    ]
 
     def parse(self):
         for index, token, content in self.tokens:
