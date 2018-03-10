@@ -18,6 +18,7 @@ class PhpParser(TokenParser):
     parens = 0
     exclude = [
         r'^app$',
+        r'app\.php$',
     ]
 
     def parse(self):
