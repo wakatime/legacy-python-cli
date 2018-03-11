@@ -3,6 +3,14 @@ History
 -------
 
 
+10.1.1 (2018-03-11)
++++++++++++++++++++
+
+- Detect dependencies from Swift, Objective-C, TypeScript and JavaScript files.
+- Categorize .mjs files as JavaScript.
+  `#121 <https://github.com/wakatime/wakatime/issues/121>`_
+
+
 10.1.0 (2018-01-04)
 +++++++++++++++++++
 
