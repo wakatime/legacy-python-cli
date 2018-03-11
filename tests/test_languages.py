@@ -174,3 +174,9 @@ class LanguagesTestCase(utils.TestCase):
             expected_language='Matlab',
             entity='matlab/with_mat_files/empty.m',
         )
+
+    def test_mjs_javascript_module_extension_detected(self):
+        self.shared(
+            expected_language='JavaScript',
+            entity='javascript_module.mjs',
+        )
