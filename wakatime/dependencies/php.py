@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-    wakatime.languages.php
-    ~~~~~~~~~~~~~~~~~~~~~~
+    wakatime.dependencies.php
+    ~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Parse dependencies from PHP code.
 

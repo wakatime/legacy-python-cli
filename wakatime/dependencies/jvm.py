@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-    wakatime.languages.java
-    ~~~~~~~~~~~~~~~~~~~~~~~
+    wakatime.dependencies.java
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Parse dependencies from Java code.
 

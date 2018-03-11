@@ -141,7 +141,7 @@ class LanguagesTestCase(utils.TestCase):
     def test_typescript_detected_over_typoscript(self):
         self.shared(
             expected_language='TypeScript',
-            entity='typescript.ts',
+            entity='empty.ts',
             extra_args=['--language', 'foo', '--plugin', 'NeoVim/703 vim-wakatime/4.0.9']
         )
 

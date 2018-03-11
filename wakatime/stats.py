@@ -53,6 +53,8 @@ def get_file_stats(file_name, entity_type='file', lineno=None, cursorpos=None,
         if not language:
             language, lexer = guess_language(file_name)
 
+        language = use_root_language(language, lexer)
+
         parser = DependencyParser(file_name, lexer)
         dependencies = parser.parse()
 
@@ -234,6 +236,13 @@ def get_lexer(language):
         return lexer_cls()
 
     return None
+
+
+def use_root_language(language, lexer):
+    if lexer and hasattr(lexer, 'root_lexer'):
+        return u(lexer.root_lexer.name)
+
+    return language
 
 
 def get_language_from_json(language, key):

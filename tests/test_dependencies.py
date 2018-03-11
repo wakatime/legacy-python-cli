@@ -188,6 +188,28 @@ class DependenciesTestCase(TestCase):
                     entity='python.py',
                 )
 
+    def test_dependencies_still_detected_when_alternate_language_used(self):
+        with mock.patch('wakatime.stats.smart_guess_lexer') as mock_guess_lexer:
+            mock_guess_lexer.return_value = None
+
+            self.shared(
+                expected_dependencies=[
+                    'app',
+                    'django',
+                    'flask',
+                    'jinja',
+                    'mock',
+                    'pygments',
+                    'simplejson',
+                    'sqlalchemy',
+                    'unittest',
+                ],
+                expected_language='Python',
+                expected_lines=37,
+                entity='python.py',
+                extra_args=['--alternate-language', 'PYTHON'],
+            )
+
     def test_python_dependencies_detected(self):
         self.shared(
             expected_dependencies=[
@@ -302,7 +324,7 @@ class DependenciesTestCase(TestCase):
             expected_dependencies=[
                 '"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"',
             ],
-            expected_language='HTML+PHP',
+            expected_language='HTML',
             expected_lines=22,
             entity='html-with-php.html',
         )
@@ -312,7 +334,7 @@ class DependenciesTestCase(TestCase):
             expected_dependencies=[
                 '"libs/json2.js"',
             ],
-            expected_language='HTML+Django/Jinja',
+            expected_language='HTML',
             expected_lines=40,
             entity='html-django.html',
         )
@@ -336,24 +358,22 @@ class DependenciesTestCase(TestCase):
             entity='go.go',
         )
 
-    def test_dependencies_still_detected_when_alternate_language_used(self):
-        with mock.patch('wakatime.stats.smart_guess_lexer') as mock_guess_lexer:
-            mock_guess_lexer.return_value = None
-
-            self.shared(
-                expected_dependencies=[
-                    'app',
-                    'django',
-                    'flask',
-                    'jinja',
-                    'mock',
-                    'pygments',
-                    'simplejson',
-                    'sqlalchemy',
-                    'unittest',
-                ],
-                expected_language='Python',
-                expected_lines=37,
-                entity='python.py',
-                extra_args=['--alternate-language', 'PYTHON'],
-            )
+    def test_es6_dependencies_detected(self):
+        self.shared(
+            expected_dependencies=[
+                'bravo',
+                'foxtrot',
+                'india',
+                'kilo',
+                'november',
+                'oscar',
+                'quebec',
+                'tango',
+                'uniform',
+                'victor',
+                'whiskey',
+            ],
+            expected_language='JavaScript',
+            expected_lines=37,
+            entity='es6.js',
+        )
