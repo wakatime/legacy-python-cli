@@ -397,3 +397,26 @@ class DependenciesTestCase(TestCase):
             expected_lines=37,
             entity='typescript.ts',
         )
+
+    def test_swift_dependencies_detected(self):
+        self.shared(
+            expected_dependencies=[
+                'UIKit',
+                'PromiseKit',
+            ],
+            expected_language='Swift',
+            expected_lines=16,
+            entity='swift.swift',
+        )
+
+    def test_objective_c_dependencies_detected(self):
+        self.shared(
+            expected_dependencies=[
+                'SomeViewController',
+                'UIKit',
+                'PromiseKit',
+            ],
+            expected_language='Objective-C',
+            expected_lines=18,
+            entity='objective-c.m',
+        )
