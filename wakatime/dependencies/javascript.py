@@ -54,3 +54,7 @@ class JavascriptParser(TokenParser):
         content = content.split('/')[-1].split('\\')[-1]
         content = self.extension.sub('', content, count=1)
         return content
+
+
+class TypeScriptParser(JavascriptParser):
+    pass

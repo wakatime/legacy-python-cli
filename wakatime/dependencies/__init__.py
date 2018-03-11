@@ -123,8 +123,6 @@ class DependencyParser(object):
 
     @property
     def root_lexer(self):
-        if not self.lexer:
-            return None
         if hasattr(self.lexer, 'root_lexer'):
             return self.lexer.root_lexer
         return self.lexer

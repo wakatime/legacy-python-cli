@@ -377,3 +377,23 @@ class DependenciesTestCase(TestCase):
             expected_lines=37,
             entity='es6.js',
         )
+
+    def test_typescript_dependencies_detected(self):
+        self.shared(
+            expected_dependencies=[
+                'bravo',
+                'foxtrot',
+                'india',
+                'kilo',
+                'november',
+                'oscar',
+                'quebec',
+                'tango',
+                'uniform',
+                'victor',
+                'whiskey',
+            ],
+            expected_language='TypeScript',
+            expected_lines=37,
+            entity='typescript.ts',
+        )
