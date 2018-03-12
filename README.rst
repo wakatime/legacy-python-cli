@@ -127,19 +127,25 @@ Useful Resources:
 Contributing
 ------------
 
-Before contributing a pull request, make sure tests pass::
-
-    virtualenv venv
-    . venv/bin/activate
-    pip install tox
-    tox
-
-The above will run tests on all Python versions available on your machine.
-To just run tests on a single Python version::
+To install the dev environment::
 
     virtualenv venv
     . venv/bin/activate
     pip install -r dev-requirements.txt
+    pip install tox
+
+Before contributing a pull request, make sure tests pass::
+
+    tox
+
+The above will run tests on all Python versions available on your machine.
+To just run all tests with your current Python version::
+
     nosetests
+
+To run only a single test method, specify the test file location, test class,
+and test method. For example, to only run the Git project detection test::
+
+    nosetests tests.test_project:ProjectTestCase.test_git_project_detected
 
 Many thanks to all `contributors <https://github.com/wakatime/wakatime/blob/master/AUTHORS>`_!
