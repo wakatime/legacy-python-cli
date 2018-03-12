@@ -420,3 +420,18 @@ class DependenciesTestCase(TestCase):
             expected_lines=18,
             entity='objective-c.m',
         )
+
+    def test_scala_dependencies_detected(self):
+        self.shared(
+            expected_dependencies=[
+                'com.alpha.SomeClass',
+                'com.bravo.something',
+                'com.charlie',
+                'golf',
+                'com.hotel.india',
+                'juliett.kilo',
+            ],
+            expected_language='Scala',
+            expected_lines=14,
+            entity='scala.scala',
+        )
