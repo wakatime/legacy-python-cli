@@ -41,14 +41,8 @@ class RustParser(TokenParser):
 
     def _process_name(self, token, content):
         if self.state == 'extern crate':
-            self.append(self._format(content))
+            self.append(content)
         self.state = None
 
     def _process_other(self, token, content):
         self.state = None
-
-    def _format(self, content):
-        content = content.strip()
-        if content.startswith('"') or content.startswith("'"):
-            return None
-        return content
