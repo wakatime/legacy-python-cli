@@ -448,3 +448,15 @@ class DependenciesTestCase(TestCase):
             expected_lines=21,
             entity='rust.rs',
         )
+
+    def test_kotlin_dependencies_detected(self):
+        self.shared(
+            expected_dependencies=[
+                'alpha.time',
+                'bravo.charlie',
+                'delta.io',
+            ],
+            expected_language='Kotlin',
+            expected_lines=22,
+            entity='kotlin.kt',
+        )
