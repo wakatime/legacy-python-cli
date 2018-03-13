@@ -455,8 +455,10 @@ class DependenciesTestCase(TestCase):
                 'alpha.time',
                 'bravo.charlie',
                 'delta.io',
+                'echo.Foxtrot',
+                'hotel',
             ],
             expected_language='Kotlin',
-            expected_lines=22,
+            expected_lines=24,
             entity='kotlin.kt',
         )
