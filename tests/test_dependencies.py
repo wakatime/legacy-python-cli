@@ -435,3 +435,16 @@ class DependenciesTestCase(TestCase):
             expected_lines=14,
             entity='scala.scala',
         )
+
+    def test_rust_dependencies_detected(self):
+        self.shared(
+            expected_dependencies=[
+                'proc_macro',
+                'phrases',
+                'syn',
+                'quote',
+            ],
+            expected_language='Rust',
+            expected_lines=21,
+            entity='rust.rs',
+        )
