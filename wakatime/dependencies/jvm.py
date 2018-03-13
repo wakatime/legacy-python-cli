@@ -134,25 +134,16 @@ class KotlinParser(TokenParser):
     def _format(self, content):
         content = content.split(u('.'))
 
+        if content[-1] == u('*'):
+            content = content[:len(content) - 1]
+
         if len(content) == 0:
             return None
 
         if len(content) == 1:
             return content[0]
 
-        if len(content[0]) == 3:
-            content = content[1:]
-        if content[-1] == u('*'):
-            content = content[:len(content) - 1]
-
-        if len(content) == 0:
-            return None
-        elif len(content) == 1:
-            content = content[0]
-        elif len(content) > 1:
-            content = u('.').join(content[:2])
-
-        return content
+        return u('.').join(content[:2])
 
 
 class ScalaParser(TokenParser):

@@ -456,7 +456,7 @@ class DependenciesTestCase(TestCase):
                 'bravo.charlie',
                 'delta.io',
                 'echo.Foxtrot',
-                'hotel',
+                'h',
             ],
             expected_language='Kotlin',
             expected_lines=24,

@@ -14,7 +14,7 @@ package ${package}
 
 import delta.io.*
 import echo.Foxtrot as Golf
-import hotel
+import h
 
 class MainActivity : AppCompatActivity() {
 
