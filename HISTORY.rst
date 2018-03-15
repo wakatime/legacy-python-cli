@@ -3,6 +3,14 @@ History
 -------
 
 
+10.1.2 (2018-03-14)
++++++++++++++++++++
+
+- Detect dependencies from Elm, Haskell, Haxe, Kotlin, Rust, and Scala files.
+- Improved Matlab vs Objective-C language detection.
+  `#129 <https://github.com/wakatime/wakatime/issues/129>`_
+
+
 10.1.1 (2018-03-11)
 +++++++++++++++++++
 
