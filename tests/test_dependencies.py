@@ -476,3 +476,31 @@ class DependenciesTestCase(TestCase):
             expected_lines=18,
             entity='haxe.hx',
         )
+
+    def test_haskell_dependencies_detected(self):
+        self.shared(
+            expected_dependencies=[
+                'Control',
+                'Data',
+                'Network',
+                'System',
+            ],
+            expected_language='Haskell',
+            expected_lines=20,
+            entity='haskell.hs',
+        )
+
+    def test_elm_dependencies_detected(self):
+        self.shared(
+            expected_dependencies=[
+                'Color',
+                'Dict',
+                'TempFontAwesome',
+                'Html',
+                'Markdown',
+                'String',
+            ],
+            expected_language='Elm',
+            expected_lines=21,
+            entity='elm.elm',
+        )
