@@ -3,6 +3,12 @@ History
 -------
 
 
+10.1.3 (2018-03-14)
++++++++++++++++++++
+
+- Smarter C vs C++ vs Objective-C language detection.
+
+
 10.1.2 (2018-03-14)
 +++++++++++++++++++
 
