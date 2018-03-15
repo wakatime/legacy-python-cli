@@ -351,12 +351,18 @@ def customize_lexer_priority(file_name, accuracy, lexer):
         priority = LANGUAGES[lexer_name]
     elif lexer_name == 'matlab':
         available_extensions = extensions_in_same_folder(file_name)
-        if '.mat' in available_extensions or '.h' not in available_extensions:
-            priority = 0.6
+        if '.mat' in available_extensions:
+            accuracy += 0.01
+        if '.h' not in available_extensions:
+            accuracy += 0.01
     elif lexer_name == 'objective-c':
         available_extensions = extensions_in_same_folder(file_name)
-        if '.mat' in available_extensions or '.h' not in available_extensions:
-            priority = 0.0
+        if '.mat' in available_extensions:
+            accuracy -= 0.01
+        else:
+            accuracy += 0.01
+        if '.h' in available_extensions:
+            accuracy += 0.01
 
     return (accuracy, priority, lexer)
 
