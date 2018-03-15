@@ -65,7 +65,7 @@ class LanguagesTestCase(utils.TestCase):
     def test_cpp_language_detected_for_header_with_c_and_cpp_files_in_folder(self):
         self.shared(
             expected_language='C++',
-            entity='c_and_cpp/empty.h',
+            entity='c_and_cpp/cpp.h',
         )
 
     def test_c_not_detected_for_non_header_with_c_files_in_folder(self):
@@ -80,10 +80,22 @@ class LanguagesTestCase(utils.TestCase):
             entity='c_and_cpp/empty.m',
         )
 
+    def test_objectivec_language_detected_when_m_files_in_folder(self):
+        self.shared(
+            expected_language='Objective-C',
+            entity='c_and_cpp/objective-c.h',
+        )
+
     def test_objectivecpp_language_detected_when_header_files_in_folder(self):
         self.shared(
             expected_language='Objective-C++',
             entity='c_and_cpp/empty.mm',
+        )
+
+    def test_objectivecpp_language_detected_when_m_files_in_folder(self):
+        self.shared(
+            expected_language='Objective-C++',
+            entity='c_and_cpp/objective-cpp.h',
         )
 
     def test_guess_language(self):
