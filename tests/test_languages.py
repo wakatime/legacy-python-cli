@@ -74,6 +74,18 @@ class LanguagesTestCase(utils.TestCase):
             entity='c_and_python/see.py',
         )
 
+    def test_objectivec_language_detected_when_header_files_in_folder(self):
+        self.shared(
+            expected_language='Objective-C',
+            entity='c_and_cpp/empty.m',
+        )
+
+    def test_objectivecpp_language_detected_when_header_files_in_folder(self):
+        self.shared(
+            expected_language='Objective-C++',
+            entity='c_and_cpp/empty.mm',
+        )
+
     def test_guess_language(self):
         with utils.mock.patch('wakatime.stats.smart_guess_lexer') as mock_guess_lexer:
             mock_guess_lexer.return_value = None
@@ -157,12 +169,6 @@ class LanguagesTestCase(utils.TestCase):
             entity='fsharp.fs',
         )
 
-    def test_objectivec_detected_over_matlab_when_file_empty(self):
-        self.shared(
-            expected_language='Objective-C',
-            entity='matlab/empty.m',
-        )
-
     def test_matlab_detected(self):
         self.shared(
             expected_language='Matlab',
@@ -174,6 +180,43 @@ class LanguagesTestCase(utils.TestCase):
             expected_language='Matlab',
             entity='matlab/with_mat_files/empty.m',
         )
+
+    def test_objectivec_detected_over_matlab_with_matching_header(self):
+        self.shared(
+            expected_language='Objective-C',
+            entity='matlab/with_mat_files/objective-c.m',
+        )
+
+    def test_objectivec_detected_over_matlab_with_non_maching_headers_present(self):
+        self.shared(
+            expected_language='Objective-C',
+            entity='matlab/with_headers/empty.m',
+        )
+
+    def test_matlab_detected_over_objectivec_when_header_in_folder(self):
+        self.shared(
+            expected_language='Matlab',
+            entity='matlab/with_headers/matlab.m',
+        )
+
+    def test_heartbeat_skipped_when_matlab_same_accuracy(self):
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+
+        entity = 'matlab/without_headers/empty.m'
+
+        config = 'tests/samples/configs/good_config.cfg'
+        entity = os.path.join('tests/samples/codefiles', entity)
+
+        now = u(int(time.time()))
+        args = ['--file', entity, '--config', config, '--time', now]
+
+        retval = execute(args)
+        self.assertEquals(retval, SUCCESS)
+        self.assertNothingPrinted()
+        self.assertHeartbeatNotSent()
+        self.assertHeartbeatNotSavedOffline()
+        self.assertOfflineHeartbeatsSynced()
+        self.assertSessionCacheUntouched()
 
     def test_mjs_javascript_module_extension_detected(self):
         self.shared(
