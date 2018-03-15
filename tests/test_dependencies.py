@@ -462,3 +462,17 @@ class DependenciesTestCase(TestCase):
             expected_lines=24,
             entity='kotlin.kt',
         )
+
+    def test_haxe_dependencies_detected(self):
+        self.shared(
+            expected_dependencies=[
+                'alpha',
+                'bravo',
+                'Math',
+                'charlie',
+                'delta',
+            ],
+            expected_language='Haxe',
+            expected_lines=18,
+            entity='haxe.hx',
+        )
