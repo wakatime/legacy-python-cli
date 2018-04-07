@@ -57,7 +57,7 @@ def parse_arguments():
     parser.add_argument('--entity', dest='entity', metavar='FILE',
                         action=FileAction,
                         help='Absolute path to file for the heartbeat. Can ' +
-                             'also be a url, domain, or app when ' +
+                             'also be a url, domain or app when ' +
                              '--entity-type is not file.')
     parser.add_argument('--file', dest='file', action=FileAction,
                         help=argparse.SUPPRESS)
@@ -83,13 +83,13 @@ def parse_arguments():
     parser.add_argument('--entity-type', dest='entity_type',
                         action=StoreWithoutQuotes,
                         help='Entity type for this heartbeat. Can be ' +
-                             '"file", "domain", or "app". Defaults to "file".')
+                             '"file", "domain" or "app". Defaults to "file".')
     parser.add_argument('--category', dest='category',
                         action=StoreWithoutQuotes,
                         help='Category of this heartbeat activity. Can be ' +
                              '"coding", "building", "debugging", ' +
-                             '"running tests", "browsing", or ' +
-                             '"code reviewing". Defaults to "coding".')
+                             '"running tests", "browsing", "code reviewing" ' +
+                             ' or "designing". Defaults to "coding".')
     parser.add_argument('--proxy', dest='proxy', action=StoreWithoutQuotes,
                         help='Optional proxy configuration. Supports HTTPS '+
                              'and SOCKS proxies. For example: '+

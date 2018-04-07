@@ -14,7 +14,7 @@ Common interface for the WakaTime api.
 optional arguments:
   -h, --help            show this help message and exit
   --entity FILE         Absolute path to file for the heartbeat. Can also be a
-                        url, domain, or app when --entity-type is not file.
+                        url, domain or app when --entity-type is not file.
   --key KEY             Your wakatime api key; uses api_key from
                         ~/.wakatime.cfg by default.
   --write               When set, tells api this heartbeat was triggered from
@@ -29,10 +29,10 @@ optional arguments:
                         Optional cursor position in the current file.
   --entity-type ENTITY_TYPE
                         Entity type for this heartbeat. Can be "file",
-                        "domain", or "app". Defaults to "file".
+                        "domain" or "app". Defaults to "file".
   --category CATEGORY   Category of this heartbeat activity. Can be "coding",
                         "building", "debugging", "running tests", "browsing",
-                        or "code reviewing". Defaults to "coding".
+                        "code reviewing" or "designing". Defaults to "coding".
   --proxy PROXY         Optional proxy configuration. Supports HTTPS and SOCKS
                         proxies. For example: https://user:pass@host:port or
                         socks5://user:pass@host:port or domain\user:pass
