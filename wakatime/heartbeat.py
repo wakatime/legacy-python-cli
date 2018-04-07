@@ -63,12 +63,13 @@ class Heartbeat(object):
         allowed_categories = [
             'coding',
             'building',
+            'indexing',
             'debugging',
             'running tests',
+            'manual testing',
             'browsing',
             'code reviewing',
             'designing',
-            'indexing',
         ]
         if self.category not in allowed_categories:
             self.category = None

@@ -505,12 +505,13 @@ class ArgumentsTestCase(TestCase):
             valid_categories = [
                 'coding',
                 'building',
+                'indexing',
                 'debugging',
                 'running tests',
+                'manual testing',
                 'browsing',
                 'code reviewing',
                 'designing',
-                'indexing',
             ]
 
             for category in valid_categories:

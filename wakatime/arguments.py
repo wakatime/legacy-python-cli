@@ -87,9 +87,10 @@ def parse_arguments():
     parser.add_argument('--category', dest='category',
                         action=StoreWithoutQuotes,
                         help='Category of this heartbeat activity. Can be ' +
-                             '"coding", "building", "debugging", ' +
-                             '"running tests", "browsing", ' +
-                             '"code reviewing", "designing" or "indexing". ' +
+                             '"coding", "building", "indexing", ' +
+                             '"debugging", "running tests", ' +
+                             '"manual testing", "browsing", ' +
+                             '"code reviewing" or "designing". ' +
                              'Defaults to "coding".')
     parser.add_argument('--proxy', dest='proxy', action=StoreWithoutQuotes,
                         help='Optional proxy configuration. Supports HTTPS '+
