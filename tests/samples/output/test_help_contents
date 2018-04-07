@@ -32,7 +32,8 @@ optional arguments:
                         "domain" or "app". Defaults to "file".
   --category CATEGORY   Category of this heartbeat activity. Can be "coding",
                         "building", "debugging", "running tests", "browsing",
-                        "code reviewing" or "designing". Defaults to "coding".
+                        "code reviewing", "designing" or "indexing". Defaults
+                        to "coding".
   --proxy PROXY         Optional proxy configuration. Supports HTTPS and SOCKS
                         proxies. For example: https://user:pass@host:port or
                         socks5://user:pass@host:port or domain\user:pass

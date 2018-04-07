@@ -88,8 +88,9 @@ def parse_arguments():
                         action=StoreWithoutQuotes,
                         help='Category of this heartbeat activity. Can be ' +
                              '"coding", "building", "debugging", ' +
-                             '"running tests", "browsing", "code reviewing" ' +
-                             ' or "designing". Defaults to "coding".')
+                             '"running tests", "browsing", ' +
+                             '"code reviewing", "designing" or "indexing". ' +
+                             'Defaults to "coding".')
     parser.add_argument('--proxy', dest='proxy', action=StoreWithoutQuotes,
                         help='Optional proxy configuration. Supports HTTPS '+
                              'and SOCKS proxies. For example: '+
