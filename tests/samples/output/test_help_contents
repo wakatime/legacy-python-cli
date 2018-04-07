@@ -1,62 +1,68 @@
 usage: wakatime [-h] [--entity FILE] [--key KEY] [--write] [--plugin PLUGIN]
                 [--time time] [--lineno LINENO] [--cursorpos CURSORPOS]
-                [--entity-type ENTITY_TYPE] [--proxy PROXY] [--no-ssl-verify]
-                [--project PROJECT] [--alternate-project ALTERNATE_PROJECT]
-                [--language LANGUAGE] [--hostname HOSTNAME]
-                [--disable-offline] [--hide-filenames] [--exclude EXCLUDE]
-                [--include INCLUDE] [--include-only-with-project-file]
-                [--extra-heartbeats] [--log-file LOG_FILE] [--api-url API_URL]
-                [--timeout TIMEOUT] [--config CONFIG] [--verbose] [--version]
+                [--entity-type ENTITY_TYPE] [--category CATEGORY]
+                [--proxy PROXY] [--no-ssl-verify] [--project PROJECT]
+                [--alternate-project ALTERNATE_PROJECT] [--language LANGUAGE]
+                [--hostname HOSTNAME] [--disable-offline] [--hide-filenames]
+                [--exclude EXCLUDE] [--include INCLUDE]
+                [--include-only-with-project-file] [--extra-heartbeats]
+                [--log-file LOG_FILE] [--api-url API_URL] [--timeout TIMEOUT]
+                [--config CONFIG] [--verbose] [--version]
 
 Common interface for the WakaTime api.
 
 optional arguments:
   -h, --help            show this help message and exit
-  --entity FILE         absolute path to file for the heartbeat; can also be a
-                        url, domain, or app when --entity-type is not file
-  --key KEY             your wakatime api key; uses api_key from
-                        ~/.wakatime.cfg by default
-  --write               when set, tells api this heartbeat was triggered from
-                        writing to a file
-  --plugin PLUGIN       optional text editor plugin name and version for User-
-                        Agent header
-  --time time           optional floating-point unix epoch timestamp; uses
-                        current time by default
-  --lineno LINENO       optional line number; current line being edited
+  --entity FILE         Absolute path to file for the heartbeat. Can also be a
+                        url, domain, or app when --entity-type is not file.
+  --key KEY             Your wakatime api key; uses api_key from
+                        ~/.wakatime.cfg by default.
+  --write               When set, tells api this heartbeat was triggered from
+                        writing to a file.
+  --plugin PLUGIN       Optional text editor plugin name and version for User-
+                        Agent header.
+  --time time           Optional floating-point unix epoch timestamp. Uses
+                        current time by default.
+  --lineno LINENO       Optional line number. This is the current line being
+                        edited.
   --cursorpos CURSORPOS
-                        optional cursor position in the current file
+                        Optional cursor position in the current file.
   --entity-type ENTITY_TYPE
-                        entity type for this heartbeat. can be one of "file",
-                        "domain", or "app"; defaults to file.
-  --proxy PROXY         optional proxy configuration. Supports HTTPS and SOCKS
+                        Entity type for this heartbeat. Can be "file",
+                        "domain", or "app". Defaults to "file".
+  --category CATEGORY   Category of this heartbeat activity. Can be "coding",
+                        "building", "debugging", "running tests", "browsing",
+                        or "code reviewing". Defaults to "coding".
+  --proxy PROXY         Optional proxy configuration. Supports HTTPS and SOCKS
                         proxies. For example: https://user:pass@host:port or
                         socks5://user:pass@host:port or domain\user:pass
-  --no-ssl-verify       disables SSL certificate verification for HTTPS
+  --no-ssl-verify       Disables SSL certificate verification for HTTPS
                         requests. By default, SSL certificates are verified.
-  --project PROJECT     optional project name
+  --project PROJECT     Optional project name.
   --alternate-project ALTERNATE_PROJECT
-                        optional alternate project name; auto-discovered
-                        project takes priority
-  --language LANGUAGE   optional language name; if valid, takes priority over
-                        auto-detected language
-  --hostname HOSTNAME   hostname of current machine.
-  --disable-offline     disables offline time logging instead of queuing
-                        logged time
-  --hide-filenames      obfuscate filenames; will not send file names to api
-  --exclude EXCLUDE     filename patterns to exclude from logging; POSIX regex
-                        syntax; can be used more than once
-  --include INCLUDE     filename patterns to log; when used in combination
+                        Optional alternate project name. Auto-discovered
+                        project takes priority.
+  --language LANGUAGE   Optional language name. If valid, takes priority over
+                        auto-detected language.
+  --hostname HOSTNAME   Hostname of current machine.
+  --disable-offline     Disables offline time logging instead of queuing
+                        logged time.
+  --hide-filenames      Obfuscate filenames. Will not send file names to api.
+  --exclude EXCLUDE     Filename patterns to exclude from logging. POSIX regex
+                        syntax. Can be used more than once.
+  --include INCLUDE     Filename patterns to log. When used in combination
                         with --exclude, files matching include will still be
-                        logged; POSIX regex syntax; can be used more than once
+                        logged. POSIX regex syntax. Can be used more than
+                        once.
   --include-only-with-project-file
-                        disables tracking folders unless they contain a
-                        .wakatime-project file; defaults to false
-  --extra-heartbeats    reads extra heartbeats from STDIN as a JSON array
-                        until EOF
-  --log-file LOG_FILE   defaults to ~/.wakatime.log
-  --api-url API_URL     heartbeats api url; for debugging with a local server
-  --timeout TIMEOUT     number of seconds to wait when sending heartbeats to
-                        api; defaults to 60 seconds
-  --config CONFIG       defaults to ~/.wakatime.cfg
-  --verbose             turns on debug messages in log file
+                        Disables tracking folders unless they contain a
+                        .wakatime-project file. Defaults to false.
+  --extra-heartbeats    Reads extra heartbeats from STDIN as a JSON array
+                        until EOF.
+  --log-file LOG_FILE   Defaults to ~/.wakatime.log.
+  --api-url API_URL     Heartbeats api url. For debugging with a local server.
+  --timeout TIMEOUT     Number of seconds to wait when sending heartbeats to
+                        api. Defaults to 60 seconds.
+  --config CONFIG       Defaults to ~/.wakatime.cfg.
+  --verbose             Turns on debug messages in log file.
   --version             show program's version number and exit

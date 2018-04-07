@@ -31,6 +31,7 @@ class Heartbeat(object):
     time = None
     entity = None
     type = None
+    category = None
     is_write = None
     project = None
     branch = None
@@ -57,6 +58,18 @@ class Heartbeat(object):
         self.type = data.get('type', data.get('entity_type'))
         if self.type not in ['file', 'domain', 'app']:
             self.type = 'file'
+
+        self.category = data.get('category')
+        allowed_categories = [
+            'coding',
+            'building',
+            'debugging',
+            'running tests',
+            'browsing',
+            'code reviewing'
+        ]
+        if self.category not in allowed_categories:
+            self.category = None
 
         if not _clone:
             exclude = self._excluded_by_pattern()
@@ -155,6 +168,7 @@ class Heartbeat(object):
             'time': self.time,
             'entity': self._unicode(self.entity),
             'type': self.type,
+            'category': self.category,
             'is_write': self.is_write,
             'project': self._unicode(self.project),
             'branch': self._unicode(self.branch),
@@ -170,9 +184,10 @@ class Heartbeat(object):
         return self.dict().items()
 
     def get_id(self):
-        return u('{time}-{type}-{project}-{branch}-{entity}-{is_write}').format(
+        return u('{time}-{type}-{category}-{project}-{branch}-{entity}-{is_write}').format(
             time=self.time,
             type=self.type,
+            category=self.category,
             project=self._unicode(self.project),
             branch=self._unicode(self.branch),
             entity=self._unicode(self.entity),

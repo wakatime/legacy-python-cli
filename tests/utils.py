@@ -144,6 +144,10 @@ class TestCase(unittest.TestCase):
     def getLogOutput(self, logs):
         return u("\n").join([u(' ').join(x) for x in logs.actual()])
 
+    def resetMocks(self):
+        for key in self.patched:
+            self.patched[key].reset_mock()
+
     @property
     def isPy35OrNewer(self):
         if sys.version_info[0] > 3:

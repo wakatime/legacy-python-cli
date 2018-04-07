@@ -276,7 +276,7 @@ class MainTestCase(utils.TestCase):
 
         self.assertEquals(int(str(e.exception)), AUTH_ERROR)
         self.assertEquals(sys.stdout.getvalue(), '')
-        expected = 'error: Invalid api key. Find your api key from wakatime.com/settings.'
+        expected = 'error: Invalid api key. Find your api key from wakatime.com/settings/api-key.'
         self.assertIn(expected, sys.stderr.getvalue())
 
         log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])

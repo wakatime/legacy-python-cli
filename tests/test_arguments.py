@@ -244,7 +244,7 @@ class ArgumentsTestCase(TestCase):
 
         self.assertEquals(int(str(e.exception)), AUTH_ERROR)
         self.assertEquals(sys.stdout.getvalue(), '')
-        expected = 'error: Missing api key. Find your api key from wakatime.com/settings.'
+        expected = 'error: Missing api key. Find your api key from wakatime.com/settings/api-key.'
         self.assertIn(expected, sys.stderr.getvalue())
 
         log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
@@ -272,7 +272,7 @@ class ArgumentsTestCase(TestCase):
 
         self.assertEquals(int(str(e.exception)), AUTH_ERROR)
         self.assertEquals(sys.stdout.getvalue(), '')
-        expected = 'error: Invalid api key. Find your api key from wakatime.com/settings.'
+        expected = 'error: Invalid api key. Find your api key from wakatime.com/settings/api-key.'
         self.assertIn(expected, sys.stderr.getvalue())
 
         log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
@@ -487,6 +487,97 @@ class ArgumentsTestCase(TestCase):
         self.assertHeartbeatNotSavedOffline()
         self.assertOfflineHeartbeatsSynced()
         self.assertSessionCacheSaved()
+
+    @log_capture()
+    def test_valid_categories(self, logs):
+        logging.disable(logging.NOTSET)
+
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+
+        with TemporaryDirectory() as tempdir:
+
+            entity = 'tests/samples/codefiles/emptyfile.txt'
+            shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
+            entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
+            config = 'tests/samples/configs/good_config.cfg'
+            now = u(int(time.time()))
+
+            valid_categories = [
+                'coding',
+                'building',
+                'debugging',
+                'running tests',
+                'browsing',
+                'code reviewing',
+            ]
+
+            for category in valid_categories:
+                args = ['--entity', entity, '--category', category, '--config', config, '--time', now]
+
+                self.resetMocks()
+                retval = execute(args)
+
+                self.assertEquals(retval, SUCCESS)
+                self.assertNothingPrinted()
+                self.assertNothingLogged(logs)
+
+                heartbeat = {
+                    'entity': u(entity),
+                    'time': float(now),
+                    'type': 'file',
+                    'category': category,
+                    'cursorpos': None,
+                    'language': 'Text only',
+                    'lines': 0,
+                    'is_write': False,
+                    'dependencies': [],
+                    'user_agent': ANY,
+                }
+                self.assertHeartbeatSent(heartbeat)
+
+                self.assertHeartbeatNotSavedOffline()
+                self.assertOfflineHeartbeatsSynced()
+                self.assertSessionCacheSaved()
+
+    @log_capture()
+    def test_invalid_category(self, logs):
+        logging.disable(logging.NOTSET)
+
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+
+        with TemporaryDirectory() as tempdir:
+
+            entity = 'tests/samples/codefiles/emptyfile.txt'
+            shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
+            entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
+            config = 'tests/samples/configs/good_config.cfg'
+            now = u(int(time.time()))
+            category = 'foobar'
+
+            args = ['--entity', entity, '--category', category, '--config', config, '--time', now]
+            retval = execute(args)
+
+            self.assertEquals(retval, SUCCESS)
+            self.assertNothingPrinted()
+            self.assertNothingLogged(logs)
+
+            heartbeat = {
+                'entity': u(entity),
+                'time': float(now),
+                'type': 'file',
+                'category': None,
+                'cursorpos': None,
+                'language': 'Text only',
+                'lines': 0,
+                'is_write': False,
+                'dependencies': [],
+                'user_agent': ANY,
+            }
+            self.assertHeartbeatSent(heartbeat)
+
+            self.assertHeartbeatNotSavedOffline()
+            self.assertOfflineHeartbeatsSynced()
+            self.assertSessionCacheSaved()
 
     @log_capture()
     def test_old_alternate_language_argument_still_supported(self, logs):
