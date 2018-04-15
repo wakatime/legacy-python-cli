@@ -94,6 +94,10 @@ class Heartbeat(object):
             self.project = project
             self.branch = branch
 
+            if self._excluded_by_unknown_project():
+                self.skip = u('Skipping because project unknown.')
+                return
+
             try:
                 stats = get_file_stats(self.entity,
                                        entity_type=self.type,
@@ -209,6 +213,11 @@ class Heartbeat(object):
 
     def _excluded_by_pattern(self):
         return should_exclude(self.entity, self.args.include, self.args.exclude)
+
+    def _excluded_by_unknown_project(self):
+        if self.project:
+            return False
+        return self.args.exclude_unknown_project
 
     def _excluded_by_missing_project_file(self):
         if not self.args.include_only_with_project_file:

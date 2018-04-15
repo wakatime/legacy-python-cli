@@ -1027,6 +1027,34 @@ class ArgumentsTestCase(TestCase):
             self.assertSessionCacheSaved()
 
     @log_capture()
+    def test_exclude_unknown_project_arg(self, logs):
+        logging.disable(logging.NOTSET)
+
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        with TemporaryDirectory() as tempdir:
+            entity = 'tests/samples/codefiles/emptyfile.txt'
+            shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
+            entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
+            config = 'tests/samples/configs/good_config.cfg'
+
+            args = ['--file', entity, '--config', config, '--exclude-unknown-project', '--verbose', '--log-file', '~/.wakatime.log']
+            retval = execute(args)
+            self.assertEquals(retval, SUCCESS)
+            self.assertNothingPrinted()
+            actual = self.getLogOutput(logs)
+            expected = 'WakaTime DEBUG Skipping because project unknown.'
+            self.assertEquals(actual, expected)
+
+            self.assertHeartbeatNotSent()
+
+            self.assertHeartbeatNotSavedOffline()
+            self.assertOfflineHeartbeatsSynced()
+            self.assertSessionCacheUntouched()
+
+    @log_capture()
     def test_uses_wakatime_home_env_variable(self, logs):
         logging.disable(logging.NOTSET)
         with TemporaryDirectory() as tempdir:

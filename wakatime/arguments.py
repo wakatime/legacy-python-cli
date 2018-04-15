@@ -136,6 +136,10 @@ def parse_arguments():
     parser.add_argument('--exclude', dest='exclude', action='append',
                         help='Filename patterns to exclude from logging. ' +
                              'POSIX regex syntax. Can be used more than once.')
+    parser.add_argument('--exclude-unknown-project',
+                        dest='exclude_unknown_project', action='store_true',
+                        help='When set, any activity where the project ' +
+                             'cannot be detected will be ignored.')
     parser.add_argument('--include', dest='include', action='append',
                         help='Filename patterns to log. When used in ' +
                              'combination with --exclude, files matching ' +
@@ -144,7 +148,7 @@ def parse_arguments():
     parser.add_argument('--include-only-with-project-file',
                         dest='include_only_with_project_file',
                         action='store_true',
-                        help='Disables tracking folders unless they contain '+
+                        help='Disables tracking folders unless they contain ' +
                              'a .wakatime-project file. Defaults to false.')
     parser.add_argument('--ignore', dest='ignore', action='append',
                         help=argparse.SUPPRESS)
@@ -243,6 +247,8 @@ def parse_arguments():
                     args.include.append(pattern)
         except TypeError:  # pragma: nocover
             pass
+    if not args.exclude_unknown_project and configs.has_option('settings', 'exclude_unknown_project'):
+        args.exclude_unknown_project = configs.getboolean('settings', 'exclude_unknown_project')
     if not args.hide_filenames and args.hidefilenames:
         args.hide_filenames = args.hidefilenames
     if args.hide_filenames:

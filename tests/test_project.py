@@ -17,7 +17,7 @@ from wakatime.constants import API_ERROR, SUCCESS
 from wakatime.exceptions import NotYetImplemented
 from wakatime.projects.base import BaseProject
 from wakatime.projects.git import Git
-from .utils import ANY, DynamicIterable, TestCase, CustomResponse, mock, json
+from .utils import ANY, DynamicIterable, TestCase, TemporaryDirectory, CustomResponse, mock, json
 
 
 class ProjectTestCase(TestCase):
@@ -630,3 +630,24 @@ class ProjectTestCase(TestCase):
 
         self.assertNothingPrinted()
         self.assertNothingLogged(logs)
+
+    @log_capture()
+    def test_exclude_unknown_project_when_project_detected(self, logs):
+        logging.disable(logging.NOTSET)
+
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        with TemporaryDirectory() as tempdir:
+            entity = 'tests/samples/codefiles/emptyfile.txt'
+            shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
+            entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
+            config = 'tests/samples/configs/exclude_unknown_project.cfg'
+
+            args = ['--file', entity, '--project', 'proj-arg', '--config', config, '--log-file', '~/.wakatime.log']
+            execute(args)
+
+            self.assertNothingPrinted()
+            self.assertNothingLogged(logs)
+            self.assertEquals('proj-arg', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
