@@ -3,6 +3,14 @@ History
 -------
 
 
+10.2.0 (2018-04-15)
++++++++++++++++++++
+
+- Force forward slash for file paths.
+- New --category argument.
+- New --exclude-unknown-project argument and corresponding config setting.
+
+
 10.1.3 (2018-03-14)
 +++++++++++++++++++
 
