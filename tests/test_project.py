@@ -452,8 +452,23 @@ class ProjectTestCase(TestCase):
             expected = 'WakaTime WARNING Regex error (unbalanced parenthesis at position 15) for disable git submodules pattern: \\(invalid regex)'
         self.assertEquals(expected, actual)
 
+    def test_git_worktree_detected(self):
+        tempdir = tempfile.mkdtemp()
+        shutil.copytree('tests/samples/projects/git-worktree', os.path.join(tempdir, 'git-wt'))
+        shutil.copytree('tests/samples/projects/git', os.path.join(tempdir, 'git'))
+        shutil.move(os.path.join(tempdir, 'git-wt', 'dot_git'), os.path.join(tempdir, 'git-wt', '.git'))
+        shutil.move(os.path.join(tempdir, 'git', 'dot_git'), os.path.join(tempdir, 'git', '.git'))
+
+        entity = os.path.join(tempdir, 'git-wt', 'emptyfile.txt')
+
+        self.shared(
+            expected_project='git',
+            expected_branch='worktree-detection-branch',
+            entity=entity,
+        )
+
     @log_capture()
-    def test_git_find_path_from_submodule(self, logs):
+    def test_git_path_from_gitdir_link_file(self, logs):
         logging.disable(logging.NOTSET)
 
         tempdir = tempfile.mkdtemp()
@@ -464,7 +479,7 @@ class ProjectTestCase(TestCase):
         path = os.path.join(tempdir, 'git', 'asubmodule')
 
         git = Git(None)
-        result = git._find_path_from_submodule(path)
+        result = git._path_from_gitdir_link_file(path)
 
         expected = os.path.realpath(os.path.join(tempdir, 'git', '.git', 'modules', 'asubmodule'))
         self.assertEquals(expected, result)
@@ -472,7 +487,7 @@ class ProjectTestCase(TestCase):
         self.assertNothingLogged(logs)
 
     @log_capture()
-    def test_git_find_path_from_submodule_handles_exceptions(self, logs):
+    def test_git_path_from_gitdir_link_file_handles_exceptions(self, logs):
         logging.disable(logging.NOTSET)
 
         tempdir = tempfile.mkdtemp()
@@ -485,7 +500,7 @@ class ProjectTestCase(TestCase):
 
             git = Git(None)
             path = os.path.join(tempdir, 'git', 'asubmodule')
-            result = git._find_path_from_submodule(path)
+            result = git._path_from_gitdir_link_file(path)
 
             self.assertIsNone(result)
             self.assertNothingPrinted()
@@ -498,7 +513,7 @@ class ProjectTestCase(TestCase):
 
             git = Git(None)
             path = os.path.join(tempdir, 'git', 'asubmodule')
-            result = git._find_path_from_submodule(path)
+            result = git._path_from_gitdir_link_file(path)
 
             self.assertIsNone(result)
             self.assertNothingPrinted()
