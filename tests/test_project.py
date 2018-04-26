@@ -12,7 +12,7 @@ import shutil
 import tempfile
 import time
 from testfixtures import log_capture
-from wakatime.compat import u
+from wakatime.compat import u, open
 from wakatime.constants import API_ERROR, SUCCESS
 from wakatime.exceptions import NotYetImplemented
 from wakatime.projects.base import BaseProject
@@ -467,6 +467,23 @@ class ProjectTestCase(TestCase):
             entity=entity,
         )
 
+    def test_git_worktree_not_detected_when_commondir_missing(self):
+        tempdir = tempfile.mkdtemp()
+        shutil.copytree('tests/samples/projects/git-worktree', os.path.join(tempdir, 'git-wt'))
+        shutil.copytree('tests/samples/projects/git', os.path.join(tempdir, 'git'))
+        shutil.move(os.path.join(tempdir, 'git-wt', 'dot_git'), os.path.join(tempdir, 'git-wt', '.git'))
+        shutil.move(os.path.join(tempdir, 'git', 'dot_git'), os.path.join(tempdir, 'git', '.git'))
+
+        os.remove(os.path.join(tempdir, 'git', '.git', 'worktrees', 'git-worktree', 'commondir'))
+
+        entity = os.path.join(tempdir, 'git-wt', 'emptyfile.txt')
+
+        self.shared(
+            expected_project=None,
+            expected_branch='worktree-detection-branch',
+            entity=entity,
+        )
+
     @log_capture()
     def test_git_path_from_gitdir_link_file(self, logs):
         logging.disable(logging.NOTSET)
@@ -495,6 +512,28 @@ class ProjectTestCase(TestCase):
         shutil.move(os.path.join(tempdir, 'git', 'dot_git'), os.path.join(tempdir, 'git', '.git'))
         shutil.move(os.path.join(tempdir, 'git', 'asubmodule', 'dot_git'), os.path.join(tempdir, 'git', 'asubmodule', '.git'))
 
+        self.orig_open = open
+        self.count = 0
+
+        with mock.patch('wakatime.projects.git.open') as mock_open:
+
+            def side_effect_function(*args, **kwargs):
+                self.count += 1
+                if self.count <= 1:
+                    raise IOError('')
+                return self.orig_open(*args, **kwargs)
+
+            mock_open.side_effect = side_effect_function
+
+            git = Git(None)
+            path = os.path.join(tempdir, 'git', 'asubmodule')
+            result = git._path_from_gitdir_link_file(path)
+
+            expected = os.path.realpath(os.path.join(tempdir, 'git', '.git', 'modules', 'asubmodule'))
+            self.assertEquals(expected, result)
+            self.assertNothingPrinted()
+            self.assertNothingLogged(logs)
+
         with mock.patch('wakatime.projects.git.open') as mock_open:
             mock_open.side_effect = UnicodeDecodeError('utf8', ''.encode('utf8'), 0, 0, '')
 
@@ -520,6 +559,24 @@ class ProjectTestCase(TestCase):
             actual = self.getLogOutput(logs)
             expected = 'OSError' if self.isPy33OrNewer else 'IOError'
             self.assertIn(expected, actual)
+
+    @log_capture()
+    def test_git_path_from_gitdir_link_file_handles_invalid_link(self, logs):
+        logging.disable(logging.NOTSET)
+
+        tempdir = tempfile.mkdtemp()
+        shutil.copytree('tests/samples/projects/git-with-submodule', os.path.join(tempdir, 'git'))
+        shutil.move(os.path.join(tempdir, 'git', 'asubmodule', 'dot_git'), os.path.join(tempdir, 'git', 'asubmodule', '.git'))
+
+        path = os.path.join(tempdir, 'git', 'asubmodule')
+
+        git = Git(None)
+        result = git._path_from_gitdir_link_file(path)
+
+        expected = None
+        self.assertEquals(expected, result)
+        self.assertNothingPrinted()
+        self.assertNothingLogged(logs)
 
     @log_capture()
     def test_project_map(self, logs):

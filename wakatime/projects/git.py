@@ -79,8 +79,6 @@ class Git(BaseProject):
             return True
 
         disabled = self._configs.get('submodules_disabled')
-        if not disabled:
-            return True
 
         if disabled.strip().lower() == 'true':
             return False
@@ -139,12 +137,13 @@ class Git(BaseProject):
             with open(filepath, 'r', encoding='utf-8') as fh:
                 return fh.readline().strip()
         except UnicodeDecodeError:
-            try:
-                with open(filepath, 'r', encoding=sys.getfilesystemencoding()) as fh:
-                    return fh.readline().strip()
-            except:
-                log.traceback(logging.WARNING)
+            pass
         except IOError:
+            pass
+        try:
+            with open(filepath, 'r', encoding=sys.getfilesystemencoding()) as fh:
+                return fh.readline().strip()
+        except:
             log.traceback(logging.WARNING)
 
         return None
