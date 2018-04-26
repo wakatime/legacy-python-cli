@@ -3,6 +3,12 @@ History
 -------
 
 
+10.2.1 (2018-04-26)
++++++++++++++++++++
+
+- Support for project detection from git worktree folders.
+
+
 10.2.0 (2018-04-15)
 +++++++++++++++++++
 
