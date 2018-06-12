@@ -68,7 +68,7 @@ format. An example config file with all available options::
         ^/etc/
     include =
         .*
-    only_include_with_project_file = false
+    include_only_with_project_file = false
     offline = true
     proxy = https://user:pass@localhost:8080
     no_ssl_verify = false
