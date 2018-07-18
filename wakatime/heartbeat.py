@@ -132,7 +132,7 @@ class Heartbeat(object):
         Returns a Heartbeat.
         """
 
-        if not self.args.hide_filenames:
+        if not self.args.hide_file_names:
             return self
 
         if self.entity is None:
@@ -141,7 +141,7 @@ class Heartbeat(object):
         if self.type != 'file':
             return self
 
-        for pattern in self.args.hide_filenames:
+        for pattern in self.args.hide_file_names:
             try:
                 compiled = re.compile(pattern, re.IGNORECASE)
                 if compiled.search(self.entity):
@@ -160,7 +160,7 @@ class Heartbeat(object):
                     return self.update(sanitized)
 
             except re.error as ex:
-                log.warning(u('Regex error ({msg}) for include pattern: {pattern}').format(
+                log.warning(u('Regex error ({msg}) for hide_file_names pattern: {pattern}').format(
                     msg=u(ex),
                     pattern=u(pattern),
                 ))

@@ -12,8 +12,9 @@
 import os
 import logging
 import random
+import re
 
-from .compat import open
+from .compat import open, u
 from .projects.git import Git
 from .projects.mercurial import Mercurial
 from .projects.projectfile import ProjectFile
@@ -65,8 +66,10 @@ def get_project_info(configs, heartbeat, data):
                 branch_name = project.branch()
                 break
 
-    if project_name is None and not data.get('hide_project_names'):
+    if project_name is None:
         project_name = data.get('project') or heartbeat.args.project
+
+    hide_project = should_obfuscate_project(heartbeat)
 
     if project_name is None or branch_name is None:
 
@@ -79,7 +82,7 @@ def get_project_info(configs, heartbeat, data):
             if project.process():
                 project_name = project_name or project.name()
                 branch_name = branch_name or project.branch()
-                if data.get('hide_project_names'):
+                if hide_project:
                     branch_name = None
                     project_name = generate_project_name()
                     project_file = os.path.join(project.folder(), '.wakatime-project')
@@ -90,10 +93,25 @@ def get_project_info(configs, heartbeat, data):
                         project_name = None
                 break
 
-    if project_name is None:
+    if project_name is None and not hide_project:
         project_name = data.get('alternate_project') or heartbeat.args.alternate_project
 
     return project_name, branch_name
+
+
+def should_obfuscate_project(heartbeat):
+    """Returns True if hide_project_names is true or the path matches one in
+    the list of obfuscated project paths."""
+
+    for pattern in heartbeat.args.hide_project_names:
+        try:
+            compiled = re.compile(pattern, re.IGNORECASE)
+            return compiled.search(heartbeat.entity)
+        except re.error as ex:
+            log.warning(u('Regex error ({msg}) for hide_project_names pattern: {pattern}').format(
+                msg=u(ex),
+                pattern=u(pattern),
+            ))
 
 
 def get_configs_for_plugin(plugin_name, configs):

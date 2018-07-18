@@ -126,10 +126,13 @@ def parse_arguments():
     parser.add_argument('--disableoffline', dest='offline_deprecated',
                         action='store_true',
                         help=argparse.SUPPRESS)
-    parser.add_argument('--hide-filenames', dest='hide_filenames',
+    parser.add_argument('--hide-file-names', dest='hide_file_names',
                         action='store_true',
                         help='Obfuscate filenames. Will not send file names ' +
                              'to api.')
+    parser.add_argument('--hide-filenames', dest='hide_filenames',
+                        action='store_true',
+                        help=argparse.SUPPRESS)
     parser.add_argument('--hidefilenames', dest='hidefilenames',
                         action='store_true',
                         help=argparse.SUPPRESS)
@@ -256,26 +259,8 @@ def parse_arguments():
             pass
     if not args.exclude_unknown_project and configs.has_option('settings', 'exclude_unknown_project'):
         args.exclude_unknown_project = configs.getboolean('settings', 'exclude_unknown_project')
-    if not args.hide_filenames and args.hidefilenames:
-        args.hide_filenames = args.hidefilenames
-    if args.hide_filenames:
-        args.hide_filenames = ['.*']
-    else:
-        args.hide_filenames = []
-        option = None
-        if configs.has_option('settings', 'hidefilenames'):
-            option = configs.get('settings', 'hidefilenames')
-        if configs.has_option('settings', 'hide_filenames'):
-            option = configs.get('settings', 'hide_filenames')
-        if option is not None:
-            if option.strip().lower() == 'true':
-                args.hide_filenames = ['.*']
-            elif option.strip().lower() != 'false':
-                for pattern in option.split("\n"):
-                    if pattern.strip() != '':
-                        args.hide_filenames.append(pattern)
-    if not args.hide_project_names and configs.has_option('settings', 'hide_project_names'):
-        args.hide_project_names = configs.getboolean('settings', 'hide_project_names')
+    boolean_or_list('hide_file_names', args, configs, alternative_names=['hide_filenames', 'hidefilenames'])
+    boolean_or_list('hide_project_names', args, configs, alternative_names=['hide_projectnames', 'hideprojectnames'])
     if args.offline_deprecated:
         args.offline = False
     if args.offline and configs.has_option('settings', 'offline'):
@@ -316,3 +301,30 @@ def parse_arguments():
             print(traceback.format_exc())
 
     return args, configs
+
+
+def boolean_or_list(config_name, args, configs, alternative_names=[]):
+    """Get a boolean or list of regexes from args and configs."""
+
+    # when argument flag present, set to wildcard regex
+    for key in alternative_names:
+        if hasattr(args, key) and getattr(args, key):
+            setattr(args, config_name, ['.*'])
+            return
+
+    setattr(args, config_name, [])
+
+    option = None
+    alternative_names.insert(0, config_name)
+    for key in alternative_names:
+        if configs.has_option('settings', key):
+            option = configs.get('settings', key)
+            break
+
+    if option is not None:
+        if option.strip().lower() == 'true':
+            setattr(args, config_name, ['.*'])
+        elif option.strip().lower() != 'false':
+            for pattern in option.split("\n"):
+                if pattern.strip() != '':
+                    getattr(args, config_name).append(pattern)

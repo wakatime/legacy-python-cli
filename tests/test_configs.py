@@ -414,7 +414,7 @@ class ConfigsTestCase(TestCase):
             self.assertSessionCacheSaved()
 
     @log_capture()
-    def test_does_not_hide_filenames_from_invalid_regex(self, logs):
+    def test_does_not_hide_file_names_from_invalid_regex(self, logs):
         logging.disable(logging.NOTSET)
 
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
@@ -434,9 +434,9 @@ class ConfigsTestCase(TestCase):
             self.assertNothingPrinted()
 
             actual = self.getLogOutput(logs)
-            expected = u('WakaTime WARNING Regex error (unbalanced parenthesis) for include pattern: invalid(regex')
+            expected = u('WakaTime WARNING Regex error (unbalanced parenthesis) for hide_file_names pattern: invalid(regex')
             if self.isPy35OrNewer:
-                expected = 'WakaTime WARNING Regex error (missing ), unterminated subpattern at position 7) for include pattern: invalid(regex'
+                expected = 'WakaTime WARNING Regex error (missing ), unterminated subpattern at position 7) for hide_file_names pattern: invalid(regex'
             self.assertEquals(expected, actual)
 
             heartbeat = {

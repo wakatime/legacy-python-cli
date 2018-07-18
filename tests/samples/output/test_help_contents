@@ -3,7 +3,7 @@ usage: wakatime [-h] [--entity FILE] [--key KEY] [--write] [--plugin PLUGIN]
                 [--entity-type ENTITY_TYPE] [--category CATEGORY]
                 [--proxy PROXY] [--no-ssl-verify] [--project PROJECT]
                 [--alternate-project ALTERNATE_PROJECT] [--language LANGUAGE]
-                [--hostname HOSTNAME] [--disable-offline] [--hide-filenames]
+                [--hostname HOSTNAME] [--disable-offline] [--hide-file-names]
                 [--hide-project-names] [--exclude EXCLUDE]
                 [--exclude-unknown-project] [--include INCLUDE]
                 [--include-only-with-project-file] [--extra-heartbeats]
@@ -49,7 +49,7 @@ optional arguments:
   --hostname HOSTNAME   Hostname of current machine.
   --disable-offline     Disables offline time logging instead of queuing
                         logged time.
-  --hide-filenames      Obfuscate filenames. Will not send file names to api.
+  --hide-file-names     Obfuscate filenames. Will not send file names to api.
   --hide-project-names  Obfuscate project names. When a project folder is
                         detected instead of using the folder name as the
                         project, a .wakatime-project file is created with a
