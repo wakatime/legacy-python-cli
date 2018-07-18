@@ -12,9 +12,8 @@
 import os
 import logging
 import random
-import re
 
-from .compat import open, u
+from .compat import open
 from .projects.git import Git
 from .projects.mercurial import Mercurial
 from .projects.projectfile import ProjectFile
@@ -69,7 +68,7 @@ def get_project_info(configs, heartbeat, data):
     if project_name is None:
         project_name = data.get('project') or heartbeat.args.project
 
-    hide_project = should_obfuscate_project(heartbeat)
+    hide_project = heartbeat.should_obfuscate_project()
 
     if project_name is None or branch_name is None:
 
@@ -97,21 +96,6 @@ def get_project_info(configs, heartbeat, data):
         project_name = data.get('alternate_project') or heartbeat.args.alternate_project
 
     return project_name, branch_name
-
-
-def should_obfuscate_project(heartbeat):
-    """Returns True if hide_project_names is true or the path matches one in
-    the list of obfuscated project paths."""
-
-    for pattern in heartbeat.args.hide_project_names:
-        try:
-            compiled = re.compile(pattern, re.IGNORECASE)
-            return compiled.search(heartbeat.entity)
-        except re.error as ex:
-            log.warning(u('Regex error ({msg}) for hide_project_names pattern: {pattern}').format(
-                msg=u(ex),
-                pattern=u(pattern),
-            ))
 
 
 def get_configs_for_plugin(plugin_name, configs):
