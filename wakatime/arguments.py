@@ -133,6 +133,13 @@ def parse_arguments():
     parser.add_argument('--hidefilenames', dest='hidefilenames',
                         action='store_true',
                         help=argparse.SUPPRESS)
+    parser.add_argument('--hide-project-names', dest='hide_project_names',
+                        action='store_true',
+                        help='Obfuscate project names. When a project ' +
+                             'folder is detected instead of using the ' +
+                             'folder name as the project, a ' +
+                             '.wakatime-project file is created with a ' +
+                             'random project name.')
     parser.add_argument('--exclude', dest='exclude', action='append',
                         help='Filename patterns to exclude from logging. ' +
                              'POSIX regex syntax. Can be used more than once.')
@@ -267,6 +274,8 @@ def parse_arguments():
                 for pattern in option.split("\n"):
                     if pattern.strip() != '':
                         args.hide_filenames.append(pattern)
+    if not args.hide_project_names and configs.has_option('settings', 'hide_project_names'):
+        args.hide_project_names = configs.getboolean('settings', 'hide_project_names')
     if args.offline_deprecated:
         args.offline = False
     if args.offline and configs.has_option('settings', 'offline'):

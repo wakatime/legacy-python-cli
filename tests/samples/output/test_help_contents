@@ -4,10 +4,11 @@ usage: wakatime [-h] [--entity FILE] [--key KEY] [--write] [--plugin PLUGIN]
                 [--proxy PROXY] [--no-ssl-verify] [--project PROJECT]
                 [--alternate-project ALTERNATE_PROJECT] [--language LANGUAGE]
                 [--hostname HOSTNAME] [--disable-offline] [--hide-filenames]
-                [--exclude EXCLUDE] [--exclude-unknown-project]
-                [--include INCLUDE] [--include-only-with-project-file]
-                [--extra-heartbeats] [--log-file LOG_FILE] [--api-url API_URL]
-                [--timeout TIMEOUT] [--config CONFIG] [--verbose] [--version]
+                [--hide-project-names] [--exclude EXCLUDE]
+                [--exclude-unknown-project] [--include INCLUDE]
+                [--include-only-with-project-file] [--extra-heartbeats]
+                [--log-file LOG_FILE] [--api-url API_URL] [--timeout TIMEOUT]
+                [--config CONFIG] [--verbose] [--version]
 
 Common interface for the WakaTime api.
 
@@ -49,6 +50,10 @@ optional arguments:
   --disable-offline     Disables offline time logging instead of queuing
                         logged time.
   --hide-filenames      Obfuscate filenames. Will not send file names to api.
+  --hide-project-names  Obfuscate project names. When a project folder is
+                        detected instead of using the folder name as the
+                        project, a .wakatime-project file is created with a
+                        random project name.
   --exclude EXCLUDE     Filename patterns to exclude from logging. POSIX regex
                         syntax. Can be used more than once.
   --exclude-unknown-project

@@ -3,6 +3,13 @@ History
 -------
 
 
+10.2.2 (Unreleased)
++++++++++++++++++++
+
+- New config hide_project_name and argument --hide-project-names for
+  obfuscating project names when sending coding activity to api.
+
+
 10.2.1 (2018-04-26)
 +++++++++++++++++++
 

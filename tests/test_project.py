@@ -15,6 +15,7 @@ from testfixtures import log_capture
 from wakatime.compat import u, open
 from wakatime.constants import API_ERROR, SUCCESS
 from wakatime.exceptions import NotYetImplemented
+from wakatime.project import generate_project_name
 from wakatime.projects.base import BaseProject
 from wakatime.projects.git import Git
 from .utils import ANY, DynamicIterable, TestCase, TemporaryDirectory, CustomResponse, mock, json
@@ -723,3 +724,7 @@ class ProjectTestCase(TestCase):
             self.assertNothingPrinted()
             self.assertNothingLogged(logs)
             self.assertEquals('proj-arg', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
+
+    def test_generate_project_name(self):
+        self.assertGreater(len(generate_project_name()), 1)
+        self.assertNotEqual(generate_project_name(), generate_project_name())
