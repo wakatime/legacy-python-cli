@@ -102,8 +102,9 @@ class LanguagesTestCase(utils.TestCase):
         with utils.mock.patch('wakatime.stats.smart_guess_lexer') as mock_guess_lexer:
             mock_guess_lexer.return_value = None
             source_file = 'tests/samples/codefiles/python.py'
-            result = guess_language(source_file)
-            mock_guess_lexer.assert_called_once_with(source_file)
+            local_file = None
+            result = guess_language(source_file, local_file)
+            mock_guess_lexer.assert_called_once_with(source_file, local_file)
             self.assertEquals(result, (None, None))
 
     def test_guess_language_from_vim_modeline(self):
@@ -111,6 +112,13 @@ class LanguagesTestCase(utils.TestCase):
             expected_language='Python',
             entity='python_without_extension',
         )
+
+    def test_guess_language_when_entity_not_exist_but_local_file_exists(self):
+        source_file = 'tests/samples/codefiles/does_not_exist.py'
+        local_file = 'tests/samples/codefiles/python.py'
+        self.assertFalse(os.path.exists(source_file))
+        result = guess_language(source_file, local_file)
+        self.assertEquals(result[0], 'Python')
 
     def test_language_arg_takes_priority_over_detected_language(self):
         self.shared(

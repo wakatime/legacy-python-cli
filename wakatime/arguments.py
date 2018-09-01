@@ -116,6 +116,12 @@ def parse_arguments():
                         action=StoreWithoutQuotes,
                         help='Optional language name. If valid, takes ' +
                              'priority over auto-detected language.')
+    parser.add_argument('--local-file', dest='local_file', metavar='FILE',
+                        action=FileAction,
+                        help='Absolute path to local file for the ' +
+                             'heartbeat. When --entity is a remote file, ' +
+                             'this local file will be used for stats and ' +
+                             'just the value of --entity sent with heartbeat.')
     parser.add_argument('--hostname', dest='hostname',
                         action=StoreWithoutQuotes,
                         help='Hostname of current machine.')

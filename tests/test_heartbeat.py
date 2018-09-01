@@ -22,6 +22,7 @@ class HeartbeatTestCase(TestCase):
             include = []
             plugin = None
             include_only_with_project_file = None
+            local_file = None
 
         data = {
             'entity': os.path.realpath('tests/samples/codefiles/python.py'),
@@ -56,6 +57,7 @@ class HeartbeatTestCase(TestCase):
             include = []
             plugin = None
             include_only_with_project_file = None
+            local_file = None
 
         data = {
             'entity': os.path.realpath('tests/samples/codefiles/python.py'),

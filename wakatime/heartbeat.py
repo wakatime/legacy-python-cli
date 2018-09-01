@@ -85,12 +85,15 @@ class Heartbeat(object):
                 return
             if self.type == 'file':
                 self.entity = format_file_path(self.entity)
-                if not self.entity or not os.path.isfile(self.entity):
+                if not self._file_exists():
                     self.skip = u('File does not exist; ignoring this heartbeat.')
                     return
                 if self._excluded_by_missing_project_file():
                     self.skip = u('Skipping because missing .wakatime-project file in parent path.')
                     return
+
+            if args.local_file and not os.path.isfile(args.local_file):
+                args.local_file = None
 
             project, branch = get_project_info(configs, self, data)
             self.project = project
@@ -106,7 +109,8 @@ class Heartbeat(object):
                                        lineno=data.get('lineno'),
                                        cursorpos=data.get('cursorpos'),
                                        plugin=args.plugin,
-                                       language=data.get('language'))
+                                       language=data.get('language'),
+                                       local_file=args.local_file)
             except SkipHeartbeat as ex:
                 self.skip = u(ex) or 'Skipping'
                 return
@@ -227,6 +231,10 @@ class Heartbeat(object):
         if values is None:
             return None
         return [self._unicode(value) for value in values]
+
+    def _file_exists(self):
+        return (self.entity and os.path.isfile(self.entity) or
+            self.args.local_file and os.path.isfile(self.args.local_file))
 
     def _excluded_by_pattern(self):
         return should_exclude(self.entity, self.args.include, self.args.exclude)
