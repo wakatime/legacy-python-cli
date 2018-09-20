@@ -239,12 +239,12 @@ class OfflineQueueTestCase(TestCase):
 
                         queue = Queue(None, None)
                         self.assertEquals(queue._get_db_file(), fh.name)
-                        saved_heartbeats = queue.pop_many()
+                        saved_heartbeats = next(queue.pop_many())
                         self.assertNothingPrinted()
                         self.assertNothingLogged(logs)
 
                         # make sure only heartbeats with error code responses were saved
-                        self.assertEquals(len(saved_heartbeats), 2)
+                        self.assertEquals(sum(1 for x in saved_heartbeats), 2)
                         self.assertEquals(saved_heartbeats[0].entity, os.path.realpath(os.path.join(tempdir, entities[1])))
                         self.assertEquals(saved_heartbeats[1].entity, os.path.realpath(os.path.join(tempdir, entities[3])))
 
@@ -295,7 +295,7 @@ class OfflineQueueTestCase(TestCase):
 
                         queue = Queue(None, None)
                         self.assertEquals(queue._get_db_file(), fh.name)
-                        saved_heartbeats = queue.pop_many()
+                        saved_heartbeats = next(queue.pop_many())
                         self.assertNothingPrinted()
 
                         # make sure all offline heartbeats were sent, so queue should only have 1 heartbeat left from the second 500 response
@@ -346,7 +346,7 @@ class OfflineQueueTestCase(TestCase):
 
                         queue = Queue(None, None)
                         self.assertEquals(queue._get_db_file(), fh.name)
-                        saved_heartbeats = queue.pop_many()
+                        saved_heartbeats = next(queue.pop_many())
                         self.assertNothingPrinted()
 
                         expected = "WakaTime WARNING Missing 4 results from api.\nWakaTime WARNING Missing 2 results from api."
@@ -398,7 +398,7 @@ class OfflineQueueTestCase(TestCase):
 
                 # offline queue should still have saved heartbeats
                 queue = Queue(None, None)
-                saved_heartbeats = queue.pop_many()
+                saved_heartbeats = next(queue.pop_many())
                 self.assertNothingPrinted()
                 self.assertEquals(len(saved_heartbeats), 2)
 
@@ -444,7 +444,7 @@ class OfflineQueueTestCase(TestCase):
 
                 # offline queue should still have saved heartbeats
                 queue = Queue(None, None)
-                saved_heartbeats = queue.pop_many()
+                saved_heartbeats = next(queue.pop_many())
                 self.assertNothingPrinted()
                 self.assertEquals(len(saved_heartbeats), 2)
 

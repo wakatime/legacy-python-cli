@@ -115,8 +115,12 @@ class Queue(object):
                 break
             heartbeats.append(heartbeat)
             count += 1
+            if count % 10 == 0:
+                yield heartbeats
+                heartbeats = []
 
-        return heartbeats
+        if heartbeats:
+            yield heartbeats
 
     def _get_db_file(self):
         home = '~'
