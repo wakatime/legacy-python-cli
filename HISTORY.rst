@@ -3,11 +3,17 @@ History
 -------
 
 
-10.2.2 (Unreleased)
+10.2.2 (2018-09-20)
 +++++++++++++++++++
 
 - New config hide_project_name and argument --hide-project-names for
   obfuscating project names when sending coding activity to api.
+- Fix mispelled Gosu language.
+  `#137 <https://github.com/wakatime/wakatime/issues/137>`_
+- Remove metadata when hiding project or file names.
+- New --local-file argument to be used when --entity is a remote file.
+- New argument --sync-offline-activity for configuring the maximum offline
+  heartbeats to sync to the WakaTime API.
 
 
 10.2.1 (2018-04-26)
