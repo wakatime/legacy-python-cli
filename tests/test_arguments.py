@@ -44,7 +44,8 @@ class ArgumentsTestCase(TestCase):
             execute(args)
 
         self.assertEquals(int(str(e.exception)), 0)
-        expected_stdout = open('tests/samples/output/test_help_contents').read()
+        expected_stdout = open('tests/samples/output/common_usage_header').read()
+        expected_stdout += open('tests/samples/output/test_help_contents').read()
         self.assertEquals(sys.stdout.getvalue(), expected_stdout)
         self.assertEquals(sys.stderr.getvalue(), '')
         self.assertNothingLogged(logs)
@@ -172,7 +173,8 @@ class ArgumentsTestCase(TestCase):
             self.assertNothingLogged(logs)
             self.assertEquals(int(str(e.exception)), 2)
             self.assertEquals(sys.stdout.getvalue(), '')
-            expected_stderr = open('tests/samples/output/main_test_timeout_passed_via_command_line').read()
+            expected_stderr = open('tests/samples/output/common_usage_header').read()
+            expected_stderr += open('tests/samples/output/main_test_timeout_passed_via_command_line').read()
             self.assertEquals(sys.stderr.getvalue(), expected_stderr)
 
             self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()

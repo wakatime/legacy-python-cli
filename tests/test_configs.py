@@ -55,7 +55,8 @@ class ConfigsTestCase(TestCase):
 
         self.assertEquals(int(str(e.exception)), AUTH_ERROR)
         expected_stdout = u('')
-        expected_stderr = open('tests/samples/output/configs_test_config_file_not_passed_in_command_line_args').read()
+        expected_stderr = open('tests/samples/output/common_usage_header').read()
+        expected_stderr += open('tests/samples/output/configs_test_config_file_not_passed_in_command_line_args').read()
         self.assertEquals(sys.stdout.getvalue(), expected_stdout)
         self.assertEquals(sys.stderr.getvalue(), expected_stderr)
         self.patched['wakatime.session_cache.SessionCache.get'].assert_not_called()
@@ -107,7 +108,8 @@ class ConfigsTestCase(TestCase):
         self.assertEquals(int(str(e.exception)), AUTH_ERROR)
 
         expected_stdout = u('')
-        expected_stderr = open('tests/samples/output/configs_test_missing_config_file').read()
+        expected_stderr = open('tests/samples/output/common_usage_header').read()
+        expected_stderr += open('tests/samples/output/configs_test_missing_config_file').read()
         self.assertEquals(sys.stdout.getvalue(), expected_stdout)
         self.assertEquals(sys.stderr.getvalue(), expected_stderr)
 
