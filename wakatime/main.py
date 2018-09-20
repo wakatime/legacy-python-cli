@@ -66,7 +66,7 @@ def execute(argv=None):
         retval = send_heartbeats(heartbeats, args, configs)
         if retval == SUCCESS:
             queue = Queue(args, configs)
-            offline_heartbeats = queue.pop_many()
+            offline_heartbeats = queue.pop_many(args.sync_offline_activity)
             if len(offline_heartbeats) > 0:
                 retval = send_heartbeats(offline_heartbeats, args, configs)
 

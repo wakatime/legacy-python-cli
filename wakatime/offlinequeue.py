@@ -109,7 +109,7 @@ class Queue(object):
         heartbeats = []
 
         count = 0
-        while limit == 0 or count < limit:
+        while count < limit:
             heartbeat = self.pop()
             if not heartbeat:
                 break

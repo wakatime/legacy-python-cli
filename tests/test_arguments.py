@@ -231,6 +231,96 @@ class ArgumentsTestCase(TestCase):
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
     @log_capture()
+    def test_missing_entity_argument_with_sync_offline_activity_arg(self, logs):
+        logging.disable(logging.NOTSET)
+
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+
+        config = 'tests/samples/configs/good_config.cfg'
+        args = ['--config', config, '--sync-offline-activity', '5']
+
+        retval = execute(args)
+
+        self.assertEquals(retval, SUCCESS)
+        self.assertNothingPrinted()
+        self.assertNothingLogged(logs)
+
+        self.assertHeartbeatNotSavedOffline()
+        self.assertOfflineHeartbeatsSynced()
+
+    @log_capture()
+    def test_missing_entity_argument_with_sync_offline_activity_none(self, logs):
+        logging.disable(logging.NOTSET)
+
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+
+        config = 'tests/samples/configs/good_config.cfg'
+        args = ['--config', config, '--sync-offline-activity', 'none']
+
+        with self.assertRaises(SystemExit) as e:
+            execute(args)
+
+        self.assertEquals(int(str(e.exception)), 2)
+        self.assertEquals(sys.stdout.getvalue(), '')
+        expected = 'error: argument --entity is required'
+        self.assertIn(expected, sys.stderr.getvalue())
+
+        log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
+        expected = ''
+        self.assertEquals(log_output, expected)
+
+        self.assertHeartbeatNotSavedOffline()
+        self.assertOfflineHeartbeatsNotSynced()
+
+    @log_capture()
+    def test_invalid_sync_offline_activity(self, logs):
+        logging.disable(logging.NOTSET)
+
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+
+        config = 'tests/samples/configs/good_config.cfg'
+        args = ['--config', config, '--sync-offline-activity', 'all']
+
+        with self.assertRaises(SystemExit) as e:
+            execute(args)
+
+        self.assertEquals(int(str(e.exception)), 2)
+        self.assertEquals(sys.stdout.getvalue(), '')
+        expected = 'error: argument --sync-offline-activity must be "none" or an integer number'
+        self.assertIn(expected, sys.stderr.getvalue())
+
+        log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
+        expected = ''
+        self.assertEquals(log_output, expected)
+
+        self.assertHeartbeatNotSavedOffline()
+        self.assertOfflineHeartbeatsNotSynced()
+
+    @log_capture()
+    def test_invalid_negative_sync_offline_activity(self, logs):
+        logging.disable(logging.NOTSET)
+
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+
+        config = 'tests/samples/configs/good_config.cfg'
+        args = ['--config', config, '--sync-offline-activity', '-1']
+
+        with self.assertRaises(SystemExit) as e:
+            execute(args)
+
+        self.assertEquals(int(str(e.exception)), 2)
+        self.assertEquals(sys.stdout.getvalue(), '')
+        expected = 'error: argument --sync-offline-activity must be "none" or an integer number'
+        self.assertIn(expected, sys.stderr.getvalue())
+
+        log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
+        expected = ''
+        self.assertEquals(log_output, expected)
+
+        self.assertHeartbeatNotSavedOffline()
+        self.assertOfflineHeartbeatsNotSynced()
+
+    @log_capture()
     def test_missing_api_key(self, logs):
         logging.disable(logging.NOTSET)
 

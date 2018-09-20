@@ -186,6 +186,17 @@ def parse_arguments():
                         action=StoreWithoutQuotes,
                         help='Number of seconds to wait when sending ' +
                              'heartbeats to api. Defaults to 60 seconds.')
+    parser.add_argument('--sync-offline-activity',
+                        dest='sync_offline_activity',
+                        action=StoreWithoutQuotes,
+                        help='Amount of offline activity to sync from your ' +
+                             'local ~/.wakatime.db sqlite3 file to your ' +
+                             'WakaTime Dashboard before exiting. Can be ' +
+                             '"none" or a positive integer number. Defaults ' +
+                             'to 5, meaning for every heartbeat sent while ' +
+                             'online 5 offline heartbeats are synced. Can ' +
+                             'be used without --entity to only sync offline ' +
+                             'activity without generating new heartbeats.')
     parser.add_argument('--config', dest='config', action=StoreWithoutQuotes,
                         help='Defaults to ~/.wakatime.cfg.')
     parser.add_argument('--verbose', dest='verbose', action='store_true',
@@ -230,8 +241,19 @@ def parse_arguments():
     if not args.entity:
         if args.file:
             args.entity = args.file
-        else:
+        elif not args.sync_offline_activity or args.sync_offline_activity == 'none':
             parser.error('argument --entity is required')
+
+    if not args.sync_offline_activity:
+        args.sync_offline_activity = '5'
+    if args.sync_offline_activity == 'none':
+        args.sync_offline_activity = '0'
+    try:
+        args.sync_offline_activity = int(args.sync_offline_activity)
+        if args.sync_offline_activity < 0:
+            raise Exception('Error')
+    except:
+        parser.error('argument --sync-offline-activity must be "none" or an integer number')
 
     if not args.language and args.alternate_language:
         args.language = args.alternate_language
