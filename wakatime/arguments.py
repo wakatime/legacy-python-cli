@@ -20,7 +20,7 @@ import traceback
 from .__about__ import __version__
 from .compat import basestring
 from .configs import parseConfigFile
-from .constants import AUTH_ERROR
+from .constants import AUTH_ERROR, DEFAULT_SYNC_OFFLINE_ACTIVITY
 from .packages import argparse
 
 
@@ -245,9 +245,9 @@ def parse_arguments():
             parser.error('argument --entity is required')
 
     if not args.sync_offline_activity:
-        args.sync_offline_activity = '5'
+        args.sync_offline_activity = DEFAULT_SYNC_OFFLINE_ACTIVITY
     if args.sync_offline_activity == 'none':
-        args.sync_offline_activity = '0'
+        args.sync_offline_activity = 0
     try:
         args.sync_offline_activity = int(args.sync_offline_activity)
         if args.sync_offline_activity < 0:

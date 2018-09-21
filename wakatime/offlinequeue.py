@@ -15,6 +15,7 @@ import os
 from time import sleep
 
 from .compat import json
+from .constants import DEFAULT_SYNC_OFFLINE_ACTIVITY, HEARTBEATS_PER_REQUEST
 from .heartbeat import Heartbeat
 
 
@@ -104,7 +105,7 @@ class Queue(object):
 
     def pop_many(self, limit=None):
         if limit is None:
-            limit = 5
+            limit = DEFAULT_SYNC_OFFLINE_ACTIVITY
 
         heartbeats = []
 
@@ -115,7 +116,7 @@ class Queue(object):
                 break
             heartbeats.append(heartbeat)
             count += 1
-            if count % 10 == 0:
+            if count % HEARTBEATS_PER_REQUEST == 0:
                 yield heartbeats
                 heartbeats = []
 
