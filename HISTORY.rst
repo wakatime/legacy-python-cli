@@ -3,6 +3,13 @@ History
 -------
 
 
+10.2.4 (2018-09-20)
++++++++++++++++++++
+
+- Default --sync-offline-activity to 100 instead of 5, so offline coding is
+  synced to dashboard faster.
+
+
 10.2.3 (2018-09-20)
 +++++++++++++++++++
 
