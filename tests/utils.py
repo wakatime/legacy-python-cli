@@ -2,13 +2,14 @@
 
 import logging
 import os
+import platform
 import re
 import sys
 import tempfile
 
 from wakatime.compat import u
 from wakatime.packages.requests.models import Response
-from wakatime.utils import BACKSLASH_REPLACE_PATTERN
+from wakatime.utils import BACKSLASH_REPLACE_PATTERN, WINDOWS_DRIVE_PATTERN
 
 
 try:
@@ -73,7 +74,10 @@ class TestCase(unittest.TestCase):
                 self.assertEquals(first_list, second_list)
 
     def normalize_path(self, path):
-        return re.sub(BACKSLASH_REPLACE_PATTERN, '/', path)
+        filepath = re.sub(BACKSLASH_REPLACE_PATTERN, '/', path)
+        if platform.system() == 'Windows' and WINDOWS_DRIVE_PATTERN.match(filepath):
+            filepath = filepath.capitalize()
+        return filepath
 
     def assertPathsEqual(self, first_path, second_path, message=None):
         if message:
