@@ -13,7 +13,7 @@ class UtilsTestCase(TestCase):
         path = 'some\\path////to\\\\\\a\\file.txt'
         expected = os.path.realpath('some/path/to/a/file.txt')
         result = format_file_path(path)
-        self.assertEquals(expected, result)
+        self.assertPathsEqual(expected, result)
 
     def test_format_file_path_uppercase_windows_drive(self):
         path = 'c:\\some\\path////to\\\\\\a\\file.txt'
@@ -25,7 +25,7 @@ class UtilsTestCase(TestCase):
                 mock_abspath.return_value = path
 
                 result = format_file_path(path)
-                self.assertEquals(expected, result)
+                self.assertPathsEqual(expected, result)
 
     def test_format_file_path_handles_exceptions(self):
         path = 'c:\\some\\path////to\\\\\\a\\file.txt'
@@ -35,4 +35,4 @@ class UtilsTestCase(TestCase):
             mock_abspath.side_effect = Exception('foobar')
 
             result = format_file_path(path)
-            self.assertEquals(expected, result)
+            self.assertPathsEqual(expected, result)
