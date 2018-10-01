@@ -2,6 +2,10 @@
     :target: https://travis-ci.org/wakatime/wakatime
     :alt: Tests
 
+.. image:: https://ci.appveyor.com/api/projects/status/g9snpluqi8svrgbn/branch/master?svg=true
+    :target: https://ci.appveyor.com/project/alanhamlett/wakatime-jl10s/branch/master
+    :alt: Windows Tests
+
 .. image:: https://coveralls.io/repos/wakatime/wakatime/badge.svg?branch=master&service=github
     :target: https://coveralls.io/github/wakatime/wakatime?branch=master
     :alt: Coverage
