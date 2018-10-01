@@ -3,8 +3,10 @@ environment:
     TOXENV: py
 
   matrix:
-    - PYTHON: C:\Python36-x64
     - PYTHON: C:\Python27-x64
+    - PYTHON: C:\Python34-x64
+    - PYTHON: C:\Python35-x64
+    - PYTHON: C:\Python36-x64
 
 init:
   - SET PATH=%PYTHON%;%PATH%
