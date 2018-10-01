@@ -3,6 +3,14 @@ History
 -------
 
 
+10.3.0 (2018-09-30)
++++++++++++++++++++
+
+- Re-enable detecting projects from Subversion folder on Windows platform.
+- Prevent opening cmd window on Windows when detecting project from Subversion.
+- Run tests on Windows using Appveyor.
+
+
 10.2.4 (2018-09-20)
 +++++++++++++++++++
 
