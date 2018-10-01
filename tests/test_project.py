@@ -7,7 +7,6 @@ from wakatime.packages.requests.models import Response
 
 import logging
 import os
-import platform
 import shutil
 import tempfile
 import time
@@ -219,9 +218,8 @@ class ProjectTestCase(TestCase):
                     stderr = ''
                     mock_popen.return_value = DynamicIterable((stdout, stderr), max_calls=1)
 
-                    expected = None if platform.system() == 'Windows' else 'svn'
                     self.shared(
-                        expected_project=expected,
+                        expected_project='svn',
                         entity='projects/svn/afolder/emptyfile.txt',
                     )
 
