@@ -8,10 +8,12 @@ from wakatime.packages.requests.models import Response
 
 import logging
 import os
+import platform
 import time
 import shutil
 from testfixtures import log_capture
 from . import utils
+from .utils import unittest
 
 
 class LoggingTestCase(utils.TestCase):
@@ -81,6 +83,7 @@ class LoggingTestCase(utils.TestCase):
             self.assertEquals(logfile, logging.getLogger('WakaTime').handlers[0].baseFilename)
             logs.check()
 
+    @unittest.skipIf(platform.system() == 'Windows', 'Windows file issue')
     @log_capture()
     def test_log_file_location_can_be_set_from_env_variable(self, logs):
         logging.disable(logging.NOTSET)
