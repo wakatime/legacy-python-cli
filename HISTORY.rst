@@ -3,6 +3,14 @@ History
 -------
 
 
+10.4.0 (2018-10-03)
++++++++++++++++++++
+
+- Support logging coding activity to remote network drive files on Windows
+  platform by detecting UNC path from drive letter.
+  `#72 <https://github.com/wakatime/wakatime/issues/72>`_
+
+
 10.3.0 (2018-09-30)
 +++++++++++++++++++
 
