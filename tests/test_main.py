@@ -27,6 +27,7 @@ from .utils import ANY, CustomResponse
 
 class MainTestCase(utils.TestCase):
     patch_these = [
+        'time.sleep',
         'wakatime.packages.requests.adapters.HTTPAdapter.send',
         'wakatime.offlinequeue.Queue.push',
         ['wakatime.offlinequeue.Queue.pop', None],

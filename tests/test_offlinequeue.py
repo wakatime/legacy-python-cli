@@ -20,6 +20,7 @@ from .utils import mock, json, ANY, CustomResponse, NamedTemporaryFile, Temporar
 
 class OfflineQueueTestCase(TestCase):
     patch_these = [
+        'time.sleep',
         'wakatime.packages.requests.adapters.HTTPAdapter.send',
         'wakatime.session_cache.SessionCache.save',
         'wakatime.session_cache.SessionCache.delete',
