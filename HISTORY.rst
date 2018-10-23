@@ -3,6 +3,13 @@ History
 -------
 
 
+10.4.2 (2018-10-23)
++++++++++++++++++++
+
+- Fix bug caused by git config section without any submodule option defined.
+  `#152 <https://github.com/wakatime/wakatime/issues/152>`_
+
+
 10.4.1 (2018-10-05)
 +++++++++++++++++++
 
