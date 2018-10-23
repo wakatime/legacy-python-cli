@@ -366,6 +366,21 @@ class ProjectTestCase(TestCase):
             entity=entity,
         )
 
+    def test_git_submodule_without_option_submodule_disabled(self):
+        tempdir = tempfile.mkdtemp()
+        shutil.copytree('tests/samples/projects/git-with-submodule', os.path.join(tempdir, 'git'))
+        shutil.move(os.path.join(tempdir, 'git', 'dot_git'), os.path.join(tempdir, 'git', '.git'))
+        shutil.move(os.path.join(tempdir, 'git', 'asubmodule', 'dot_git'), os.path.join(tempdir, 'git', 'asubmodule', '.git'))
+
+        entity = os.path.join(tempdir, 'git', 'asubmodule', 'emptyfile.txt')
+
+        self.shared(
+            expected_project='asubmodule',
+            expected_branch='asubbranch',
+            entity=entity,
+            config='git-submodules-without-option.cfg',
+        )
+
     def test_git_submodule_detected_and_enabled_globally(self):
         tempdir = tempfile.mkdtemp()
         shutil.copytree('tests/samples/projects/git-with-submodule', os.path.join(tempdir, 'git'))
