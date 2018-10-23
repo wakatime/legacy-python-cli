@@ -366,7 +366,7 @@ class ProjectTestCase(TestCase):
             entity=entity,
         )
 
-    def test_git_submodule_without_option_submodule_disabled(self):
+    def test_git_submodule_without_option(self):
         tempdir = tempfile.mkdtemp()
         shutil.copytree('tests/samples/projects/git-with-submodule', os.path.join(tempdir, 'git'))
         shutil.move(os.path.join(tempdir, 'git', 'dot_git'), os.path.join(tempdir, 'git', '.git'))
