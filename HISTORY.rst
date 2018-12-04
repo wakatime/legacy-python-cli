@@ -3,6 +3,13 @@ History
 -------
 
 
+10.5.0 (2018-11-03)
++++++++++++++++++++
+
+- New category "Writing Tests".
+  `#156 <https://github.com/wakatime/wakatime/issues/156>`_
+
+
 10.4.2 (2018-10-23)
 +++++++++++++++++++
 
