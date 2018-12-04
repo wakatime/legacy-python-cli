@@ -39,6 +39,11 @@ class TestCase(unittest.TestCase):
 
         self.maxDiff = 1000
 
+        patch_getproxies = mock.patch('wakatime.packages.requests.sessions.get_environ_proxies')
+        mocked_getproxies = patch_getproxies.start()
+        mocked_getproxies.reset_mock()
+        mocked_getproxies.return_value = {}
+
         self.patched = {}
         if hasattr(self, 'patch_these'):
             for patch_this in self.patch_these:
