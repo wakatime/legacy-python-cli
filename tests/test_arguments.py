@@ -601,6 +601,7 @@ class ArgumentsTestCase(TestCase):
                 'debugging',
                 'running tests',
                 'manual testing',
+                'writing tests',
                 'browsing',
                 'code reviewing',
                 'designing',
