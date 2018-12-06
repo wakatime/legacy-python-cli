@@ -25,14 +25,15 @@ class LanguagesTestCase(utils.TestCase):
         ['wakatime.session_cache.SessionCache.connect', None],
     ]
 
-    def shared(self, expected_language='', entity='', extra_args=[]):
+    def shared(self, expected_language='', entity='', entity_type='file', extra_args=[]):
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         config = 'tests/samples/configs/good_config.cfg'
-        entity = os.path.join('tests/samples/codefiles', entity)
+        if entity_type == 'file':
+            entity = os.path.join('tests/samples/codefiles', entity)
 
         now = u(int(time.time()))
-        args = ['--file', entity, '--config', config, '--time', now] + extra_args
+        args = ['--entity', entity, '--config', config, '--time', now] + extra_args
 
         retval = execute(args)
         self.assertEquals(retval, SUCCESS)
@@ -41,12 +42,12 @@ class LanguagesTestCase(utils.TestCase):
         heartbeat = {
             'language': expected_language,
             'lines': ANY,
-            'entity': os.path.realpath(entity),
+            'entity': os.path.realpath(entity) if entity_type == 'file' else entity,
             'project': ANY,
             'branch': ANY,
             'dependencies': ANY,
             'time': float(now),
-            'type': 'file',
+            'type': entity_type,
             'is_write': False,
             'user_agent': ANY,
         }
@@ -124,7 +125,7 @@ class LanguagesTestCase(utils.TestCase):
         self.shared(
             expected_language='Java',
             entity='python.py',
-            extra_args=['--language', 'JAVA']
+            extra_args=['--language', 'JAVA'],
         )
 
     def test_language_arg_is_used_when_not_guessed(self):
@@ -136,6 +137,30 @@ class LanguagesTestCase(utils.TestCase):
                 entity='python.py',
                 extra_args=['--language', 'JAVA']
             )
+
+    def test_language_defaults_to_none_for_entity_type_app(self):
+        self.shared(
+            expected_language=None,
+            entity='not-a-file',
+            entity_type='domain',
+            extra_args=['--entity-type', 'domain'],
+        )
+
+    def test_language_arg_used_for_entity_type_app(self):
+        self.shared(
+            expected_language='Java',
+            entity='not-a-file',
+            entity_type='app',
+            extra_args=['--entity-type', 'app', '--language', 'JAVA'],
+        )
+
+    def test_language_arg_used_for_entity_type_domain(self):
+        self.shared(
+            expected_language='Java',
+            entity='not-a-file',
+            entity_type='domain',
+            extra_args=['--entity-type', 'domain', '--language', 'JAVA'],
+        )
 
     def test_vim_language_arg_is_used_when_not_guessed(self):
         with utils.mock.patch('wakatime.stats.smart_guess_lexer') as mock_guess_lexer:

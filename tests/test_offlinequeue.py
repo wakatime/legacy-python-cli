@@ -724,7 +724,7 @@ class OfflineQueueTestCase(TestCase):
                     args = ['--file', entity, '--key', key, '--config', config, '--time', now]
 
                     with mock.patch('wakatime.stats.standardize_language') as mock_language:
-                        mock_language.return_value = (language, None)
+                        mock_language.return_value = language
 
                         with mock.patch('wakatime.heartbeat.get_project_info') as mock_project:
                             mock_project.return_value = (project, branch)
