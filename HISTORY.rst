@@ -3,6 +3,13 @@ History
 -------
 
 
+10.6.0 (2018-11-05)
++++++++++++++++++++
+
+- Support language argument for non-file entity types.
+- Send 25 heartbeats per API request.
+
+
 10.5.0 (2018-11-03)
 +++++++++++++++++++
 
