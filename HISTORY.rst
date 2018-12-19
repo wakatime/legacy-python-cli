@@ -3,6 +3,13 @@ History
 -------
 
 
+10.6.1 (2018-12-19)
++++++++++++++++++++
+
+- Correctly parse include_only_with_project_file when set to false.
+  `#161 <https://github.com/wakatime/wakatime/issues/161>`_
+
+
 10.6.0 (2018-11-05)
 +++++++++++++++++++
 
