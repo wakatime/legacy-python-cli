@@ -275,7 +275,7 @@ def parse_arguments():
         except TypeError:  # pragma: nocover
             pass
     if not args.include_only_with_project_file and configs.has_option('settings', 'include_only_with_project_file'):
-        args.include_only_with_project_file = configs.get('settings', 'include_only_with_project_file')
+        args.include_only_with_project_file = configs.get('settings', 'include_only_with_project_file') == 'true'
     if not args.include:
         args.include = []
     if configs.has_option('settings', 'include'):
