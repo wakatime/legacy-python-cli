@@ -26,7 +26,7 @@ log = logging.getLogger('WakaTime')
 
 BACKSLASH_REPLACE_PATTERN = re.compile(r'[\\/]+')
 WINDOWS_DRIVE_PATTERN = re.compile(r'^[a-z]:/')
-WINDOWS_NETWORK_MOUNT_PATTERN = re.compile(r'^\\{2}[a-z]+')
+WINDOWS_NETWORK_MOUNT_PATTERN = re.compile(r'^\\{2}[a-z]+', re.IGNORECASE)
 
 
 def should_exclude(entity, include, exclude):
