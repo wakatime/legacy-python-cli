@@ -3,6 +3,13 @@ History
 -------
 
 
+10.7.0 (2018-12-28)
++++++++++++++++++++
+
+- Add support for UNC network shares without drive letter mapped on Winows.
+  `#162 <https://github.com/wakatime/wakatime/issues/162>`_
+
+
 10.6.1 (2018-12-19)
 +++++++++++++++++++
 
