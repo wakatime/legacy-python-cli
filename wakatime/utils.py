@@ -81,7 +81,8 @@ def format_file_path(filepath):
         is_windows_network_mount = WINDOWS_NETWORK_MOUNT_PATTERN.match(filepath)
         filepath = os.path.realpath(os.path.abspath(filepath))
         filepath = re.sub(BACKSLASH_REPLACE_PATTERN, '/', filepath)
-        if WINDOWS_DRIVE_PATTERN.match(filepath):
+        is_windows_drive = WINDOWS_DRIVE_PATTERN.match(filepath)
+        if is_windows_drive:
             filepath = filepath.capitalize()
         if is_windows_network_mount:
             # Add back a / to the front, since the previous modifications
