@@ -27,6 +27,18 @@ class UtilsTestCase(TestCase):
                 result = format_file_path(path)
                 self.assertPathsEqual(expected, result)
 
+    def test_format_file_path_windows_network_mount(self):
+        path = '\\\\some\\path////to\\\\\\a\\file.txt'
+        expected = '//some/path/to/a/file.txt'
+
+        with mock.patch('os.path.realpath') as mock_realpath:
+            mock_realpath.return_value = path
+            with mock.patch('os.path.abspath') as mock_abspath:
+                mock_abspath.return_value = path
+
+                result = format_file_path(path)
+                self.assertPathsEqual(expected, result)
+
     def test_format_file_path_handles_exceptions(self):
         path = 'c:\\some\\path////to\\\\\\a\\file.txt'
         expected = path

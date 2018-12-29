@@ -255,6 +255,9 @@ class Heartbeat(object):
         if self._file_exists():
             return
 
+        if not self.entity:
+            return
+
         self.args.local_file = self._to_unc_path(self.entity)
 
     def _to_unc_path(self, filepath):
