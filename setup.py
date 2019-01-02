@@ -1,4 +1,4 @@
-from setuptools import setup
+import setuptools
 
 about = {}
 with open('wakatime/__about__.py') as f:
@@ -8,7 +8,7 @@ packages = [
     about['__title__'],
 ]
 
-setup(
+setuptools.setup(
     name=about['__title__'],
     version=about['__version__'],
     license=about['__license__'],
