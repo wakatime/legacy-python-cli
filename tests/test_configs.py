@@ -497,6 +497,9 @@ class ConfigsTestCase(TestCase):
             }
             self.assertHeartbeatSent(heartbeat)
 
+            detected_proj = open(os.path.join(tempdir, 'git', '.wakatime-project')).read()
+            self.assertEquals(detected_proj, generated_proj)
+
             self.assertHeartbeatNotSavedOffline()
             self.assertOfflineHeartbeatsSynced()
             self.assertSessionCacheSaved()

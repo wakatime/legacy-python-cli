@@ -335,7 +335,7 @@ def boolean_or_list(config_name, args, configs, alternative_names=[]):
     """Get a boolean or list of regexes from args and configs."""
 
     # when argument flag present, set to wildcard regex
-    for key in alternative_names:
+    for key in alternative_names + [config_name]:
         if hasattr(args, key) and getattr(args, key):
             setattr(args, config_name, ['.*'])
             return

@@ -158,6 +158,13 @@ class ProjectTestCase(TestCase):
             entity='projects/wakatime_project_file/emptyfile.txt',
         )
 
+    def test_wakatime_project_file_used_even_when_project_names_hidden(self):
+        self.shared(
+            expected_project='waka-project-file',
+            entity='projects/wakatime_project_file/emptyfile.txt',
+            extra_args=['--hide-project-names'],
+        )
+
     def test_git_project_detected(self):
         tempdir = tempfile.mkdtemp()
         shutil.copytree('tests/samples/projects/git', os.path.join(tempdir, 'git'))
@@ -168,6 +175,33 @@ class ProjectTestCase(TestCase):
             expected_branch='master',
             entity=os.path.join(tempdir, 'git', 'emptyfile.txt'),
         )
+
+    def test_get_project_not_used_when_project_names_hidden(self):
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        tempdir = tempfile.mkdtemp()
+        shutil.copytree('tests/samples/projects/git', os.path.join(tempdir, 'git'))
+        shutil.move(os.path.join(tempdir, 'git', 'dot_git'), os.path.join(tempdir, 'git', '.git'))
+
+        now = u(int(time.time()))
+        entity = os.path.join(tempdir, 'git', 'emptyfile.txt')
+        config = 'tests/samples/configs/good_config.cfg'
+
+        args = ['--hide-project-names', '--file', entity, '--config', config, '--time', now]
+
+        execute(args)
+        self.assertHeartbeatSavedOffline()
+
+        self.assertNotEquals('git', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
+        self.assertEquals(None, self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['branch'])
+        proj = open(os.path.join(tempdir, 'git', '.wakatime-project')).read()
+        self.assertEquals(proj, self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
+
+        execute(args)
+
+        self.assertEquals(proj, self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
 
     @log_capture()
     def test_ioerror_when_reading_git_branch(self, logs):
