@@ -3,6 +3,13 @@ History
 -------
 
 
+10.7.1 (2019-01-05)
++++++++++++++++++++
+
+- Fix bug causing random project names when hide project names enabled.
+  `vscode-wakatime#162 <https://github.com/wakatime/vscode-wakatime/issues/61>`_
+
+
 10.7.0 (2018-12-28)
 +++++++++++++++++++
 
