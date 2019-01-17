@@ -3,6 +3,13 @@ History
 -------
 
 
+10.8.0 (2019-01-17)
++++++++++++++++++++
+
+- Add ssl_certs_file arg and config for custom ca bundles.
+  `#164 <https://github.com/wakatime/wakatime/issues/164>`_
+
+
 10.7.1 (2019-01-05)
 +++++++++++++++++++
 
