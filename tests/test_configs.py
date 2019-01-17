@@ -663,13 +663,33 @@ class ConfigsTestCase(TestCase):
             shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
 
-            config = 'tests/samples/configs/has_ssl_verify_disabled.cfg'
+            config = 'tests/samples/configs/ssl_verify_disabled.cfg'
             args = ['--file', entity, '--config', config, '--timeout', '15', '--log-file', '~/.wakatime.log']
             retval = execute(args)
             self.assertEquals(retval, SUCCESS)
             self.assertNothingPrinted()
 
             self.assertHeartbeatSent(proxies=ANY, timeout=15, verify=False)
+
+            self.assertHeartbeatNotSavedOffline()
+            self.assertOfflineHeartbeatsSynced()
+            self.assertSessionCacheSaved()
+
+    def test_ssl_custom_ca_certs_file(self):
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+
+        with TemporaryDirectory() as tempdir:
+            entity = 'tests/samples/codefiles/emptyfile.txt'
+            shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
+            entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
+
+            config = 'tests/samples/configs/ssl_custom_certfile.cfg'
+            args = ['--file', entity, '--config', config, '--timeout', '15', '--log-file', '~/.wakatime.log']
+            retval = execute(args)
+            self.assertEquals(retval, SUCCESS)
+            self.assertNothingPrinted()
+
+            self.assertHeartbeatSent(proxies=ANY, timeout=15, verify='/fake/ca/certs/bundle.pem')
 
             self.assertHeartbeatNotSavedOffline()
             self.assertOfflineHeartbeatsSynced()

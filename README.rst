@@ -77,6 +77,7 @@ format. An example config file with all available options::
     offline = true
     proxy = https://user:pass@localhost:8080
     no_ssl_verify = false
+    ssl_certs_file =
     timeout = 30
     hostname = machinename
     [projectmap]

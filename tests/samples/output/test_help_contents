@@ -29,6 +29,9 @@ optional arguments:
                         socks5://user:pass@host:port or domain\user:pass
   --no-ssl-verify       Disables SSL certificate verification for HTTPS
                         requests. By default, SSL certificates are verified.
+  --ssl-certs-file SSL_CERTS_FILE
+                        Override the bundled Python Requests CA certs file. By
+                        default, uses certifi for ca certs.
   --project PROJECT     Optional project name.
   --alternate-project ALTERNATE_PROJECT
                         Optional alternate project name. Auto-discovered
