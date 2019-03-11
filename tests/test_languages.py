@@ -69,6 +69,12 @@ class LanguagesTestCase(utils.TestCase):
             entity='c_and_cpp/cpp.h',
         )
 
+    def test_cpp_language_detected_for_header_with_c_and_cxx_files_in_folder(self):
+        self.shared(
+            expected_language='C++',
+            entity='c_and_cxx/cpp.h',
+        )
+
     def test_c_not_detected_for_non_header_with_c_files_in_folder(self):
         self.shared(
             expected_language='Python',
