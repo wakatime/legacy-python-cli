@@ -3,6 +3,13 @@ History
 -------
 
 
+10.8.1 (2019-03-11)
++++++++++++++++++++
+
+- Detect C++ language from all C++ file extensions.
+  `vscode-wakatime#87 <https://github.com/wakatime/vscode-wakatime/issues/87>`_
+
+
 10.8.0 (2019-01-17)
 +++++++++++++++++++
 
