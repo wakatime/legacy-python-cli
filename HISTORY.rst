@@ -3,6 +3,13 @@ History
 -------
 
 
+10.8.2 (2019-03-27)
++++++++++++++++++++
+
+- Detect go.mod files as Go language.
+  `jetbrains-wakatime#119 <https://github.com/wakatime/jetbrains-wakatime/issues/119>`_
+
+
 10.8.1 (2019-03-11)
 +++++++++++++++++++
 
