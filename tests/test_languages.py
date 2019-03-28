@@ -274,3 +274,9 @@ class LanguagesTestCase(utils.TestCase):
             expected_language='JavaScript',
             entity='javascript_module.mjs',
         )
+
+    def test_go_mod_detected(self):
+        self.shared(
+            expected_language='Go',
+            entity='go.mod',
+        )
