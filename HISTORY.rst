@@ -3,6 +3,13 @@ History
 -------
 
 
+10.8.4 (2019-04-30)
++++++++++++++++++++
+
+- Use wakatime fork of certifi package.
+  `sublime-wakatime#95 <https://github.com/wakatime/sublime-wakatime/issues/95>`_
+
+
 10.8.3 (2019-04-30)
 +++++++++++++++++++
 
