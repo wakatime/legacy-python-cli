@@ -74,6 +74,8 @@ format. An example config file with all available options::
     include =
         .*
     include_only_with_project_file = false
+    status_bar_icon = true
+    status_bar_coding_activity = true
     offline = true
     proxy = https://user:pass@localhost:8080
     no_ssl_verify = false
