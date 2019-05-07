@@ -203,7 +203,7 @@ def parse_arguments():
                              'activity without generating new heartbeats.')
     parser.add_argument('--show-time-today', dest='show_time_today',
                         action='store_true',
-                        help='Returns dashboard time for Today.')
+                        help='Prints dashboard time for Today, then exits.')
     parser.add_argument('--config', dest='config', action=StoreWithoutQuotes,
                         help='Defaults to ~/.wakatime.cfg.')
     parser.add_argument('--verbose', dest='verbose', action='store_true',
