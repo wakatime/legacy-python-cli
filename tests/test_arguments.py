@@ -21,7 +21,7 @@ from wakatime.constants import (
 from wakatime.packages.requests.exceptions import RequestException
 from wakatime.packages.requests.models import Response
 from wakatime.utils import get_user_agent
-from .utils import mock, json, ANY, CustomResponse, TemporaryDirectory, TestCase, NamedTemporaryFile
+from .utils import mock, json, ANY, CustomResponse, SummaryResponse, TemporaryDirectory, TestCase, NamedTemporaryFile
 
 
 class ArgumentsTestCase(TestCase):
@@ -318,6 +318,27 @@ class ArgumentsTestCase(TestCase):
         log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
         expected = ''
         self.assertEquals(log_output, expected)
+
+        self.assertHeartbeatNotSavedOffline()
+        self.assertOfflineHeartbeatsNotSynced()
+
+    @log_capture()
+    def test_missing_entity_argument_with_show_time_today_arg(self, logs):
+        logging.disable(logging.NOTSET)
+
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = SummaryResponse()
+
+        config = 'tests/samples/configs/good_config.cfg'
+        args = ['--config', config, '--show-time-today', '--verbose']
+
+        retval = execute(args)
+
+        self.assertEquals(retval, SUCCESS)
+        self.assertNothingLogged(logs)
+
+        expected = '4 hrs 23 mins\n'
+        actual = self.getPrintedOutput()
+        self.assertEquals(actual, expected)
 
         self.assertHeartbeatNotSavedOffline()
         self.assertOfflineHeartbeatsNotSynced()

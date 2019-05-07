@@ -287,3 +287,22 @@ class CustomResponse(Response):
             return self.second_response_text if self.second_response_text is not None else self.response_text
         self._count += 1
         return self.response_text
+
+
+class SummaryResponse(Response):
+    response_code = 200
+    response_text = '{"data": [{"grand_total": {"text": "4 hrs 23 mins"}}]}'
+
+    _count = 0
+
+    @property
+    def status_code(self):
+        return self.response_code
+
+    @status_code.setter
+    def status_code(self, value):
+        pass
+
+    @property
+    def text(self):
+        return self.response_text
