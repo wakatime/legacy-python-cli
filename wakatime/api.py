@@ -163,7 +163,7 @@ def send_heartbeats(heartbeats, args, configs, use_ntlm_proxy=False):
     return AUTH_ERROR if code == 401 else API_ERROR
 
 
-def get_coding_time(start, end, args, use_ntlm_proxy=False):
+def get_time_today(args, use_ntlm_proxy=False):
     """Get coding time from WakaTime API for given time range.
 
     Returns total time as string or `None` when unable to fetch summary from
@@ -207,8 +207,8 @@ def get_coding_time(start, end, args, use_ntlm_proxy=False):
         ssl_verify = args.ssl_certs_file
 
     params = {
-        'start': start,
-        'end': end,
+        'start': 'today',
+        'end': 'today',
     }
 
     # send request to api
@@ -219,7 +219,7 @@ def get_coding_time(start, end, args, use_ntlm_proxy=False):
                                verify=ssl_verify)
     except RequestException:
         if should_try_ntlm:
-            return get_coding_time(start, end, args, use_ntlm_proxy=True)
+            return get_time_today(args, use_ntlm_proxy=True)
 
         session_cache.delete()
         if log.isEnabledFor(logging.DEBUG):
@@ -233,7 +233,7 @@ def get_coding_time(start, end, args, use_ntlm_proxy=False):
 
     except:  # delete cached session when requests raises unknown exception
         if should_try_ntlm:
-            return get_coding_time(start, end, args, use_ntlm_proxy=True)
+            return get_time_today(args, use_ntlm_proxy=True)
 
         session_cache.delete()
         if log.isEnabledFor(logging.DEBUG):
@@ -264,7 +264,7 @@ def get_coding_time(start, end, args, use_ntlm_proxy=False):
             return None, API_ERROR
     else:
         if should_try_ntlm:
-            return get_coding_time(start, end, args, use_ntlm_proxy=True)
+            return get_time_today(args, use_ntlm_proxy=True)
 
         session_cache.delete()
         log.debug({
