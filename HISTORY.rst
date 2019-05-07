@@ -3,6 +3,12 @@ History
 -------
 
 
+10.9.0 (2019-05-07)
++++++++++++++++++++
+
+- New argument --show-time-today for printing Today's coding time.
+
+
 10.8.4 (2019-04-30)
 +++++++++++++++++++
 
