@@ -6,7 +6,7 @@ History
 11.0.0 (2019-05-07)
 +++++++++++++++++++
 
-- Rename largument --show-time-today to --today.
+- Rename argument --show-time-today to --today.
 
 
 10.9.0 (2019-05-07)
