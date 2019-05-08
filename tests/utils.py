@@ -37,7 +37,7 @@ class TestCase(unittest.TestCase):
         # disable logging while testing
         logging.disable(logging.CRITICAL)
 
-        self.maxDiff = 1000
+        self.maxDiff = None
 
         patch_getproxies = mock.patch('wakatime.packages.requests.sessions.get_environ_proxies')
         mocked_getproxies = patch_getproxies.start()
@@ -292,8 +292,6 @@ class CustomResponse(Response):
 class SummaryResponse(Response):
     response_code = 200
     response_text = '{"data": [{"grand_total": {"text": "4 hrs 23 mins"}}]}'
-
-    _count = 0
 
     @property
     def status_code(self):

@@ -323,7 +323,7 @@ class ArgumentsTestCase(TestCase):
         self.assertOfflineHeartbeatsNotSynced()
 
     @log_capture()
-    def test_missing_entity_argument_with_show_time_today_arg(self, logs):
+    def test_missing_entity_argument_with_today_arg(self, logs):
         logging.disable(logging.NOTSET)
 
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = SummaryResponse()
