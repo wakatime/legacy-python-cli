@@ -353,9 +353,7 @@ class MainTestCase(utils.TestCase):
         self.assertEquals(actual, expected)
 
         log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
-        expected = "u'response_code': 400"
-        if is_py3:
-            expected = "'response_code': 400"
+        expected = "'response_code': 400"
         self.assertIn(expected, log_output)
 
         self.assertHeartbeatNotSavedOffline()
