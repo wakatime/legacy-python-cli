@@ -76,7 +76,7 @@ optional arguments:
                         sent while online 5 offline heartbeats are synced. Can
                         be used without --entity to only sync offline activity
                         without generating new heartbeats.
-  --show-time-today     Prints dashboard time for Today, then exits.
+  --today               Prints dashboard time for Today, then exits.
   --config CONFIG       Defaults to ~/.wakatime.cfg.
   --verbose             Turns on debug messages in log file.
   --version             show program's version number and exit

@@ -329,7 +329,7 @@ class ArgumentsTestCase(TestCase):
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = SummaryResponse()
 
         config = 'tests/samples/configs/good_config.cfg'
-        args = ['--config', config, '--show-time-today', '--verbose']
+        args = ['--config', config, '--today', '--verbose']
 
         retval = execute(args)
 

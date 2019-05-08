@@ -42,7 +42,7 @@ def execute(argv=None):
 
     setup_logging(args, __version__)
 
-    if args.show_time_today:
+    if args.today:
         text, retval = get_time_today(args)
         if text:
             print(text)
