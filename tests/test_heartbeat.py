@@ -67,10 +67,10 @@ class HeartbeatTestCase(TestCase):
             'project': 'aproject',
             'branch': 'abranch',
         }
-        heartbeat = Heartbeat(data, Args(), None)
+        heartbeat = Heartbeat(data, Args(), None, _clone=True)
         sanitized = heartbeat.sanitize()
         self.assertEquals('HIDDEN.py', sanitized.entity)
-        self.assertEquals('master', sanitized.branch)
+        self.assertEquals('abranch', sanitized.branch)
         self.assertEquals('aproject', sanitized.project)
         sensitive = [
             'dependencies',
