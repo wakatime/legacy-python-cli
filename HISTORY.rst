@@ -3,6 +3,13 @@ History
 -------
 
 
+12.0.0 (2019-06-23)
++++++++++++++++++++
+
+- New optional config option hide_branch_names.
+  `#183 <https://github.com/wakatime/wakatime/issues/183>`_
+
+
 11.0.0 (2019-05-07)
 +++++++++++++++++++
 
