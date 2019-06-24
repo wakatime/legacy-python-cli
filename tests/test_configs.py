@@ -461,6 +461,40 @@ class ConfigsTestCase(TestCase):
             self.assertOfflineHeartbeatsSynced()
             self.assertSessionCacheSaved()
 
+    def test_hide_matching_filenames_showing_branch_names(self):
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+
+        with TemporaryDirectory() as tempdir:
+            shutil.copytree('tests/samples/projects/git', os.path.join(tempdir, 'git'))
+            shutil.move(os.path.join(tempdir, 'git', 'dot_git'), os.path.join(tempdir, 'git', '.git'))
+            entity = os.path.join(tempdir, 'git', 'emptyfile.txt')
+            now = u(int(time.time()))
+            config = 'tests/samples/configs/hide_file_names_showing_branch_name.cfg'
+            key = u(uuid.uuid4())
+            args = ['--file', entity, '--key', key, '--config', config, '--time', now, '--log-file', '~/.wakatime.log']
+
+            retval = execute(args)
+            self.assertEquals(retval, SUCCESS)
+            self.assertNothingPrinted()
+
+            heartbeat = {
+                'language': 'Text only',
+                'lines': None,
+                'entity': 'HIDDEN.txt',
+                'project': 'git',
+                'branch': 'master',
+                'time': float(now),
+                'is_write': False,
+                'type': 'file',
+                'dependencies': None,
+                'user_agent': ANY,
+            }
+            self.assertHeartbeatSent(heartbeat)
+
+            self.assertHeartbeatNotSavedOffline()
+            self.assertOfflineHeartbeatsSynced()
+            self.assertSessionCacheSaved()
+
     def test_obfuscte_project_names(self):
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
@@ -471,7 +505,6 @@ class ConfigsTestCase(TestCase):
             now = u(int(time.time()))
             config = 'tests/samples/configs/paranoid_projects.cfg'
             key = u(uuid.uuid4())
-            dependencies = []
             generated_proj = 'Icy Bridge 42'
 
             args = ['--file', entity, '--key', key, '--config', config, '--time', now, '--log-file', '~/.wakatime.log']
@@ -486,13 +519,57 @@ class ConfigsTestCase(TestCase):
 
             heartbeat = {
                 'language': 'Text only',
-                'lines': 0,
+                'lines': None,
                 'entity': os.path.realpath(entity),
                 'project': generated_proj,
+                'branch': None,
                 'time': float(now),
                 'is_write': False,
                 'type': 'file',
-                'dependencies': dependencies,
+                'dependencies': None,
+                'user_agent': ANY,
+            }
+            self.assertHeartbeatSent(heartbeat)
+
+            detected_proj = open(os.path.join(tempdir, 'git', '.wakatime-project')).read()
+            self.assertEquals(detected_proj, generated_proj)
+
+            self.assertHeartbeatNotSavedOffline()
+            self.assertOfflineHeartbeatsSynced()
+            self.assertSessionCacheSaved()
+
+    def test_obfuscate_project_names_showing_branch_names(self):
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+
+        with TemporaryDirectory() as tempdir:
+            shutil.copytree('tests/samples/projects/git', os.path.join(tempdir, 'git'))
+            shutil.move(os.path.join(tempdir, 'git', 'dot_git'), os.path.join(tempdir, 'git', '.git'))
+            entity = os.path.join(tempdir, 'git', 'emptyfile.txt')
+            now = u(int(time.time()))
+            config = 'tests/samples/configs/paranoid_projects_showing_branch_names.cfg'
+            key = u(uuid.uuid4())
+            generated_proj = 'Icy Bridge 42'
+
+            args = ['--file', entity, '--key', key, '--config', config, '--time', now, '--log-file', '~/.wakatime.log']
+
+            with mock.patch('wakatime.project.generate_project_name') as mock_proj:
+                mock_proj.return_value = generated_proj
+
+                retval = execute(args)
+
+            self.assertEquals(retval, SUCCESS)
+            self.assertNothingPrinted()
+
+            heartbeat = {
+                'language': 'Text only',
+                'lines': None,
+                'entity': os.path.realpath(entity),
+                'project': generated_proj,
+                'branch': 'master',
+                'time': float(now),
+                'is_write': False,
+                'type': 'file',
+                'dependencies': None,
                 'user_agent': ANY,
             }
             self.assertHeartbeatSent(heartbeat)

@@ -159,9 +159,12 @@ class ProjectTestCase(TestCase):
         )
 
     def test_wakatime_project_file_used_even_when_project_names_hidden(self):
+        tempdir = tempfile.mkdtemp()
+        shutil.copytree('tests/samples/projects/wakatime_project_file', os.path.join(tempdir, 'wakatime_project_file'))
+
         self.shared(
             expected_project='waka-project-file',
-            entity='projects/wakatime_project_file/emptyfile.txt',
+            entity=os.path.join(tempdir, 'wakatime_project_file', 'emptyfile.txt'),
             extra_args=['--hide-project-names'],
         )
 
@@ -176,7 +179,7 @@ class ProjectTestCase(TestCase):
             entity=os.path.join(tempdir, 'git', 'emptyfile.txt'),
         )
 
-    def test_get_project_not_used_when_project_names_hidden(self):
+    def test_git_project_not_used_when_project_names_hidden(self):
         response = Response()
         response.status_code = 0
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
@@ -196,6 +199,45 @@ class ProjectTestCase(TestCase):
 
         self.assertNotEquals('git', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
         self.assertEquals(None, self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['branch'])
+        proj = open(os.path.join(tempdir, 'git', '.wakatime-project')).read()
+        self.assertEquals(proj, self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
+
+        execute(args)
+
+        self.assertEquals(proj, self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
+
+    def test_git_branch_not_used_when_branch_names_hidden(self):
+        tempdir = tempfile.mkdtemp()
+        shutil.copytree('tests/samples/projects/git', os.path.join(tempdir, 'git'))
+        shutil.move(os.path.join(tempdir, 'git', 'dot_git'), os.path.join(tempdir, 'git', '.git'))
+
+        self.shared(
+            expected_project='git',
+            expected_branch=None,
+            entity=os.path.join(tempdir, 'git', 'emptyfile.txt'),
+            extra_args=['--hide-branch-names'],
+        )
+
+    def test_branch_used_when_project_names_hidden_but_branch_names_visible(self):
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        tempdir = tempfile.mkdtemp()
+        shutil.copytree('tests/samples/projects/git', os.path.join(tempdir, 'git'))
+        shutil.move(os.path.join(tempdir, 'git', 'dot_git'), os.path.join(tempdir, 'git', '.git'))
+
+        now = u(int(time.time()))
+        entity = os.path.join(tempdir, 'git', 'emptyfile.txt')
+        config = 'tests/samples/configs/show_branch_names.cfg'
+
+        args = ['--hide-project-names', '--file', entity, '--config', config, '--time', now]
+
+        execute(args)
+        self.assertHeartbeatSavedOffline()
+
+        self.assertNotEquals('git', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
+        self.assertNotEquals(None, self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['branch'])
         proj = open(os.path.join(tempdir, 'git', '.wakatime-project')).read()
         self.assertEquals(proj, self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
 

@@ -50,6 +50,8 @@ optional arguments:
                         detected instead of using the folder name as the
                         project, a .wakatime-project file is created with a
                         random project name.
+  --hide-branch-names   Obfuscate branch names. Will not send revision control
+                        branch names to api.
   --exclude EXCLUDE     Filename patterns to exclude from logging. POSIX regex
                         syntax. Can be used more than once.
   --exclude-unknown-project

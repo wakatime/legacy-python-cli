@@ -19,6 +19,7 @@ class HeartbeatTestCase(TestCase):
             exclude = []
             hide_file_names = ['.*']
             hide_project_names = []
+            hide_branch_names = None
             include = []
             plugin = None
             include_only_with_project_file = None
@@ -47,6 +48,43 @@ class HeartbeatTestCase(TestCase):
         self.assertNothingLogged(logs)
 
     @log_capture()
+    def test_sanitize_removes_sensitive_data_but_still_shows_branch(self, logs):
+        logging.disable(logging.NOTSET)
+
+        class Args(object):
+            exclude = []
+            hide_file_names = ['.*']
+            hide_project_names = []
+            hide_branch_names = []
+            include = []
+            plugin = None
+            include_only_with_project_file = None
+            local_file = None
+
+        data = {
+            'entity': os.path.realpath('tests/samples/codefiles/python.py'),
+            'type': 'file',
+            'project': 'aproject',
+            'branch': 'abranch',
+        }
+        heartbeat = Heartbeat(data, Args(), None)
+        sanitized = heartbeat.sanitize()
+        self.assertEquals('HIDDEN.py', sanitized.entity)
+        self.assertEquals('master', sanitized.branch)
+        self.assertEquals('aproject', sanitized.project)
+        sensitive = [
+            'dependencies',
+            'lines',
+            'lineno',
+            'cursorpos',
+        ]
+        for item in sensitive:
+            self.assertIsNone(getattr(sanitized, item))
+
+        self.assertNothingPrinted()
+        self.assertNothingLogged(logs)
+
+    @log_capture()
     def test_sanitize_does_nothing_when_hidefilenames_false(self, logs):
         logging.disable(logging.NOTSET)
 
@@ -54,6 +92,7 @@ class HeartbeatTestCase(TestCase):
             exclude = []
             hide_file_names = []
             hide_project_names = []
+            hide_branch_names = None
             include = []
             plugin = None
             include_only_with_project_file = None
@@ -80,6 +119,7 @@ class HeartbeatTestCase(TestCase):
         class Args(object):
             hide_file_names = ['.*']
             hide_project_names = []
+            hide_branch_names = None
             plugin = None
 
         branch = 'abc123'
@@ -102,6 +142,7 @@ class HeartbeatTestCase(TestCase):
         class Args(object):
             hide_file_names = ['.*']
             hide_project_names = []
+            hide_branch_names = None
             plugin = None
 
         branch = 'abc123'
@@ -122,6 +163,7 @@ class HeartbeatTestCase(TestCase):
         class Args(object):
             hide_file_names = ['.*']
             hide_project_names = []
+            hide_branch_names = None
             plugin = None
 
         samples = [
