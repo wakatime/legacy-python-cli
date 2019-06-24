@@ -66,6 +66,7 @@ format. An example config file with all available options::
     api_key = your-api-key
     hide_file_names = false
     hide_project_names = false
+    hide_branch_names =
     exclude =
         ^COMMIT_EDITMSG$
         ^TAG_EDITMSG$
