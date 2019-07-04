@@ -280,3 +280,9 @@ class LanguagesTestCase(utils.TestCase):
             expected_language='Go',
             entity='go.mod',
         )
+
+    def test_aspx_language_attribute(self):
+        self.shared(
+            expected_language='CustomFromAttribute',
+            entity='aspx/custom.aspx',
+        )
