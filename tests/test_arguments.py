@@ -1436,7 +1436,7 @@ class ArgumentsTestCase(TestCase):
         logging.disable(logging.NOTSET)
 
         config = 'tests/samples/configs/good_config.cfg'
-        args = ['--config', config, '--config-read-key', 'api_key']
+        args = ['--config', config, '--config-read', 'api_key']
 
         retval = execute(args)
 
@@ -1455,7 +1455,7 @@ class ArgumentsTestCase(TestCase):
         logging.disable(logging.NOTSET)
 
         config = 'tests/samples/configs/project_map.cfg'
-        args = ['--config', config, '--config-read-key', 'foobarfake', '--config-section', 'projectmap']
+        args = ['--config', config, '--config-read', 'foobarfake', '--config-section', 'projectmap']
 
         retval = execute(args)
 

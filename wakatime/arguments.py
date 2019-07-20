@@ -214,11 +214,11 @@ def parse_arguments():
                         action=StoreWithoutQuotes,
                         help='Optional config section when reading or ' +
                              'writing a config key. Defaults to [settings].')
-    parser.add_argument('--config-read-key', dest='config_read_key',
+    parser.add_argument('--config-read', dest='config_read',
                         action=StoreWithoutQuotes,
                         help='Prints value for the given config key, then ' +
                              'exits.')
-    parser.add_argument('--config-write-key', dest='config_write_key',
+    parser.add_argument('--config-write', dest='config_write',
                         action=StoreWithoutQuotes, nargs=2,
                         help='Writes value to a config key, then exits. ' +
                              'Expects two arguments, key and value.')
@@ -232,16 +232,16 @@ def parse_arguments():
     # parse ~/.wakatime.cfg file
     configs = parseConfigFile(args.config)
 
-    if args.config_read_key:
+    if args.config_read:
         section = args.config_section or 'settings'
-        key = args.config_read_key
+        key = args.config_read
         print(configs.get(section, key))
         raise SystemExit(SUCCESS)
 
-    if args.config_write_key:
+    if args.config_write:
         section = args.config_section or 'settings'
-        key = args.config_write_key[0]
-        val = args.config_write_key[1]
+        key = args.config_write[0]
+        val = args.config_write[1]
         if not configs.has_section(section):
             configs.add_section(section)
         configs.set(section, key, val)
