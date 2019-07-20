@@ -80,5 +80,13 @@ optional arguments:
                         without generating new heartbeats.
   --today               Prints dashboard time for Today, then exits.
   --config CONFIG       Defaults to ~/.wakatime.cfg.
+  --config-section CONFIG_SECTION
+                        Optional config section when reading or writing a
+                        config key. Defaults to [settings].
+  --config-read-key CONFIG_READ_KEY
+                        Prints value for the given config key, then exits.
+  --config-write-key CONFIG_WRITE_KEY CONFIG_WRITE_KEY
+                        Writes value to a config key, then exits. Expects two
+                        arguments, key and value.
   --verbose             Turns on debug messages in log file.
   --version             show program's version number and exit

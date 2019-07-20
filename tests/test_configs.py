@@ -50,10 +50,9 @@ class ConfigsTestCase(TestCase):
                 with mock.patch('wakatime.configs.open') as mock_open:
                     mock_open.side_effect = IOError('')
 
-                    with self.assertRaises(SystemExit) as e:
-                        execute(args)
+                    retval = execute(args)
 
-        self.assertEquals(int(str(e.exception)), AUTH_ERROR)
+        self.assertEquals(retval, AUTH_ERROR)
         expected_stdout = u('')
         expected_stderr = open('tests/samples/output/common_usage_header').read()
         expected_stderr += open('tests/samples/output/configs_test_config_file_not_passed_in_command_line_args').read()
@@ -102,10 +101,9 @@ class ConfigsTestCase(TestCase):
             entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
 
             args = ['--file', entity, '--config', config, '--log-file', '~/.wakatime.log']
-            with self.assertRaises(SystemExit) as e:
-                execute(args)
+            retval = execute(args)
 
-        self.assertEquals(int(str(e.exception)), AUTH_ERROR)
+        self.assertEquals(retval, AUTH_ERROR)
 
         expected_stdout = u('')
         expected_stderr = open('tests/samples/output/common_usage_header').read()
@@ -178,10 +176,9 @@ class ConfigsTestCase(TestCase):
             config = 'tests/samples/configs/bad_config.cfg'
             args = ['--file', entity, '--config', config, '--log-file', '~/.wakatime.log']
 
-            with self.assertRaises(SystemExit) as e:
-                execute(args)
+            retval = execute(args)
 
-            self.assertEquals(int(str(e.exception)), CONFIG_FILE_PARSE_ERROR)
+            self.assertEquals(retval, CONFIG_FILE_PARSE_ERROR)
             self.assertIn('ParsingError', sys.stdout.getvalue())
             expected_stderr = ''
             self.assertEquals(sys.stderr.getvalue(), expected_stderr)

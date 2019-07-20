@@ -40,10 +40,10 @@ class ArgumentsTestCase(TestCase):
     def test_help_contents(self, logs):
         logging.disable(logging.NOTSET)
         args = ['--help']
-        with self.assertRaises(SystemExit) as e:
-            execute(args)
 
-        self.assertEquals(int(str(e.exception)), 0)
+        retval = execute(args)
+
+        self.assertEquals(retval, SUCCESS)
         expected_stdout = open('tests/samples/output/common_usage_header').read()
         expected_stdout += open('tests/samples/output/test_help_contents').read()
         self.assertEquals(sys.stdout.getvalue(), expected_stdout)
@@ -167,11 +167,10 @@ class ArgumentsTestCase(TestCase):
             key = str(uuid.uuid4())
             args = ['--file', entity, '--key', key, '--config', config, '--timeout', 'abc']
 
-            with self.assertRaises(SystemExit) as e:
-                execute(args)
+            retval = execute(args)
 
             self.assertNothingLogged(logs)
-            self.assertEquals(int(str(e.exception)), 2)
+            self.assertEquals(retval, 2)
             self.assertEquals(sys.stdout.getvalue(), '')
             expected_stderr = open('tests/samples/output/common_usage_header').read()
             expected_stderr += open('tests/samples/output/main_test_timeout_passed_via_command_line').read()
@@ -213,10 +212,9 @@ class ArgumentsTestCase(TestCase):
         config = 'tests/samples/configs/good_config.cfg'
         args = ['--config', config]
 
-        with self.assertRaises(SystemExit) as e:
-            execute(args)
+        retval = execute(args)
 
-        self.assertEquals(int(str(e.exception)), 2)
+        self.assertEquals(retval, 2)
         self.assertEquals(sys.stdout.getvalue(), '')
         expected = 'error: argument --entity is required'
         self.assertIn(expected, sys.stderr.getvalue())
@@ -259,10 +257,9 @@ class ArgumentsTestCase(TestCase):
         config = 'tests/samples/configs/good_config.cfg'
         args = ['--config', config, '--sync-offline-activity', 'none']
 
-        with self.assertRaises(SystemExit) as e:
-            execute(args)
+        retval = execute(args)
 
-        self.assertEquals(int(str(e.exception)), 2)
+        self.assertEquals(retval, 2)
         self.assertEquals(sys.stdout.getvalue(), '')
         expected = 'error: argument --entity is required'
         self.assertIn(expected, sys.stderr.getvalue())
@@ -283,10 +280,9 @@ class ArgumentsTestCase(TestCase):
         config = 'tests/samples/configs/good_config.cfg'
         args = ['--config', config, '--sync-offline-activity', 'all']
 
-        with self.assertRaises(SystemExit) as e:
-            execute(args)
+        retval = execute(args)
 
-        self.assertEquals(int(str(e.exception)), 2)
+        self.assertEquals(retval, 2)
         self.assertEquals(sys.stdout.getvalue(), '')
         expected = 'error: argument --sync-offline-activity must be "none" or an integer number'
         self.assertIn(expected, sys.stderr.getvalue())
@@ -307,10 +303,9 @@ class ArgumentsTestCase(TestCase):
         config = 'tests/samples/configs/good_config.cfg'
         args = ['--config', config, '--sync-offline-activity', '-1']
 
-        with self.assertRaises(SystemExit) as e:
-            execute(args)
+        retval = execute(args)
 
-        self.assertEquals(int(str(e.exception)), 2)
+        self.assertEquals(retval, 2)
         self.assertEquals(sys.stdout.getvalue(), '')
         expected = 'error: argument --sync-offline-activity must be "none" or an integer number'
         self.assertIn(expected, sys.stderr.getvalue())
@@ -318,27 +313,6 @@ class ArgumentsTestCase(TestCase):
         log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
         expected = ''
         self.assertEquals(log_output, expected)
-
-        self.assertHeartbeatNotSavedOffline()
-        self.assertOfflineHeartbeatsNotSynced()
-
-    @log_capture()
-    def test_missing_entity_argument_with_today_arg(self, logs):
-        logging.disable(logging.NOTSET)
-
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = SummaryResponse()
-
-        config = 'tests/samples/configs/good_config.cfg'
-        args = ['--config', config, '--today', '--verbose']
-
-        retval = execute(args)
-
-        self.assertEquals(retval, SUCCESS)
-        self.assertNothingLogged(logs)
-
-        expected = '4 hrs 23 mins\n'
-        actual = self.getPrintedOutput()
-        self.assertEquals(actual, expected)
 
         self.assertHeartbeatNotSavedOffline()
         self.assertOfflineHeartbeatsNotSynced()
@@ -352,10 +326,9 @@ class ArgumentsTestCase(TestCase):
         config = 'tests/samples/configs/missing_api_key.cfg'
         args = ['--config', config]
 
-        with self.assertRaises(SystemExit) as e:
-            execute(args)
+        retval = execute(args)
 
-        self.assertEquals(int(str(e.exception)), AUTH_ERROR)
+        self.assertEquals(retval, AUTH_ERROR)
         self.assertEquals(sys.stdout.getvalue(), '')
         expected = 'error: Missing api key. Find your api key from wakatime.com/settings/api-key.'
         self.assertIn(expected, sys.stderr.getvalue())
@@ -380,10 +353,9 @@ class ArgumentsTestCase(TestCase):
         key = 'an-invalid-key'
         args = ['--key', key]
 
-        with self.assertRaises(SystemExit) as e:
-            execute(args)
+        retval = execute(args)
 
-        self.assertEquals(int(str(e.exception)), AUTH_ERROR)
+        self.assertEquals(retval, AUTH_ERROR)
         self.assertEquals(sys.stdout.getvalue(), '')
         expected = 'error: Invalid api key. Find your api key from wakatime.com/settings/api-key.'
         self.assertIn(expected, sys.stderr.getvalue())
@@ -1310,3 +1282,189 @@ class ArgumentsTestCase(TestCase):
             self.assertEquals(logging.WARNING, logging.getLogger('WakaTime').level)
             self.assertEquals(logfile, logging.getLogger('WakaTime').handlers[0].baseFilename)
             logs.check()
+
+    @log_capture()
+    def test_today_arg_prints_coding_activity(self, logs):
+        logging.disable(logging.NOTSET)
+
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = SummaryResponse()
+
+        config = 'tests/samples/configs/good_config.cfg'
+        args = ['--config', config, '--today']
+
+        retval = execute(args)
+
+        self.assertEquals(retval, SUCCESS)
+        self.assertNothingLogged(logs)
+
+        expected = '4 hrs 23 mins\n'
+        actual = self.getPrintedOutput()
+        self.assertEquals(actual, expected)
+
+        self.assertHeartbeatNotSavedOffline()
+        self.assertOfflineHeartbeatsNotSynced()
+
+    @log_capture()
+    def test_requests_exception_with_today_arg(self, logs):
+        logging.disable(logging.NOTSET)
+
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].side_effect = RequestException('requests exception')
+
+        key = str(uuid.uuid4())
+        args = ['--today', '--key', key]
+
+        retval = execute(args)
+        self.assertEquals(retval, API_ERROR)
+        self.assertNothingPrinted()
+        self.assertNothingLogged(logs)
+        self.assertHeartbeatNotSavedOffline()
+        self.assertOfflineHeartbeatsNotSynced()
+
+    @log_capture()
+    def test_requests_exception_with_today_arg_verbose(self, logs):
+        logging.disable(logging.NOTSET)
+
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].side_effect = RequestException('requests exception')
+
+        key = str(uuid.uuid4())
+        args = ['--today', '--key', key, '--verbose']
+
+        retval = execute(args)
+        self.assertEquals(retval, API_ERROR)
+
+        expected = 'RequestException: requests exception\n'
+        actual = self.getPrintedOutput()
+        self.assertEquals(actual, expected)
+
+        log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
+        expected = "'RequestException': u'requests exception'"
+        if is_py3:
+            expected = "'RequestException': 'requests exception'"
+        self.assertIn(expected, log_output)
+
+        self.assertHeartbeatNotSavedOffline()
+        self.assertOfflineHeartbeatsNotSynced()
+
+    @log_capture()
+    def test_generic_exception_with_today_arg(self, logs):
+        logging.disable(logging.NOTSET)
+
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].side_effect = Exception('generic exception')
+
+        key = str(uuid.uuid4())
+        args = ['--today', '--key', key]
+
+        retval = execute(args)
+        self.assertEquals(retval, API_ERROR)
+        self.assertNothingPrinted()
+        self.assertNothingLogged(logs)
+        self.assertHeartbeatNotSavedOffline()
+        self.assertOfflineHeartbeatsNotSynced()
+
+    @log_capture()
+    def test_generic_exception_with_today_arg_verbose(self, logs):
+        logging.disable(logging.NOTSET)
+
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].side_effect = Exception('generic exception')
+
+        key = str(uuid.uuid4())
+        args = ['--today', '--key', key, '--verbose']
+
+        retval = execute(args)
+        self.assertEquals(retval, API_ERROR)
+
+        expected = 'Exception: generic exception\n'
+        actual = self.getPrintedOutput()
+        self.assertEquals(actual, expected)
+
+        log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
+        expected = "'Exception': u'generic exception'"
+        if is_py3:
+            expected = "'Exception': 'generic exception'"
+        self.assertIn(expected, log_output)
+
+        self.assertHeartbeatNotSavedOffline()
+        self.assertOfflineHeartbeatsNotSynced()
+
+    @log_capture()
+    def test_error_response_with_today_arg(self, logs):
+        logging.disable(logging.NOTSET)
+
+        response = CustomResponse()
+        response.response_code = 400
+        response.response_text = 'error response text'
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        key = str(uuid.uuid4())
+        args = ['--today', '--key', key]
+
+        retval = execute(args)
+        self.assertEquals(retval, API_ERROR)
+        self.assertNothingPrinted()
+        self.assertNothingLogged(logs)
+        self.assertHeartbeatNotSavedOffline()
+        self.assertOfflineHeartbeatsNotSynced()
+
+    @log_capture()
+    def test_error_response_with_today_arg_verbose(self, logs):
+        logging.disable(logging.NOTSET)
+
+        response = CustomResponse()
+        response.response_code = 400
+        response.response_text = 'error response text'
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        key = str(uuid.uuid4())
+        args = ['--today', '--key', key, '--verbose']
+
+        retval = execute(args)
+        self.assertEquals(retval, API_ERROR)
+
+        expected = 'Error: 400\n'
+        actual = self.getPrintedOutput()
+        self.assertEquals(actual, expected)
+
+        log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
+        expected = "'response_code': 400"
+        self.assertIn(expected, log_output)
+
+        self.assertHeartbeatNotSavedOffline()
+        self.assertOfflineHeartbeatsNotSynced()
+
+    @log_capture()
+    def test_can_read_config_key(self, logs):
+        logging.disable(logging.NOTSET)
+
+        config = 'tests/samples/configs/good_config.cfg'
+        args = ['--config', config, '--config-read-key', 'api_key']
+
+        retval = execute(args)
+
+        self.assertEquals(retval, SUCCESS)
+        self.assertNothingLogged(logs)
+
+        expected = '1090a6ae-855f-4be7-b8fb-3edbaf1aa3ec\n'
+        actual = self.getPrintedOutput()
+        self.assertEquals(actual, expected)
+
+        self.assertHeartbeatNotSavedOffline()
+        self.assertOfflineHeartbeatsNotSynced()
+
+    @log_capture()
+    def test_can_read_config_key_from_custom_section(self, logs):
+        logging.disable(logging.NOTSET)
+
+        config = 'tests/samples/configs/project_map.cfg'
+        args = ['--config', config, '--config-read-key', 'foobarfake', '--config-section', 'projectmap']
+
+        retval = execute(args)
+
+        self.assertEquals(retval, SUCCESS)
+        self.assertNothingLogged(logs)
+
+        expected = 'unused\n'
+        actual = self.getPrintedOutput()
+        self.assertEquals(actual, expected)
+
+        self.assertHeartbeatNotSavedOffline()
+        self.assertOfflineHeartbeatsNotSynced()

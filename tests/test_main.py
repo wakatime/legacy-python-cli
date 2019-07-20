@@ -233,133 +233,6 @@ class MainTestCase(utils.TestCase):
             self.assertSessionCacheDeleted()
 
     @log_capture()
-    def test_requests_exception_with_today_arg(self, logs):
-        logging.disable(logging.NOTSET)
-
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].side_effect = RequestException('requests exception')
-
-        key = str(uuid.uuid4())
-        args = ['--today', '--key', key]
-
-        retval = execute(args)
-        self.assertEquals(retval, API_ERROR)
-        self.assertNothingPrinted()
-        self.assertNothingLogged(logs)
-        self.assertHeartbeatNotSavedOffline()
-        self.assertOfflineHeartbeatsNotSynced()
-
-    @log_capture()
-    def test_requests_exception_with_today_arg_verbose(self, logs):
-        logging.disable(logging.NOTSET)
-
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].side_effect = RequestException('requests exception')
-
-        key = str(uuid.uuid4())
-        args = ['--today', '--key', key, '--verbose']
-
-        retval = execute(args)
-        self.assertEquals(retval, API_ERROR)
-
-        expected = 'RequestException: requests exception\n'
-        actual = self.getPrintedOutput()
-        self.assertEquals(actual, expected)
-
-        log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
-        expected = "'RequestException': u'requests exception'"
-        if is_py3:
-            expected = "'RequestException': 'requests exception'"
-        self.assertIn(expected, log_output)
-
-        self.assertHeartbeatNotSavedOffline()
-        self.assertOfflineHeartbeatsNotSynced()
-
-    @log_capture()
-    def test_generic_exception_with_today_arg(self, logs):
-        logging.disable(logging.NOTSET)
-
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].side_effect = Exception('generic exception')
-
-        key = str(uuid.uuid4())
-        args = ['--today', '--key', key]
-
-        retval = execute(args)
-        self.assertEquals(retval, API_ERROR)
-        self.assertNothingPrinted()
-        self.assertNothingLogged(logs)
-        self.assertHeartbeatNotSavedOffline()
-        self.assertOfflineHeartbeatsNotSynced()
-
-    @log_capture()
-    def test_generic_exception_with_today_arg_verbose(self, logs):
-        logging.disable(logging.NOTSET)
-
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].side_effect = Exception('generic exception')
-
-        key = str(uuid.uuid4())
-        args = ['--today', '--key', key, '--verbose']
-
-        retval = execute(args)
-        self.assertEquals(retval, API_ERROR)
-
-        expected = 'Exception: generic exception\n'
-        actual = self.getPrintedOutput()
-        self.assertEquals(actual, expected)
-
-        log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
-        expected = "'Exception': u'generic exception'"
-        if is_py3:
-            expected = "'Exception': 'generic exception'"
-        self.assertIn(expected, log_output)
-
-        self.assertHeartbeatNotSavedOffline()
-        self.assertOfflineHeartbeatsNotSynced()
-
-    @log_capture()
-    def test_error_response_with_today_arg(self, logs):
-        logging.disable(logging.NOTSET)
-
-        response = CustomResponse()
-        response.response_code = 400
-        response.response_text = 'error response text'
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
-
-        key = str(uuid.uuid4())
-        args = ['--today', '--key', key]
-
-        retval = execute(args)
-        self.assertEquals(retval, API_ERROR)
-        self.assertNothingPrinted()
-        self.assertNothingLogged(logs)
-        self.assertHeartbeatNotSavedOffline()
-        self.assertOfflineHeartbeatsNotSynced()
-
-    @log_capture()
-    def test_error_response_with_today_arg_verbose(self, logs):
-        logging.disable(logging.NOTSET)
-
-        response = CustomResponse()
-        response.response_code = 400
-        response.response_text = 'error response text'
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
-
-        key = str(uuid.uuid4())
-        args = ['--today', '--key', key, '--verbose']
-
-        retval = execute(args)
-        self.assertEquals(retval, API_ERROR)
-
-        expected = 'Error: 400\n'
-        actual = self.getPrintedOutput()
-        self.assertEquals(actual, expected)
-
-        log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
-        expected = "'response_code': 400"
-        self.assertIn(expected, log_output)
-
-        self.assertHeartbeatNotSavedOffline()
-        self.assertOfflineHeartbeatsNotSynced()
-
-    @log_capture()
     def test_requests_exception_without_offline_logging(self, logs):
         logging.disable(logging.NOTSET)
 
@@ -399,10 +272,9 @@ class MainTestCase(utils.TestCase):
         config = 'tests/samples/configs/missing_api_key.cfg'
         args = ['--config', config, '--key', 'invalid-api-key']
 
-        with self.assertRaises(SystemExit) as e:
-            execute(args)
+        retval = execute(args)
 
-        self.assertEquals(int(str(e.exception)), AUTH_ERROR)
+        self.assertEquals(retval, AUTH_ERROR)
         self.assertEquals(sys.stdout.getvalue(), '')
         expected = 'error: Invalid api key. Find your api key from wakatime.com/settings/api-key.'
         self.assertIn(expected, sys.stderr.getvalue())

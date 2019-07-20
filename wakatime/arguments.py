@@ -19,8 +19,8 @@ import time
 import traceback
 from .__about__ import __version__
 from .compat import basestring
-from .configs import parseConfigFile
-from .constants import AUTH_ERROR, DEFAULT_SYNC_OFFLINE_ACTIVITY
+from .configs import getConfigFile, parseConfigFile
+from .constants import AUTH_ERROR, DEFAULT_SYNC_OFFLINE_ACTIVITY, SUCCESS
 from .packages import argparse
 
 
@@ -210,6 +210,18 @@ def parse_arguments():
                         help='Prints dashboard time for Today, then exits.')
     parser.add_argument('--config', dest='config', action=StoreWithoutQuotes,
                         help='Defaults to ~/.wakatime.cfg.')
+    parser.add_argument('--config-section', dest='config_section',
+                        action=StoreWithoutQuotes,
+                        help='Optional config section when reading or ' +
+                             'writing a config key. Defaults to [settings].')
+    parser.add_argument('--config-read-key', dest='config_read_key',
+                        action=StoreWithoutQuotes,
+                        help='Prints value for the given config key, then ' +
+                             'exits.')
+    parser.add_argument('--config-write-key', dest='config_write_key',
+                        action=StoreWithoutQuotes, nargs=2,
+                        help='Writes value to a config key, then exits. ' +
+                             'Expects two arguments, key and value.')
     parser.add_argument('--verbose', dest='verbose', action='store_true',
                         help='Turns on debug messages in log file.')
     parser.add_argument('--version', action='version', version=__version__)
@@ -217,12 +229,29 @@ def parse_arguments():
     # parse command line arguments
     args = parser.parse_args()
 
+    # parse ~/.wakatime.cfg file
+    configs = parseConfigFile(args.config)
+
+    if args.config_read_key:
+        section = args.config_section or 'settings'
+        key = args.config_read_key
+        print(configs.get(section, key))
+        raise SystemExit(SUCCESS)
+
+    if args.config_write_key:
+        section = args.config_section or 'settings'
+        key = args.config_write_key[0]
+        val = args.config_write_key[1]
+        if not configs.has_section(section):
+            configs.add_section(section)
+        configs.set(section, key, val)
+        with open(args.config or getConfigFile(), 'w', encoding='utf-8') as fh:
+            configs.write(fh)
+        raise SystemExit(SUCCESS)
+
     # use current unix epoch timestamp by default
     if not args.timestamp:
         args.timestamp = time.time()
-
-    # parse ~/.wakatime.cfg file
-    configs = parseConfigFile(args.config)
 
     # update args from configs
     if not args.hostname:

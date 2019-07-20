@@ -38,7 +38,10 @@ def execute(argv=None):
     if argv:
         sys.argv = ['wakatime'] + argv
 
-    args, configs = parse_arguments()
+    try:
+        args, configs = parse_arguments()
+    except SystemExit as ex:
+        return ex.code
 
     setup_logging(args, __version__)
 

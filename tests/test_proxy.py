@@ -234,10 +234,9 @@ class ProxyTestCase(utils.TestCase):
             config = 'tests/samples/configs/good_config.cfg'
             args = ['--file', entity, '--config', config, '--proxy', proxy]
 
-            with self.assertRaises(SystemExit) as e:
-                execute(args)
+            retval = execute(args)
 
-            self.assertEquals(int(str(e.exception)), 2)
+            self.assertEquals(retval, 2)
             self.assertEquals(sys.stdout.getvalue(), '')
             expected = 'error: Invalid proxy. Must be in format https://user:pass@host:port or socks5://user:pass@host:port or domain\\user:pass.'
             self.assertIn(expected, sys.stderr.getvalue())
