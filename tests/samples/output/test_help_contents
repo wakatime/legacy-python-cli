@@ -5,7 +5,7 @@ optional arguments:
   -h, --help            show this help message and exit
   --entity FILE         Absolute path to file for the heartbeat. Can also be a
                         url, domain or app when --entity-type is not file.
-  --key KEY             Your wakatime api key; uses api_key from
+  --key API_KEY         Your wakatime api key; uses api_key from
                         ~/.wakatime.cfg by default.
   --write               When set, tells api this heartbeat was triggered from
                         writing to a file.
@@ -13,10 +13,9 @@ optional arguments:
                         Agent header.
   --time time           Optional floating-point unix epoch timestamp. Uses
                         current time by default.
-  --lineno LINENO       Optional line number. This is the current line being
+  --lineno INT          Optional line number. This is the current line being
                         edited.
-  --cursorpos CURSORPOS
-                        Optional cursor position in the current file.
+  --cursorpos INT       Optional cursor position in the current file.
   --entity-type ENTITY_TYPE
                         Entity type for this heartbeat. Can be "file",
                         "domain" or "app". Defaults to "file".
@@ -29,11 +28,11 @@ optional arguments:
                         socks5://user:pass@host:port or domain\user:pass
   --no-ssl-verify       Disables SSL certificate verification for HTTPS
                         requests. By default, SSL certificates are verified.
-  --ssl-certs-file SSL_CERTS_FILE
+  --ssl-certs-file FILE
                         Override the bundled Python Requests CA certs file. By
                         default, uses certifi for ca certs.
   --project PROJECT     Optional project name.
-  --alternate-project ALTERNATE_PROJECT
+  --alternate-project PROJECT
                         Optional alternate project name. Auto-discovered
                         project takes priority.
   --language LANGUAGE   Optional language name. If valid, takes priority over
@@ -52,12 +51,12 @@ optional arguments:
                         random project name.
   --hide-branch-names   Obfuscate branch names. Will not send revision control
                         branch names to api.
-  --exclude EXCLUDE     Filename patterns to exclude from logging. POSIX regex
+  --exclude PATH        Filename patterns to exclude from logging. POSIX regex
                         syntax. Can be used more than once.
   --exclude-unknown-project
                         When set, any activity where the project cannot be
                         detected will be ignored.
-  --include INCLUDE     Filename patterns to log. When used in combination
+  --include PATH        Filename patterns to log. When used in combination
                         with --exclude, files matching include will still be
                         logged. POSIX regex syntax. Can be used more than
                         once.
@@ -66,11 +65,11 @@ optional arguments:
                         .wakatime-project file. Defaults to false.
   --extra-heartbeats    Reads extra heartbeats from STDIN as a JSON array
                         until EOF.
-  --log-file LOG_FILE   Defaults to ~/.wakatime.log.
-  --api-url API_URL     Heartbeats api url. For debugging with a local server.
-  --timeout TIMEOUT     Number of seconds to wait when sending heartbeats to
+  --log-file FILE       Defaults to ~/.wakatime.log.
+  --api-url URL         Heartbeats api url. For debugging with a local server.
+  --timeout SECONDS     Number of seconds to wait when sending heartbeats to
                         api. Defaults to 60 seconds.
-  --sync-offline-activity SYNC_OFFLINE_ACTIVITY
+  --sync-offline-activity AMOUNT
                         Amount of offline activity to sync from your local
                         ~/.wakatime.db sqlite3 file to your WakaTime Dashboard
                         before exiting. Can be "none" or a positive integer
@@ -79,13 +78,12 @@ optional arguments:
                         be used without --entity to only sync offline activity
                         without generating new heartbeats.
   --today               Prints dashboard time for Today, then exits.
-  --config CONFIG       Defaults to ~/.wakatime.cfg.
-  --config-section CONFIG_SECTION
+  --config FILE         Defaults to ~/.wakatime.cfg.
+  --config-section SECTION
                         Optional config section when reading or writing a
                         config key. Defaults to [settings].
-  --config-read-key CONFIG_READ_KEY
-                        Prints value for the given config key, then exits.
-  --config-write-key CONFIG_WRITE_KEY CONFIG_WRITE_KEY
+  --config-read KEY     Prints value for the given config key, then exits.
+  --config-write KEY VALUE
                         Writes value to a config key, then exits. Expects two
                         arguments, key and value.
   --verbose             Turns on debug messages in log file.
