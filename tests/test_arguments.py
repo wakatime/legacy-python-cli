@@ -1293,7 +1293,7 @@ class ArgumentsTestCase(TestCase):
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = resp
 
         config = 'tests/samples/configs/good_config.cfg'
-        args = ['--config', config, '--today']
+        args = ['--config', config, '--today', '--verbose']
 
         retval = execute(args)
 
@@ -1317,7 +1317,7 @@ class ArgumentsTestCase(TestCase):
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = resp
 
         config = 'tests/samples/configs/good_config.cfg'
-        args = ['--config', config, '--today']
+        args = ['--config', config, '--today', '--verbose']
 
         retval = execute(args)
 
