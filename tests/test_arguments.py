@@ -21,7 +21,7 @@ from wakatime.constants import (
 from wakatime.packages.requests.exceptions import RequestException
 from wakatime.packages.requests.models import Response
 from wakatime.utils import get_user_agent
-from .utils import mock, json, ANY, CustomResponse, SummaryResponse, TemporaryDirectory, TestCase, NamedTemporaryFile
+from .utils import mock, json, ANY, CustomResponse, TemporaryDirectory, TestCase, NamedTemporaryFile
 
 
 class ArgumentsTestCase(TestCase):
@@ -1287,7 +1287,10 @@ class ArgumentsTestCase(TestCase):
     def test_today_arg_prints_coding_activity(self, logs):
         logging.disable(logging.NOTSET)
 
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = SummaryResponse()
+        resp = CustomResponse()
+        resp.response_code = 200
+        resp.response_text = '{"data": [{"categories": [{"name": "Coding", "text": "4 hrs 1 min"}], "grand_total": {"text": "4 hrs 23 mins"}}]}'
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = resp
 
         config = 'tests/samples/configs/good_config.cfg'
         args = ['--config', config, '--today']
@@ -1298,6 +1301,30 @@ class ArgumentsTestCase(TestCase):
         self.assertNothingLogged(logs)
 
         expected = '4 hrs 23 mins\n'
+        actual = self.getPrintedOutput()
+        self.assertEquals(actual, expected)
+
+        self.assertHeartbeatNotSavedOffline()
+        self.assertOfflineHeartbeatsNotSynced()
+
+    @log_capture()
+    def test_today_arg_prints_categories(self, logs):
+        logging.disable(logging.NOTSET)
+
+        resp = CustomResponse()
+        resp.response_code = 200
+        resp.response_text = '{"data": [{"categories": [{"name": "Coding", "text": "4 hrs 1 min"}, {"name": "Building", "text": "1 hr 22 mins"}], "grand_total": {"text": "4 hrs 23 mins"}}]}'
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = resp
+
+        config = 'tests/samples/configs/good_config.cfg'
+        args = ['--config', config, '--today']
+
+        retval = execute(args)
+
+        self.assertEquals(retval, SUCCESS)
+        self.assertNothingLogged(logs)
+
+        expected = '4 hrs 1 min coding, 1 hr 22 mins building\n'
         actual = self.getPrintedOutput()
         self.assertEquals(actual, expected)
 
