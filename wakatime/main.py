@@ -57,7 +57,7 @@ def execute(argv=None):
         hb = Heartbeat(vars(args), args, configs)
         if hb:
             heartbeats.append(hb)
-        else:
+        elif args.entity:
             log.debug(hb.skip)
 
         if args.extra_heartbeats:
