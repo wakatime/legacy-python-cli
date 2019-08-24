@@ -3,6 +3,15 @@ History
 -------
 
 
+13.0.0 (2019-08-24)
++++++++++++++++++++
+
+- New arguments for reading and writing ini config file.
+- Today argument shows categories when available.
+- Prevent unnecessarily debug log when syncing offline heartbeats.
+- Support for Python 3.7.
+
+
 12.0.0 (2019-06-23)
 +++++++++++++++++++
 
