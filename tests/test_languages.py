@@ -280,3 +280,9 @@ class LanguagesTestCase(utils.TestCase):
             expected_language='Go',
             entity='go.mod',
         )
+
+    def test_coldfusion_detected(self):
+        self.shared(
+            expected_language='ColdFusion',
+            entity='coldfusion.cfm',
+        )
