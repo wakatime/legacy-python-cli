@@ -3,6 +3,12 @@ History
 -------
 
 
+13.0.1 (2019-10-25)
++++++++++++++++++++
+
+- Detect ColdFusion as root language instead of HTML.
+
+
 13.0.0 (2019-08-24)
 +++++++++++++++++++
 
