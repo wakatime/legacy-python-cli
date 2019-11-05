@@ -18,6 +18,10 @@
     :target: https://pypi.python.org/pypi/wakatime
     :alt: Supported Python Versions
 
+ .. image:: https://wakatime.com/badge/github/wakatime/wakatime.svg
+    :target: https://wakatime.com/
+    :alt: Code time tracker
+
 
 WakaTime
 ========
