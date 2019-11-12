@@ -210,6 +210,18 @@ class DependenciesTestCase(TestCase):
                 extra_args=['--alternate-language', 'PYTHON'],
             )
 
+    def test_long_dependencies_removed(self):
+        self.shared(
+            expected_dependencies=[
+                'django',
+                'flask',
+                'notlongenoughnotlongenoughnotlongenoughnotlongenoughnotlongenoughnotlongenoughnotlongenoughnotlongenoughnotlongenoughnotlongenoughnotlongenoughnotlongenoughnotlongenoughnotlongenoughnotlongenoughnotlo',
+            ],
+            expected_language='Python',
+            expected_lines=20,
+            entity='python_with_long_import.py',
+        )
+
     def test_python_dependencies_detected(self):
         self.shared(
             expected_dependencies=[
