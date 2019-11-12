@@ -3,6 +3,14 @@ History
 -------
 
 
+13.0.2 (2019-11-12)
++++++++++++++++++++
+
+- Filter dependencies longer than 200 characters.
+- Close sqlite connection even when error raised.
+  `#196 <https://github.com/wakatime/wakatime/issues/196>`_
+
+
 13.0.1 (2019-10-25)
 +++++++++++++++++++
 
