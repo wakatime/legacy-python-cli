@@ -3,6 +3,13 @@ History
 -------
 
 
+13.0.3 (2019-12-04)
++++++++++++++++++++
+
+- Support slashes in Mercurial and Git branch names.
+  `#199 <https://github.com/wakatime/wakatime/issues/199>`_
+
+
 13.0.2 (2019-11-12)
 +++++++++++++++++++
 
