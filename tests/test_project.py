@@ -399,6 +399,25 @@ class ProjectTestCase(TestCase):
             self.assertEquals('hg', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
             self.assertEquals('test-hg-branch', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['branch'])
 
+    def test_mercurial_project_branch_with_slash_detected(self):
+        response = Response()
+        response.status_code = 0
+        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+
+        with mock.patch('wakatime.projects.git.Git.process') as mock_git:
+            mock_git.return_value = False
+
+            now = u(int(time.time()))
+            entity = 'tests/samples/projects/hg-branch-with-slash/emptyfile.txt'
+            config = 'tests/samples/configs/good_config.cfg'
+
+            args = ['--file', entity, '--config', config, '--time', now]
+
+            execute(args)
+
+            self.assertEquals('hg-branch-with-slash', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
+            self.assertEquals('branch/with/slash', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['branch'])
+
     @log_capture()
     def test_ioerror_when_reading_mercurial_branch(self, logs):
         logging.disable(logging.NOTSET)
@@ -667,6 +686,17 @@ class ProjectTestCase(TestCase):
         self.assertEquals(expected, result)
         self.assertNothingPrinted()
         self.assertNothingLogged(logs)
+
+    def test_git_branch_with_slash(self):
+        tempdir = tempfile.mkdtemp()
+        shutil.copytree('tests/samples/projects/git-branch-with-slash', os.path.join(tempdir, 'git'))
+        shutil.move(os.path.join(tempdir, 'git', 'dot_git'), os.path.join(tempdir, 'git', '.git'))
+
+        self.shared(
+            expected_project='git',
+            expected_branch='branch/with/slash',
+            entity=os.path.join(tempdir, 'git', 'emptyfile.txt'),
+        )
 
     @log_capture()
     def test_project_map(self, logs):
