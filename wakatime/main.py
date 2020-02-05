@@ -21,9 +21,9 @@ pwd = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(pwd))
 sys.path.insert(0, os.path.join(pwd, 'packages'))
 
-from .compat import py26
+from .compat import is_py26
 
-if not py26:
+if not is_py26:
     sys.path.insert(0, os.path.join(pwd, 'packages', 'py27'))
 
 from .__about__ import __version__
