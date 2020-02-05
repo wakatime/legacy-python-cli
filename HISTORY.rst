@@ -3,6 +3,13 @@ History
 -------
 
 
+13.0.4 (2020-02-05)
++++++++++++++++++++
+
+- Bundle cryptography, pyopenssl, and ipaddress packages for improved SSL
+  support on Python2.
+
+
 13.0.3 (2019-12-04)
 +++++++++++++++++++
 
