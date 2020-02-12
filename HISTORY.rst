@@ -3,6 +3,12 @@ History
 -------
 
 
+13.0.6 (2020-02-11)
++++++++++++++++++++
+
+- Force requests to use bundled ca cert from certifi by default.
+
+
 13.0.5 (2020-02-11)
 +++++++++++++++++++
 
