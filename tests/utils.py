@@ -8,6 +8,7 @@ import sys
 import tempfile
 
 from wakatime.compat import u
+from wakatime.packages import certifi
 from wakatime.packages.requests.models import Response
 from wakatime.utils import BACKSLASH_REPLACE_PATTERN, WINDOWS_DRIVE_PATTERN
 
@@ -93,7 +94,7 @@ class TestCase(unittest.TestCase):
     def assertHeartbeatNotSent(self):
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_not_called()
 
-    def assertHeartbeatSent(self, heartbeat=None, extra_heartbeats=[], headers=None, cert=None, proxies={}, stream=False, timeout=60, verify=True):
+    def assertHeartbeatSent(self, heartbeat=None, extra_heartbeats=[], headers=None, cert=None, proxies={}, stream=False, timeout=60, verify=certifi.where()):
         self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_called_once_with(
             ANY, cert=cert, proxies=proxies, stream=stream, timeout=timeout, verify=verify,
         )

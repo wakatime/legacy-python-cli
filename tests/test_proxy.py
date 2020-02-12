@@ -11,6 +11,7 @@ import sys
 from testfixtures import log_capture
 from wakatime.compat import u
 from wakatime.constants import API_ERROR, SUCCESS
+from wakatime.packages import certifi
 from wakatime.packages.requests.exceptions import RequestException
 from wakatime.packages.requests.models import Response
 from . import utils
@@ -58,7 +59,7 @@ class ProxyTestCase(utils.TestCase):
             self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_called_once_with()
 
-            self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_called_once_with(ANY, cert=None, proxies={'https': proxy}, stream=False, timeout=60, verify=True)
+            self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_called_once_with(ANY, cert=None, proxies={'https': proxy}, stream=False, timeout=60, verify=certifi.where())
 
     def test_https_proxy(self):
         response = CustomResponse()
@@ -84,7 +85,7 @@ class ProxyTestCase(utils.TestCase):
             self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_called_once_with()
 
-            self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_called_once_with(ANY, cert=None, proxies={'https': proxy}, stream=False, timeout=60, verify=True)
+            self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_called_once_with(ANY, cert=None, proxies={'https': proxy}, stream=False, timeout=60, verify=certifi.where())
 
     def test_socks_proxy(self):
         response = CustomResponse()
@@ -110,7 +111,7 @@ class ProxyTestCase(utils.TestCase):
             self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_called_once_with()
 
-            self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_called_once_with(ANY, cert=None, proxies={'https': proxy}, stream=False, timeout=60, verify=True)
+            self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_called_once_with(ANY, cert=None, proxies={'https': proxy}, stream=False, timeout=60, verify=certifi.where())
 
     def test_ntlm_proxy_used_after_trying_normal_proxy(self):
         response = Response()
@@ -138,8 +139,8 @@ class ProxyTestCase(utils.TestCase):
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
             expected_calls = [
-                call(ANY, cert=None, proxies={'https': proxy}, stream=False, timeout=60, verify=True),
-                call(ANY, cert=None, proxies={}, stream=False, timeout=60, verify=True),
+                call(ANY, cert=None, proxies={'https': proxy}, stream=False, timeout=60, verify=certifi.where()),
+                call(ANY, cert=None, proxies={}, stream=False, timeout=60, verify=certifi.where()),
             ]
             self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_has_calls(expected_calls)
 
@@ -176,8 +177,8 @@ class ProxyTestCase(utils.TestCase):
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
             expected_calls = [
-                call(ANY, cert=None, proxies={'https': proxy}, stream=False, timeout=60, verify=True),
-                call(ANY, cert=None, proxies={}, stream=False, timeout=60, verify=True),
+                call(ANY, cert=None, proxies={'https': proxy}, stream=False, timeout=60, verify=certifi.where()),
+                call(ANY, cert=None, proxies={}, stream=False, timeout=60, verify=certifi.where()),
             ]
             self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_has_calls(expected_calls)
 
@@ -214,8 +215,8 @@ class ProxyTestCase(utils.TestCase):
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
             expected_calls = [
-                call(ANY, cert=None, proxies={'https': proxy}, stream=False, timeout=60, verify=True),
-                call(ANY, cert=None, proxies={}, stream=False, timeout=60, verify=True),
+                call(ANY, cert=None, proxies={'https': proxy}, stream=False, timeout=60, verify=certifi.where()),
+                call(ANY, cert=None, proxies={}, stream=False, timeout=60, verify=certifi.where()),
             ]
             self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_has_calls(expected_calls)
 
