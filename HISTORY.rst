@@ -3,6 +3,13 @@ History
 -------
 
 
+13.0.7 (2020-02-13)
++++++++++++++++++++
+
+- Split bundled pygments library for Python 2.7+.
+- Upgrade pygments for py27+ to v2.5.2 development master.
+
+
 13.0.6 (2020-02-11)
 +++++++++++++++++++
 
