@@ -4,9 +4,10 @@
 from __future__ import print_statement
 
 import os, sys
+import first, second
 import django.forms.monstertruck
 from app import *
-from flask import session
+from flask import session, render_template
 import simplejson as json
 from . import privatemodule
 from jinja import tags

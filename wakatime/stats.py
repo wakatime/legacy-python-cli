@@ -14,22 +14,35 @@ import os
 import re
 import sys
 
-from .compat import u, open
+from .compat import is_py26, u, open
 from .constants import MAX_FILE_SIZE_SUPPORTED
 from .dependencies import DependencyParser
 from .exceptions import SkipHeartbeat
 from .language_priorities import LANGUAGES
 
-from .packages.pygments.lexers import (
-    _iter_lexerclasses,
-    _fn_matches,
-    basename,
-    ClassNotFound,
-    CppLexer,
-    find_lexer_class,
-    get_lexer_by_name,
-)
-from .packages.pygments.modeline import get_filetype_from_buffer
+if is_py26:
+    from .packages.py26.pygments.lexers import (
+        _iter_lexerclasses,
+        _fn_matches,
+        basename,
+        ClassNotFound,
+        CppLexer,
+        find_lexer_class,
+        get_lexer_by_name,
+    )
+    from .packages.py26.pygments.modeline import get_filetype_from_buffer
+else:
+    from .packages.py27.pygments.lexers import (
+        _iter_lexerclasses,
+        _fn_matches,
+        basename,
+        ClassNotFound,
+        CppLexer,
+        find_lexer_class,
+        get_lexer_by_name,
+    )
+    from .packages.py27.pygments.modeline import get_filetype_from_buffer
+
 
 try:
     from .packages import simplejson as json  # pragma: nocover
@@ -102,8 +115,8 @@ def smart_guess_lexer(file_name, local_file):
 
     if lexer1:
         lexer = lexer1
-    if (lexer2 and accuracy2 and
-            (not accuracy1 or accuracy2 > accuracy1)):
+    if (lexer2 and accuracy2 is not None and
+            (accuracy1 is None or accuracy2 > accuracy1)):
         lexer = lexer2
 
     return lexer

@@ -9,13 +9,17 @@ import os
 import time
 import shutil
 from testfixtures import log_capture
-from wakatime.compat import u
+from wakatime.compat import is_py26, u
 from wakatime.constants import SUCCESS
 from wakatime.exceptions import NotYetImplemented
 from wakatime.dependencies import DependencyParser, TokenParser
-from wakatime.packages.pygments.lexers import ClassNotFound, PythonLexer
 from wakatime.stats import get_lexer_by_name
 from .utils import mock, ANY, CustomResponse, TemporaryDirectory, TestCase
+
+if is_py26:
+    from wakatime.packages.py26.pygments.lexers import ClassNotFound, PythonLexer
+else:
+    from wakatime.packages.py27.pygments.lexers import ClassNotFound, PythonLexer
 
 
 class DependenciesTestCase(TestCase):
@@ -166,7 +170,7 @@ class DependenciesTestCase(TestCase):
             self.shared(
                 expected_dependencies=[],
                 expected_language='Python',
-                expected_lines=37,
+                expected_lines=38,
                 entity='python.py',
             )
 
@@ -184,7 +188,7 @@ class DependenciesTestCase(TestCase):
                 self.shared(
                     expected_dependencies=[],
                     expected_language=None,
-                    expected_lines=37,
+                    expected_lines=38,
                     entity='python.py',
                 )
 
@@ -196,16 +200,18 @@ class DependenciesTestCase(TestCase):
                 expected_dependencies=[
                     'app',
                     'django',
+                    'first',
                     'flask',
                     'jinja',
                     'mock',
                     'pygments',
+                    'second',
                     'simplejson',
                     'sqlalchemy',
                     'unittest',
                 ],
                 expected_language='Python',
-                expected_lines=37,
+                expected_lines=38,
                 entity='python.py',
                 extra_args=['--alternate-language', 'PYTHON'],
             )
@@ -227,16 +233,18 @@ class DependenciesTestCase(TestCase):
             expected_dependencies=[
                 'app',
                 'django',
+                'first',
                 'flask',
                 'jinja',
                 'mock',
                 'pygments',
+                'second',
                 'simplejson',
                 'sqlalchemy',
                 'unittest',
             ],
             expected_language='Python',
-            expected_lines=37,
+            expected_lines=38,
             entity='python.py',
         )
 

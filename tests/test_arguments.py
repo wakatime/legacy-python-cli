@@ -105,10 +105,10 @@ class ArgumentsTestCase(TestCase):
             'time': float(now),
             'type': 'file',
             'cursorpos': None,
-            'dependencies': ['sqlalchemy', 'jinja', 'simplejson', 'flask', 'app', 'django', 'pygments', 'unittest', 'mock'],
+            'dependencies': ['sqlalchemy', 'jinja', 'simplejson', 'flask', 'app', 'django', 'pygments', 'unittest', 'mock', 'first', 'second'],
             'language': u('Python'),
             'lineno': None,
-            'lines': 37,
+            'lines': 38,
             'is_write': False,
             'user_agent': ua,
         }
@@ -723,7 +723,7 @@ class ArgumentsTestCase(TestCase):
             'dependencies': [],
             'language': u(language),
             'lineno': None,
-            'lines': 37,
+            'lines': 38,
             'is_write': False,
             'user_agent': ANY,
         }

@@ -386,7 +386,7 @@ class ConfigsTestCase(TestCase):
             now = u(int(time.time()))
             config = 'tests/samples/configs/hide_file_names_not_python.cfg'
             key = u(uuid.uuid4())
-            dependencies = ['sqlalchemy', 'jinja', 'simplejson', 'flask', 'app', 'django', 'pygments', 'unittest', 'mock']
+            dependencies = ['sqlalchemy', 'jinja', 'simplejson', 'flask', 'app', 'django', 'pygments', 'unittest', 'mock', 'first', 'second']
             project = 'abcxyz'
 
             args = ['--file', entity, '--key', key, '--config', config, '--time', now, '--log-file', '~/.wakatime.log', '--alternate-project', project]
@@ -397,7 +397,7 @@ class ConfigsTestCase(TestCase):
 
             heartbeat = {
                 'language': 'Python',
-                'lines': 37,
+                'lines': 38,
                 'entity': entity,
                 'project': project,
                 'time': float(now),
