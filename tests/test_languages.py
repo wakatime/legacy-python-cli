@@ -8,7 +8,7 @@ import os
 import time
 from wakatime.compat import u
 from wakatime.constants import SUCCESS
-from wakatime.stats import guess_language
+from wakatime.stats import guess_lexer
 from . import utils
 from .utils import ANY, CustomResponse
 
@@ -105,27 +105,26 @@ class LanguagesTestCase(utils.TestCase):
             entity='c_and_cpp/objective-cpp.h',
         )
 
-    def test_guess_language(self):
-        with utils.mock.patch('wakatime.stats.smart_guess_lexer') as mock_guess_lexer:
-            mock_guess_lexer.return_value = None
-            source_file = 'tests/samples/codefiles/python.py'
-            local_file = None
-            result = guess_language(source_file, local_file)
-            mock_guess_lexer.assert_called_once_with(source_file, local_file)
-            self.assertEquals(result, (None, None))
+    def test_guess_lexer(self):
+        source_file = 'tests/samples/codefiles/python.py'
+        local_file = None
+        lexer = guess_lexer(source_file, local_file)
+        language = u(lexer.name) if lexer else None
+        self.assertEquals(language, 'Python')
 
-    def test_guess_language_from_vim_modeline(self):
+    def test_guess_lexer_from_vim_modeline(self):
         self.shared(
             expected_language='Python',
             entity='python_without_extension',
         )
 
-    def test_guess_language_when_entity_not_exist_but_local_file_exists(self):
+    def test_guess_lexer_when_entity_not_exist_but_local_file_exists(self):
         source_file = 'tests/samples/codefiles/does_not_exist.py'
         local_file = 'tests/samples/codefiles/python.py'
         self.assertFalse(os.path.exists(source_file))
-        result = guess_language(source_file, local_file)
-        self.assertEquals(result[0], 'Python')
+        lexer = guess_lexer(source_file, local_file)
+        language = u(lexer.name) if lexer else None
+        self.assertEquals(language, 'Python')
 
     def test_language_arg_takes_priority_over_detected_language(self):
         self.shared(
@@ -135,7 +134,7 @@ class LanguagesTestCase(utils.TestCase):
         )
 
     def test_language_arg_is_used_when_not_guessed(self):
-        with utils.mock.patch('wakatime.stats.smart_guess_lexer') as mock_guess_lexer:
+        with utils.mock.patch('wakatime.stats.guess_lexer') as mock_guess_lexer:
             mock_guess_lexer.return_value = None
 
             self.shared(
@@ -169,7 +168,7 @@ class LanguagesTestCase(utils.TestCase):
         )
 
     def test_vim_language_arg_is_used_when_not_guessed(self):
-        with utils.mock.patch('wakatime.stats.smart_guess_lexer') as mock_guess_lexer:
+        with utils.mock.patch('wakatime.stats.guess_lexer') as mock_guess_lexer:
             mock_guess_lexer.return_value = None
 
             self.shared(
@@ -179,7 +178,7 @@ class LanguagesTestCase(utils.TestCase):
             )
 
     def test_alternate_language_not_used_when_invalid(self):
-        with utils.mock.patch('wakatime.stats.smart_guess_lexer') as mock_guess_lexer:
+        with utils.mock.patch('wakatime.stats.guess_lexer') as mock_guess_lexer:
             mock_guess_lexer.return_value = None
 
             self.shared(
@@ -189,7 +188,7 @@ class LanguagesTestCase(utils.TestCase):
             )
 
     def test_error_reading_alternate_language_json_map_file(self):
-        with utils.mock.patch('wakatime.stats.smart_guess_lexer') as mock_guess_lexer:
+        with utils.mock.patch('wakatime.stats.guess_lexer') as mock_guess_lexer:
             mock_guess_lexer.return_value = None
 
             with utils.mock.patch('wakatime.stats.open') as mock_open:
@@ -285,4 +284,10 @@ class LanguagesTestCase(utils.TestCase):
         self.shared(
             expected_language='ColdFusion',
             entity='coldfusion.cfm',
+        )
+
+    def test_gas_detected_as_assembly(self):
+        self.shared(
+            expected_language='Assembly',
+            entity='gas.s',
         )

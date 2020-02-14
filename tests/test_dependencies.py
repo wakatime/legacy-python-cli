@@ -193,7 +193,7 @@ class DependenciesTestCase(TestCase):
                 )
 
     def test_dependencies_still_detected_when_alternate_language_used(self):
-        with mock.patch('wakatime.stats.smart_guess_lexer') as mock_guess_lexer:
+        with mock.patch('wakatime.stats.guess_lexer') as mock_guess_lexer:
             mock_guess_lexer.return_value = None
 
             self.shared(
