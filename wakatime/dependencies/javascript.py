@@ -16,7 +16,7 @@ from . import TokenParser
 
 class JavascriptParser(TokenParser):
     state = None
-    extension = re.compile(r'\.\w{1,4}$')
+    extension = re.compile(r"\.\w{1,4}$")
 
     def parse(self):
         for index, token, content in self.tokens:
@@ -24,11 +24,11 @@ class JavascriptParser(TokenParser):
         return self.dependencies
 
     def _process_token(self, token, content):
-        if self.partial(token) == 'Reserved':
+        if self.partial(token) == "Reserved":
             self._process_reserved(token, content)
-        elif self.partial(token) == 'Single':
+        elif self.partial(token) == "Single":
             self._process_string(token, content)
-        elif self.partial(token) == 'Punctuation':
+        elif self.partial(token) == "Punctuation":
             self._process_punctuation(token, content)
         else:
             self._process_other(token, content)
@@ -38,12 +38,12 @@ class JavascriptParser(TokenParser):
             self.state = content
 
     def _process_string(self, token, content):
-        if self.state == 'import':
+        if self.state == "import":
             self.append(self._format_module(content))
         self.state = None
 
     def _process_punctuation(self, token, content):
-        if content == ';':
+        if content == ";":
             self.state = None
 
     def _process_other(self, token, content):
@@ -51,8 +51,8 @@ class JavascriptParser(TokenParser):
 
     def _format_module(self, content):
         content = content.strip().strip('"').strip("'").strip()
-        content = content.split('/')[-1].split('\\')[-1]
-        content = self.extension.sub('', content, count=1)
+        content = content.split("/")[-1].split("\\")[-1]
+        content = self.extension.sub("", content, count=1)
         return content
 
 

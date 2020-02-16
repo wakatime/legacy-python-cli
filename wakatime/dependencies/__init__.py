@@ -12,12 +12,12 @@
 import logging
 import re
 import sys
+from importlib import import_module
 
-from ..compat import u, open, import_module
+from ..compat import u
 from ..exceptions import NotYetImplemented
 
-
-log = logging.getLogger('WakaTime')
+log = logging.getLogger("WakaTime")
 
 
 class TokenParser(object):
@@ -25,6 +25,7 @@ class TokenParser(object):
     language, inherit from this class and implement the :meth:`parse` method
     to return a list of dependency strings.
     """
+
     exclude = []
 
     def __init__(self, source_file, lexer=None):
@@ -45,8 +46,14 @@ class TokenParser(object):
         """
         raise NotYetImplemented()
 
-    def append(self, dep, truncate=False, separator=None, truncate_to=None,
-               strip_whitespace=True):
+    def append(
+        self,
+        dep,
+        truncate=False,
+        separator=None,
+        truncate_to=None,
+        strip_whitespace=True,
+    ):
         self._save_dependency(
             dep,
             truncate=truncate,
@@ -56,27 +63,37 @@ class TokenParser(object):
         )
 
     def partial(self, token):
-        return u(token).split('.')[-1]
+        return u(token).split(".")[-1]
 
     def _extract_tokens(self):
         if self.lexer:
             try:
-                with open(self.source_file, 'r', encoding='utf-8') as fh:
+                with open(self.source_file, "r", encoding="utf-8") as fh:
                     return self.lexer.get_tokens_unprocessed(fh.read(512000))
             except:
                 pass
             try:
-                with open(self.source_file, 'r', encoding=sys.getfilesystemencoding()) as fh:
-                    return self.lexer.get_tokens_unprocessed(fh.read(512000))  # pragma: nocover
+                with open(
+                    self.source_file, "r", encoding=sys.getfilesystemencoding()
+                ) as fh:
+                    return self.lexer.get_tokens_unprocessed(
+                        fh.read(512000)
+                    )  # pragma: nocover
             except:
                 pass
         return []
 
-    def _save_dependency(self, dep, truncate=False, separator=None,
-                         truncate_to=None, strip_whitespace=True):
+    def _save_dependency(
+        self,
+        dep,
+        truncate=False,
+        separator=None,
+        truncate_to=None,
+        strip_whitespace=True,
+    ):
         if truncate:
             if separator is None:
-                separator = u('.')
+                separator = u(".")
             separator = u(separator)
             dep = dep.split(separator)
             if truncate_to is None or truncate_to < 1:
@@ -106,24 +123,34 @@ class DependencyParser(object):
         self.lexer = lexer
 
         if self.lexer:
-            module_name = self.root_lexer.__module__.rsplit('.', 1)[-1]
-            class_name = self.root_lexer.__class__.__name__.replace('Lexer', 'Parser', 1)
+            module_name = self.root_lexer.__module__.rsplit(".", 1)[-1]
+            class_name = self.root_lexer.__class__.__name__.replace(
+                "Lexer", "Parser", 1
+            )
         else:
-            module_name = 'unknown'
-            class_name = 'UnknownParser'
+            module_name = "unknown"
+            class_name = "UnknownParser"
 
         try:
-            module = import_module('.%s' % module_name, package=__package__)
+            module = import_module(".%s" % module_name, package=__package__)
             try:
                 self.parser = getattr(module, class_name)
             except AttributeError:
-                log.debug('Parsing dependencies not supported for {0}.{1}'.format(module_name, class_name))
+                log.debug(
+                    "Parsing dependencies not supported for {0}.{1}".format(
+                        module_name, class_name
+                    )
+                )
         except ImportError:
-            log.debug('Parsing dependencies not supported for {0}.{1}'.format(module_name, class_name))
+            log.debug(
+                "Parsing dependencies not supported for {0}.{1}".format(
+                    module_name, class_name
+                )
+            )
 
     @property
     def root_lexer(self):
-        if hasattr(self.lexer, 'root_lexer'):
+        if hasattr(self.lexer, "root_lexer"):
             return self.lexer.root_lexer
         return self.lexer
 

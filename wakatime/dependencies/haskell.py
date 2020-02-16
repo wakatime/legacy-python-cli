@@ -21,13 +21,13 @@ class HaskellParser(TokenParser):
         return self.dependencies
 
     def _process_token(self, token, content):
-        if self.partial(token) == 'Reserved':
+        if self.partial(token) == "Reserved":
             self._process_reserved(token, content)
-        elif self.partial(token) == 'Namespace':
+        elif self.partial(token) == "Namespace":
             self._process_namespace(token, content)
-        elif self.partial(token) == 'Keyword':
+        elif self.partial(token) == "Keyword":
             self._process_keyword(token, content)
-        elif self.partial(token) == 'Text':
+        elif self.partial(token) == "Text":
             self._process_text(token, content)
         else:
             self._process_other(token, content)
@@ -36,11 +36,11 @@ class HaskellParser(TokenParser):
         self.state = content.strip()
 
     def _process_namespace(self, token, content):
-        if self.state == 'import':
+        if self.state == "import":
             self.append(self._format(content))
 
     def _process_keyword(self, token, content):
-        if self.state != 'import' or content.strip() != 'qualified':
+        if self.state != "import" or content.strip() != "qualified":
             self.state = None
 
     def _process_text(self, token, content):
@@ -50,4 +50,4 @@ class HaskellParser(TokenParser):
         self.state = None
 
     def _format(self, content):
-        return content.strip().split('.')[0].strip()
+        return content.strip().split(".")[0].strip()

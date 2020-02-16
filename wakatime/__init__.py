@@ -11,7 +11,7 @@
 """
 
 
-__all__ = ['main']
+__all__ = ["main"]
 
 
 from .main import execute

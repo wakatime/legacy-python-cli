@@ -7,19 +7,20 @@
 """
 
 
-import os
 import logging
+import os
 import re
 from subprocess import PIPE
 
-from .compat import u, json, is_win, Popen
+import simplejson
+
+from .compat import Popen, is_win, u
 from .exceptions import SkipHeartbeat
 from .project import get_project_info
 from .stats import get_file_stats
-from .utils import get_user_agent, should_exclude, format_file_path, find_project_file
+from .utils import find_project_file, format_file_path, get_user_agent, should_exclude
 
-
-log = logging.getLogger('WakaTime')
+log = logging.getLogger("WakaTime")
 
 
 class Heartbeat(object):
@@ -44,44 +45,42 @@ class Heartbeat(object):
     user_agent = None
 
     _sensitive_when_hiding_filename = (
-        'dependencies',
-        'lines',
-        'lineno',
-        'cursorpos',
+        "dependencies",
+        "lines",
+        "lineno",
+        "cursorpos",
     )
-    _sensitive_when_hiding_branch = (
-        'branch',
-    )
+    _sensitive_when_hiding_branch = ("branch",)
 
     def __init__(self, data, args, configs, _clone=None):
         if not data:
-            self.skip = u('Skipping because heartbeat data is missing.')
+            self.skip = u("Skipping because heartbeat data is missing.")
             return
 
         self.args = args
         self.configs = configs
 
-        self.entity = data.get('entity')
-        self.time = data.get('time', data.get('timestamp'))
-        self.is_write = data.get('is_write')
-        self.user_agent = data.get('user_agent') or get_user_agent(args.plugin)
+        self.entity = data.get("entity")
+        self.time = data.get("time", data.get("timestamp"))
+        self.is_write = data.get("is_write")
+        self.user_agent = data.get("user_agent") or get_user_agent(args.plugin)
 
-        self.type = data.get('type', data.get('entity_type'))
-        if self.type not in ['file', 'domain', 'app']:
-            self.type = 'file'
+        self.type = data.get("type", data.get("entity_type"))
+        if self.type not in ["file", "domain", "app"]:
+            self.type = "file"
 
-        self.category = data.get('category')
+        self.category = data.get("category")
         allowed_categories = [
-            'coding',
-            'building',
-            'indexing',
-            'debugging',
-            'running tests',
-            'manual testing',
-            'writing tests',
-            'browsing',
-            'code reviewing',
-            'designing',
+            "coding",
+            "building",
+            "indexing",
+            "debugging",
+            "running tests",
+            "manual testing",
+            "writing tests",
+            "browsing",
+            "code reviewing",
+            "designing",
         ]
         if self.category not in allowed_categories:
             self.category = None
@@ -89,18 +88,20 @@ class Heartbeat(object):
         if not _clone:
             exclude = self._excluded_by_pattern()
             if exclude:
-                self.skip = u('Skipping because matches exclude pattern: {pattern}').format(
-                    pattern=u(exclude),
-                )
+                self.skip = u(
+                    "Skipping because matches exclude pattern: {pattern}"
+                ).format(pattern=u(exclude),)
                 return
-            if self.type == 'file':
+            if self.type == "file":
                 self.entity = format_file_path(self.entity)
                 self._format_local_file()
                 if not self._file_exists():
-                    self.skip = u('File does not exist; ignoring this heartbeat.')
+                    self.skip = u("File does not exist; ignoring this heartbeat.")
                     return
                 if self._excluded_by_missing_project_file():
-                    self.skip = u('Skipping because missing .wakatime-project file in parent path.')
+                    self.skip = u(
+                        "Skipping because missing .wakatime-project file in parent path."
+                    )
                     return
 
             if args.local_file and not os.path.isfile(args.local_file):
@@ -111,27 +112,29 @@ class Heartbeat(object):
             self.branch = branch
 
             if self._excluded_by_unknown_project():
-                self.skip = u('Skipping because project unknown.')
+                self.skip = u("Skipping because project unknown.")
                 return
 
             try:
-                stats = get_file_stats(self.entity,
-                                       entity_type=self.type,
-                                       lineno=data.get('lineno'),
-                                       cursorpos=data.get('cursorpos'),
-                                       plugin=args.plugin,
-                                       language=data.get('language'),
-                                       local_file=args.local_file)
+                stats = get_file_stats(
+                    self.entity,
+                    entity_type=self.type,
+                    lineno=data.get("lineno"),
+                    cursorpos=data.get("cursorpos"),
+                    plugin=args.plugin,
+                    language=data.get("language"),
+                    local_file=args.local_file,
+                )
             except SkipHeartbeat as ex:
-                self.skip = u(ex) or 'Skipping'
+                self.skip = u(ex) or "Skipping"
                 return
 
         else:
-            self.project = data.get('project')
-            self.branch = data.get('branch')
+            self.project = data.get("project")
+            self.branch = data.get("branch")
             stats = data
 
-        for key in ['language', 'dependencies', 'lines', 'lineno', 'cursorpos']:
+        for key in ["language", "dependencies", "lines", "lineno", "cursorpos"]:
             if stats.get(key) is not None:
                 setattr(self, key, stats[key])
 
@@ -152,7 +155,7 @@ class Heartbeat(object):
         if self.entity is None:
             return self
 
-        if self.type != 'file':
+        if self.type != "file":
             return self
 
         if self._should_obfuscate_filename():
@@ -160,7 +163,7 @@ class Heartbeat(object):
             if self._should_obfuscate_branch(default=True):
                 self._sanitize_metadata(keys=self._sensitive_when_hiding_branch)
             extension = u(os.path.splitext(self.entity)[1])
-            self.entity = u('HIDDEN{0}').format(extension)
+            self.entity = u("HIDDEN{0}").format(extension)
         elif self.should_obfuscate_project():
             self._sanitize_metadata(keys=self._sensitive_when_hiding_filename)
             if self._should_obfuscate_branch(default=True):
@@ -171,30 +174,32 @@ class Heartbeat(object):
         return self
 
     def json(self):
-        return json.dumps(self.dict())
+        return simplejson.dumps(self.dict())
 
     def dict(self):
         return {
-            'time': self.time,
-            'entity': self._unicode(self.entity),
-            'type': self.type,
-            'category': self.category,
-            'is_write': self.is_write,
-            'project': self._unicode(self.project),
-            'branch': self._unicode(self.branch),
-            'language': self._unicode(self.language),
-            'dependencies': self._unicode_list(self.dependencies),
-            'lines': self.lines,
-            'lineno': self.lineno,
-            'cursorpos': self.cursorpos,
-            'user_agent': self._unicode(self.user_agent),
+            "time": self.time,
+            "entity": self._unicode(self.entity),
+            "type": self.type,
+            "category": self.category,
+            "is_write": self.is_write,
+            "project": self._unicode(self.project),
+            "branch": self._unicode(self.branch),
+            "language": self._unicode(self.language),
+            "dependencies": self._unicode_list(self.dependencies),
+            "lines": self.lines,
+            "lineno": self.lineno,
+            "cursorpos": self.cursorpos,
+            "user_agent": self._unicode(self.user_agent),
         }
 
     def items(self):
         return self.dict().items()
 
     def get_id(self):
-        return u('{time}-{type}-{category}-{project}-{branch}-{entity}-{is_write}').format(
+        return u(
+            "{time}-{type}-{category}-{project}-{branch}-{entity}-{is_write}"
+        ).format(
             time=self.time,
             type=self.type,
             category=self.category,
@@ -214,10 +219,13 @@ class Heartbeat(object):
                 if compiled.search(self.entity):
                     return True
             except re.error as ex:
-                log.warning(u('Regex error ({msg}) for hide_project_names pattern: {pattern}').format(
-                    msg=u(ex),
-                    pattern=u(pattern),
-                ))
+                log.warning(
+                    u(
+                        "Regex error ({msg}) for hide_project_names pattern: {pattern}"
+                    ).format(
+                        msg=u(ex), pattern=u(pattern),
+                    )
+                )
 
         return False
 
@@ -231,10 +239,13 @@ class Heartbeat(object):
                 if compiled.search(self.entity):
                     return True
             except re.error as ex:
-                log.warning(u('Regex error ({msg}) for hide_file_names pattern: {pattern}').format(
-                    msg=u(ex),
-                    pattern=u(pattern),
-                ))
+                log.warning(
+                    u(
+                        "Regex error ({msg}) for hide_file_names pattern: {pattern}"
+                    ).format(
+                        msg=u(ex), pattern=u(pattern),
+                    )
+                )
 
         return False
 
@@ -256,10 +267,13 @@ class Heartbeat(object):
                 if compiled.search(self.entity) or compiled.search(self.branch):
                     return True
             except re.error as ex:
-                log.warning(u('Regex error ({msg}) for hide_branch_names pattern: {pattern}').format(
-                    msg=u(ex),
-                    pattern=u(pattern),
-                ))
+                log.warning(
+                    u(
+                        "Regex error ({msg}) for hide_branch_names pattern: {pattern}"
+                    ).format(
+                        msg=u(ex), pattern=u(pattern),
+                    )
+                )
 
         return False
 
@@ -274,8 +288,12 @@ class Heartbeat(object):
         return [self._unicode(value) for value in values]
 
     def _file_exists(self):
-        return (self.entity and os.path.isfile(self.entity) or
-            self.args.local_file and os.path.isfile(self.args.local_file))
+        return (
+            self.entity
+            and os.path.isfile(self.entity)
+            or self.args.local_file
+            and os.path.isfile(self.args.local_file)
+        )
 
     def _format_local_file(self):
         """When args.local_file empty on Windows, tries to map args.entity to a
@@ -284,7 +302,7 @@ class Heartbeat(object):
         Updates args.local_file in-place without returning anything.
         """
 
-        if self.type != 'file':
+        if self.type != "file":
             return
 
         if not self.entity:
@@ -305,7 +323,9 @@ class Heartbeat(object):
 
         stdout = None
         try:
-            stdout, stderr = Popen(['net', 'use'], stdout=PIPE, stderr=PIPE).communicate()
+            stdout, stderr = Popen(
+                ["net", "use"], stdout=PIPE, stderr=PIPE
+            ).communicate()
         except OSError:
             pass
         else:
@@ -318,14 +338,14 @@ class Heartbeat(object):
                     if not cols:
                         cols = self._unc_columns(line)
                         continue
-                    start, end = cols.get('local', (0, 0))
+                    start, end = cols.get("local", (0, 0))
                     if not start and not end:
                         break
-                    local = line[start:end].strip().split(':')[0].upper()
+                    local = line[start:end].strip().split(":")[0].upper()
                     if not local.isalpha():
                         continue
                     if local == drive:
-                        start, end = cols.get('remote', (0, 0))
+                        start, end = cols.get("remote", (0, 0))
                         if not start and not end:
                             break
                         remote = line[start:end].strip()
@@ -335,14 +355,14 @@ class Heartbeat(object):
 
     def _unc_columns(self, line):
         cols = {}
-        current_col = u('')
+        current_col = u("")
         newcol = False
         start, end = 0, 0
         for char in line:
             if char.isalpha():
                 if newcol:
                     cols[current_col.strip().lower()] = (start, end)
-                    current_col = u('')
+                    current_col = u("")
                     start = end
                     newcol = False
                 current_col += u(char)
@@ -354,7 +374,7 @@ class Heartbeat(object):
         return cols
 
     def _splitdrive(self, filepath):
-        if filepath[1:2] != ':' or not filepath[0].isalpha():
+        if filepath[1:2] != ":" or not filepath[0].isalpha():
             return None, filepath
         return filepath[0].upper(), filepath[2:]
 

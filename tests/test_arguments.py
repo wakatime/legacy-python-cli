@@ -2,32 +2,32 @@
 
 
 from wakatime.main import execute
-from wakatime.packages import requests
 
 import logging
 import os
 import time
+import requests
 import shutil
 import sys
 import uuid
 from testfixtures import log_capture
 from wakatime.arguments import parse_arguments
-from wakatime.compat import u, is_py3
+from wakatime.compat import u
 from wakatime.constants import (
     API_ERROR,
     AUTH_ERROR,
     SUCCESS,
 )
-from wakatime.packages import certifi
-from wakatime.packages.requests.exceptions import RequestException
-from wakatime.packages.requests.models import Response
+import certifi
+from requests.exceptions import RequestException
+from requests.models import Response
 from wakatime.utils import get_user_agent
 from .utils import mock, json, ANY, CustomResponse, TemporaryDirectory, TestCase, NamedTemporaryFile
 
 
 class ArgumentsTestCase(TestCase):
     patch_these = [
-        'wakatime.packages.requests.adapters.HTTPAdapter.send',
+        'requests.adapters.HTTPAdapter.send',
         'wakatime.offlinequeue.Queue.push',
         ['wakatime.offlinequeue.Queue.pop', None],
         ['wakatime.offlinequeue.Queue.connect', None],
@@ -57,7 +57,7 @@ class ArgumentsTestCase(TestCase):
     @log_capture()
     def test_argument_parsing(self, logs):
         logging.disable(logging.NOTSET)
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/twolinefile.txt'
@@ -84,7 +84,7 @@ class ArgumentsTestCase(TestCase):
     def test_argument_parsing_strips_quotes(self, logs):
         logging.disable(logging.NOTSET)
 
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         now = u(int(time.time()))
         config = 'tests/samples/configs/good_config.cfg'
@@ -121,7 +121,7 @@ class ArgumentsTestCase(TestCase):
     @log_capture()
     def test_lineno_and_cursorpos(self, logs):
         logging.disable(logging.NOTSET)
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         entity = 'tests/samples/codefiles/twolinefile.txt'
         config = 'tests/samples/configs/good_config.cfg'
@@ -158,7 +158,7 @@ class ArgumentsTestCase(TestCase):
     @log_capture()
     def test_invalid_timeout_passed_via_command_line(self, logs):
         logging.disable(logging.NOTSET)
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/twolinefile.txt'
@@ -185,7 +185,7 @@ class ArgumentsTestCase(TestCase):
     def test_missing_entity_file(self, logs):
         logging.disable(logging.NOTSET)
 
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         entity = 'tests/samples/codefiles/missingfile.txt'
 
@@ -208,7 +208,7 @@ class ArgumentsTestCase(TestCase):
     def test_missing_entity_argument(self, logs):
         logging.disable(logging.NOTSET)
 
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         config = 'tests/samples/configs/good_config.cfg'
         args = ['--config', config]
@@ -235,7 +235,7 @@ class ArgumentsTestCase(TestCase):
     def test_missing_entity_argument_with_sync_offline_activity_arg(self, logs):
         logging.disable(logging.NOTSET)
 
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         config = 'tests/samples/configs/good_config.cfg'
         args = ['--config', config, '--sync-offline-activity', '5']
@@ -253,7 +253,7 @@ class ArgumentsTestCase(TestCase):
     def test_missing_entity_argument_with_sync_offline_activity_none(self, logs):
         logging.disable(logging.NOTSET)
 
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         config = 'tests/samples/configs/good_config.cfg'
         args = ['--config', config, '--sync-offline-activity', 'none']
@@ -276,7 +276,7 @@ class ArgumentsTestCase(TestCase):
     def test_invalid_sync_offline_activity(self, logs):
         logging.disable(logging.NOTSET)
 
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         config = 'tests/samples/configs/good_config.cfg'
         args = ['--config', config, '--sync-offline-activity', 'all']
@@ -299,7 +299,7 @@ class ArgumentsTestCase(TestCase):
     def test_invalid_negative_sync_offline_activity(self, logs):
         logging.disable(logging.NOTSET)
 
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         config = 'tests/samples/configs/good_config.cfg'
         args = ['--config', config, '--sync-offline-activity', '-1']
@@ -322,7 +322,7 @@ class ArgumentsTestCase(TestCase):
     def test_missing_api_key(self, logs):
         logging.disable(logging.NOTSET)
 
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         config = 'tests/samples/configs/missing_api_key.cfg'
         args = ['--config', config]
@@ -349,7 +349,7 @@ class ArgumentsTestCase(TestCase):
     def test_invalid_api_key(self, logs):
         logging.disable(logging.NOTSET)
 
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         key = 'an-invalid-key'
         args = ['--key', key]
@@ -376,7 +376,7 @@ class ArgumentsTestCase(TestCase):
     def test_api_key_passed_via_command_line(self, logs):
         logging.disable(logging.NOTSET)
 
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with TemporaryDirectory() as tempdir:
             filename = list(filter(lambda x: x.endswith('.txt'), os.listdir(u('tests/samples/codefiles/unicode'))))[0]
@@ -415,7 +415,7 @@ class ArgumentsTestCase(TestCase):
     @log_capture()
     def test_proxy_argument(self, logs):
         logging.disable(logging.NOTSET)
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
@@ -437,12 +437,12 @@ class ArgumentsTestCase(TestCase):
             self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_called_once_with()
 
-            self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_called_once_with(ANY, cert=None, proxies={'https': proxy}, stream=False, timeout=60, verify=certifi.where())
+            self.patched['requests.adapters.HTTPAdapter.send'].assert_called_once_with(ANY, cert=None, proxies={'https': proxy}, stream=False, timeout=60, verify=certifi.where())
 
     @log_capture()
     def test_disable_ssl_verify_argument(self, logs):
         logging.disable(logging.NOTSET)
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
@@ -463,12 +463,12 @@ class ArgumentsTestCase(TestCase):
             self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_called_once_with()
 
-            self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_called_once_with(ANY, cert=None, proxies=ANY, stream=False, timeout=60, verify=False)
+            self.patched['requests.adapters.HTTPAdapter.send'].assert_called_once_with(ANY, cert=None, proxies=ANY, stream=False, timeout=60, verify=False)
 
     @log_capture()
     def test_custom_ssl_certs_file_argument(self, logs):
         logging.disable(logging.NOTSET)
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
@@ -490,13 +490,13 @@ class ArgumentsTestCase(TestCase):
             self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_called_once_with()
 
-            self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_called_once_with(ANY, cert=None, proxies=ANY, stream=False, timeout=60, verify=certfile)
+            self.patched['requests.adapters.HTTPAdapter.send'].assert_called_once_with(ANY, cert=None, proxies=ANY, stream=False, timeout=60, verify=certfile)
 
     @log_capture()
     def test_write_argument(self, logs):
         logging.disable(logging.NOTSET)
 
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
@@ -535,7 +535,7 @@ class ArgumentsTestCase(TestCase):
     def test_entity_type_domain(self, logs):
         logging.disable(logging.NOTSET)
 
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         entity = 'google.com'
         config = 'tests/samples/configs/good_config.cfg'
@@ -570,7 +570,7 @@ class ArgumentsTestCase(TestCase):
     def test_entity_type_app(self, logs):
         logging.disable(logging.NOTSET)
 
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         entity = 'Firefox'
         config = 'tests/samples/configs/good_config.cfg'
@@ -605,7 +605,7 @@ class ArgumentsTestCase(TestCase):
     def test_valid_categories(self, logs):
         logging.disable(logging.NOTSET)
 
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with TemporaryDirectory() as tempdir:
 
@@ -660,7 +660,7 @@ class ArgumentsTestCase(TestCase):
     def test_invalid_category(self, logs):
         logging.disable(logging.NOTSET)
 
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with TemporaryDirectory() as tempdir:
 
@@ -700,7 +700,7 @@ class ArgumentsTestCase(TestCase):
     def test_old_alternate_language_argument_still_supported(self, logs):
         logging.disable(logging.NOTSET)
 
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         language = 'Java'
         now = u(int(time.time()))
@@ -739,7 +739,7 @@ class ArgumentsTestCase(TestCase):
 
         response = CustomResponse()
         response.response_text = '{"responses": [[null, 201], [null,201]]}'
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         now1 = u(int(time.time()))
         project1 = os.path.basename(os.path.abspath('.'))
@@ -802,7 +802,7 @@ class ArgumentsTestCase(TestCase):
 
         response = CustomResponse()
         response.response_text = '{"responses": [[null, 201], [null,201]]}'
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         now1 = u(int(time.time()))
         project1 = os.path.basename(os.path.abspath('.'))
@@ -865,7 +865,7 @@ class ArgumentsTestCase(TestCase):
 
         response = CustomResponse()
         response.response_text = '{"responses": [[null, 201], [null,201]]}'
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/twolinefile.txt'
@@ -929,7 +929,7 @@ class ArgumentsTestCase(TestCase):
 
         response = CustomResponse()
         response.response_text = '{"responses": [[null, 201], [null,201]]}'
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/twolinefile.txt'
@@ -993,7 +993,7 @@ class ArgumentsTestCase(TestCase):
     def test_extra_heartbeats_with_malformed_json(self, logs):
         logging.disable(logging.NOTSET)
 
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/twolinefile.txt'
@@ -1026,7 +1026,7 @@ class ArgumentsTestCase(TestCase):
 
         response = CustomResponse()
         response.response_text = '{"responses": [[null, 201], [null,201]]}'
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         now1 = u(int(time.time()))
         project1 = os.path.basename(os.path.abspath('.'))
@@ -1092,7 +1092,7 @@ class ArgumentsTestCase(TestCase):
 
         response = CustomResponse()
         response.response_text = '{"responses": [[null, 201], [null,201]]}'
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         now1 = u(int(time.time()))
         project_not_used = 'xyz'
@@ -1146,7 +1146,7 @@ class ArgumentsTestCase(TestCase):
 
         response = Response()
         response.status_code = 0
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
@@ -1197,7 +1197,7 @@ class ArgumentsTestCase(TestCase):
     def test_legacy_disableoffline_arg_supported(self, logs):
         logging.disable(logging.NOTSET)
 
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].side_effect = RequestException('requests exception')
+        self.patched['requests.adapters.HTTPAdapter.send'].side_effect = RequestException('requests exception')
 
         with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/twolinefile.txt'
@@ -1214,9 +1214,7 @@ class ArgumentsTestCase(TestCase):
             self.assertNothingPrinted()
 
             log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
-            expected = "WakaTime ERROR {'RequestException': u'requests exception'}"
-            if is_py3:
-                expected = "WakaTime ERROR {'RequestException': 'requests exception'}"
+            expected = "WakaTime ERROR {'RequestException': 'requests exception'}"
             self.assertEquals(expected, log_output)
 
             self.assertHeartbeatSent()
@@ -1225,7 +1223,7 @@ class ArgumentsTestCase(TestCase):
             self.assertSessionCacheDeleted()
 
     def test_legacy_hidefilenames_arg_supported(self):
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/python.py'
@@ -1265,7 +1263,7 @@ class ArgumentsTestCase(TestCase):
 
         response = Response()
         response.status_code = 0
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         with NamedTemporaryFile() as fh:
             now = u(int(time.time()))
@@ -1291,7 +1289,7 @@ class ArgumentsTestCase(TestCase):
         resp = CustomResponse()
         resp.response_code = 200
         resp.response_text = '{"data": [{"categories": [{"name": "Coding", "text": "4 hrs 1 min"}], "grand_total": {"text": "4 hrs 23 mins"}}]}'
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = resp
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = resp
 
         config = 'tests/samples/configs/good_config.cfg'
         args = ['--config', config, '--today', '--verbose']
@@ -1315,7 +1313,7 @@ class ArgumentsTestCase(TestCase):
         resp = CustomResponse()
         resp.response_code = 200
         resp.response_text = '{"data": [{"categories": [{"name": "Coding", "text": "4 hrs 1 min"}, {"name": "Building", "text": "1 hr 22 mins"}], "grand_total": {"text": "4 hrs 23 mins"}}]}'
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = resp
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = resp
 
         config = 'tests/samples/configs/good_config.cfg'
         args = ['--config', config, '--today', '--verbose']
@@ -1336,7 +1334,7 @@ class ArgumentsTestCase(TestCase):
     def test_requests_exception_with_today_arg(self, logs):
         logging.disable(logging.NOTSET)
 
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].side_effect = RequestException('requests exception')
+        self.patched['requests.adapters.HTTPAdapter.send'].side_effect = RequestException('requests exception')
 
         key = str(uuid.uuid4())
         config = 'tests/samples/configs/good_config.cfg'
@@ -1353,7 +1351,7 @@ class ArgumentsTestCase(TestCase):
     def test_requests_exception_with_today_arg_verbose(self, logs):
         logging.disable(logging.NOTSET)
 
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].side_effect = RequestException('requests exception')
+        self.patched['requests.adapters.HTTPAdapter.send'].side_effect = RequestException('requests exception')
 
         key = str(uuid.uuid4())
         args = ['--today', '--key', key, '--verbose']
@@ -1366,9 +1364,7 @@ class ArgumentsTestCase(TestCase):
         self.assertEquals(actual, expected)
 
         log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
-        expected = "'RequestException': u'requests exception'"
-        if is_py3:
-            expected = "'RequestException': 'requests exception'"
+        expected = "'RequestException': 'requests exception'"
         self.assertIn(expected, log_output)
 
         self.assertHeartbeatNotSavedOffline()
@@ -1378,7 +1374,7 @@ class ArgumentsTestCase(TestCase):
     def test_generic_exception_with_today_arg(self, logs):
         logging.disable(logging.NOTSET)
 
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].side_effect = Exception('generic exception')
+        self.patched['requests.adapters.HTTPAdapter.send'].side_effect = Exception('generic exception')
 
         key = str(uuid.uuid4())
         config = 'tests/samples/configs/good_config.cfg'
@@ -1395,7 +1391,7 @@ class ArgumentsTestCase(TestCase):
     def test_generic_exception_with_today_arg_verbose(self, logs):
         logging.disable(logging.NOTSET)
 
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].side_effect = Exception('generic exception')
+        self.patched['requests.adapters.HTTPAdapter.send'].side_effect = Exception('generic exception')
 
         key = str(uuid.uuid4())
         args = ['--today', '--key', key, '--verbose']
@@ -1408,9 +1404,7 @@ class ArgumentsTestCase(TestCase):
         self.assertEquals(actual, expected)
 
         log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
-        expected = "'Exception': u'generic exception'"
-        if is_py3:
-            expected = "'Exception': 'generic exception'"
+        expected = "'Exception': 'generic exception'"
         self.assertIn(expected, log_output)
 
         self.assertHeartbeatNotSavedOffline()
@@ -1423,7 +1417,7 @@ class ArgumentsTestCase(TestCase):
         response = CustomResponse()
         response.response_code = 400
         response.response_text = 'error response text'
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         key = str(uuid.uuid4())
         config = 'tests/samples/configs/good_config.cfg'
@@ -1443,7 +1437,7 @@ class ArgumentsTestCase(TestCase):
         response = CustomResponse()
         response.response_code = 400
         response.response_text = 'error response text'
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         key = str(uuid.uuid4())
         args = ['--today', '--key', key, '--verbose']

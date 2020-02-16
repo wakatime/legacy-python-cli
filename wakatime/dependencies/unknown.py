@@ -13,21 +13,23 @@ import os
 
 from . import TokenParser
 
-
 FILES = {
-    'bower': {'exact': False, 'dependency': 'bower'},
-    'grunt': {'exact': False, 'dependency': 'grunt'},
+    "bower": {"exact": False, "dependency": "bower"},
+    "grunt": {"exact": False, "dependency": "grunt"},
 }
 
 
 class UnknownParser(TokenParser):
-
     def parse(self):
         self._process_file_name(os.path.basename(self.source_file))
         return self.dependencies
 
     def _process_file_name(self, file_name):
         for key, value in FILES.items():
-            found = (key == file_name) if value.get('exact') else (key.lower() in file_name.lower())
+            found = (
+                (key == file_name)
+                if value.get("exact")
+                else (key.lower() in file_name.lower())
+            )
             if found:
-                self.append(value['dependency'])
+                self.append(value["dependency"])

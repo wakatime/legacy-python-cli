@@ -26,15 +26,15 @@ class GoParser(TokenParser):
         return self.dependencies
 
     def _process_token(self, token, content):
-        if self.partial(token) == 'Namespace':
+        if self.partial(token) == "Namespace":
             self._process_namespace(token, content)
-        elif self.partial(token) == 'Punctuation':
+        elif self.partial(token) == "Punctuation":
             self._process_punctuation(token, content)
-        elif self.partial(token) == 'String':
+        elif self.partial(token) == "String":
             self._process_string(token, content)
-        elif self.partial(token) == 'Text':
+        elif self.partial(token) == "Text":
             self._process_text(token, content)
-        elif self.partial(token) == 'Other':
+        elif self.partial(token) == "Other":
             self._process_other(token, content)
         else:
             self._process_misc(token, content)
@@ -45,21 +45,21 @@ class GoParser(TokenParser):
         self.aliases = 0
 
     def _process_string(self, token, content):
-        if self.state == 'import':
+        if self.state == "import":
             self.append(content, truncate=False)
 
     def _process_punctuation(self, token, content):
-        if content == '(':
+        if content == "(":
             self.parens += 1
-        elif content == ')':
+        elif content == ")":
             self.parens -= 1
-        elif content == '.':
+        elif content == ".":
             self.aliases += 1
         else:
             self.state = None
 
     def _process_text(self, token, content):
-        if self.state == 'import':
+        if self.state == "import":
             if content == "\n" and self.parens <= 0:
                 self.state = None
                 self.parens = 0
@@ -68,7 +68,7 @@ class GoParser(TokenParser):
             self.state = None
 
     def _process_other(self, token, content):
-        if self.state == 'import':
+        if self.state == "import":
             self.aliases += 1
         else:
             self.state = None

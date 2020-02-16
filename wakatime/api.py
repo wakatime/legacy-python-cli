@@ -15,30 +15,19 @@ import logging
 import sys
 import traceback
 
-from .compat import u, is_py3, json
-from .constants import API_ERROR, AUTH_ERROR, SUCCESS, UNKNOWN_ERROR
+import certifi
+import requests
+import simplejson
+import tzlocal
+from requests.exceptions import RequestException
 
+from .compat import u
+from .constants import API_ERROR, AUTH_ERROR, SUCCESS
 from .offlinequeue import Queue
 from .session_cache import SessionCache
 from .utils import get_hostname, get_user_agent
-from .packages import tzlocal
-from .packages import certifi
 
-
-log = logging.getLogger('WakaTime')
-
-
-try:
-    from .packages import requests
-except ImportError:  # pragma: nocover
-    log.traceback(logging.ERROR)
-    print(traceback.format_exc())
-    log.error('Please upgrade Python to the latest version.')
-    print('Please upgrade Python to the latest version.')
-    sys.exit(UNKNOWN_ERROR)
-
-
-from .packages.requests.exceptions import RequestException
+log = logging.getLogger("WakaTime")
 
 
 def send_heartbeats(heartbeats, args, configs, use_ntlm_proxy=False):
@@ -52,8 +41,8 @@ def send_heartbeats(heartbeats, args, configs, use_ntlm_proxy=False):
 
     api_url = args.api_url
     if not api_url:
-        api_url = 'https://api.wakatime.com/api/v1/users/current/heartbeats.bulk'
-    log.debug('Sending heartbeats to api at %s' % api_url)
+        api_url = "https://api.wakatime.com/api/v1/users/current/heartbeats.bulk"
+    log.debug("Sending heartbeats to api at %s" % api_url)
     timeout = args.timeout
     if not timeout:
         timeout = 60
@@ -62,19 +51,19 @@ def send_heartbeats(heartbeats, args, configs, use_ntlm_proxy=False):
     log.debug(data)
 
     # setup api request
-    request_body = json.dumps(data)
-    api_key = u(base64.b64encode(str.encode(args.key) if is_py3 else args.key))
-    auth = u('Basic {api_key}').format(api_key=api_key)
+    request_body = simplejson.dumps(data)
+    api_key = u(base64.b64encode(str.encode(args.key)))
+    auth = u("Basic {api_key}").format(api_key=api_key)
     headers = {
-        'User-Agent': get_user_agent(args.plugin),
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': auth,
+        "User-Agent": get_user_agent(args.plugin),
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "Authorization": auth,
     }
 
     hostname = get_hostname(args)
     if hostname:
-        headers['X-Machine-Name'] = u(hostname).encode('utf-8')
+        headers["X-Machine-Name"] = u(hostname).encode("utf-8")
 
     # add Olson timezone to request
     try:
@@ -82,7 +71,7 @@ def send_heartbeats(heartbeats, args, configs, use_ntlm_proxy=False):
     except:
         tz = None
     if tz:
-        headers['TimeZone'] = u(tz.zone).encode('utf-8')
+        headers["TimeZone"] = u(tz.zone).encode("utf-8")
 
     session_cache = SessionCache()
     session = session_cache.get()
@@ -91,23 +80,29 @@ def send_heartbeats(heartbeats, args, configs, use_ntlm_proxy=False):
     proxies = {}
     if args.proxy:
         if use_ntlm_proxy:
-            from .packages.requests_ntlm import HttpNtlmAuth
-            username = args.proxy.rsplit(':', 1)
-            password = ''
+            from requests_ntlm import HttpNtlmAuth
+
+            username = args.proxy.rsplit(":", 1)
+            password = ""
             if len(username) == 2:
                 password = username[1]
             username = username[0]
             session.auth = HttpNtlmAuth(username, password, session)
         else:
-            should_try_ntlm = '\\' in args.proxy
-            proxies['https'] = args.proxy
+            should_try_ntlm = "\\" in args.proxy
+            proxies["https"] = args.proxy
 
     # send request to api
     response, code = None, None
     try:
-        response = session.post(api_url, data=request_body, headers=headers,
-                                proxies=proxies, timeout=timeout,
-                                verify=_get_verify(args))
+        response = session.post(
+            api_url,
+            data=request_body,
+            headers=headers,
+            proxies=proxies,
+            timeout=timeout,
+            verify=_get_verify(args),
+        )
     except RequestException:
         if should_try_ntlm:
             return send_heartbeats(heartbeats, args, configs, use_ntlm_proxy=True)
@@ -116,7 +111,7 @@ def send_heartbeats(heartbeats, args, configs, use_ntlm_proxy=False):
                 sys.exc_info()[0].__name__: u(sys.exc_info()[1]),
             }
             if log.isEnabledFor(logging.DEBUG):
-                exception_data['traceback'] = traceback.format_exc()
+                exception_data["traceback"] = traceback.format_exc()
             if args.offline:
                 queue = Queue(args, configs)
                 queue.push_many(heartbeats)
@@ -131,7 +126,7 @@ def send_heartbeats(heartbeats, args, configs, use_ntlm_proxy=False):
         else:
             exception_data = {
                 sys.exc_info()[0].__name__: u(sys.exc_info()[1]),
-                'traceback': traceback.format_exc(),
+                "traceback": traceback.format_exc(),
             }
             if args.offline:
                 queue = Queue(args, configs)
@@ -148,10 +143,9 @@ def send_heartbeats(heartbeats, args, configs, use_ntlm_proxy=False):
             session_cache.save(session)
             return SUCCESS
         else:
-            log.debug({
-                'response_code': code,
-                'response_text': content,
-            })
+            log.debug(
+                {"response_code": code, "response_text": content,}
+            )
 
         if should_try_ntlm:
             return send_heartbeats(heartbeats, args, configs, use_ntlm_proxy=True)
@@ -170,17 +164,17 @@ def get_time_today(args, use_ntlm_proxy=False):
     fetch summary.
     """
 
-    url = 'https://api.wakatime.com/api/v1/users/current/summaries'
+    url = "https://api.wakatime.com/api/v1/users/current/summaries"
     timeout = args.timeout
     if not timeout:
         timeout = 60
 
-    api_key = u(base64.b64encode(str.encode(args.key) if is_py3 else args.key))
-    auth = u('Basic {api_key}').format(api_key=api_key)
+    api_key = u(base64.b64encode(str.encode(args.key)))
+    auth = u("Basic {api_key}").format(api_key=api_key)
     headers = {
-        'User-Agent': get_user_agent(args.plugin),
-        'Accept': 'application/json',
-        'Authorization': auth,
+        "User-Agent": get_user_agent(args.plugin),
+        "Accept": "application/json",
+        "Authorization": auth,
     }
 
     session_cache = SessionCache()
@@ -190,28 +184,34 @@ def get_time_today(args, use_ntlm_proxy=False):
     proxies = {}
     if args.proxy:
         if use_ntlm_proxy:
-            from .packages.requests_ntlm import HttpNtlmAuth
-            username = args.proxy.rsplit(':', 1)
-            password = ''
+            from requests_ntlm import HttpNtlmAuth
+
+            username = args.proxy.rsplit(":", 1)
+            password = ""
             if len(username) == 2:
                 password = username[1]
             username = username[0]
             session.auth = HttpNtlmAuth(username, password, session)
         else:
-            should_try_ntlm = '\\' in args.proxy
-            proxies['https'] = args.proxy
+            should_try_ntlm = "\\" in args.proxy
+            proxies["https"] = args.proxy
 
     params = {
-        'start': 'today',
-        'end': 'today',
+        "start": "today",
+        "end": "today",
     }
 
     # send request to api
     response, code = None, None
     try:
-        response = session.get(url, params=params, headers=headers,
-                               proxies=proxies, timeout=timeout,
-                               verify=_get_verify(args))
+        response = session.get(
+            url,
+            params=params,
+            headers=headers,
+            proxies=proxies,
+            timeout=timeout,
+            verify=_get_verify(args),
+        )
     except RequestException:
         if should_try_ntlm:
             return get_time_today(args, use_ntlm_proxy=True)
@@ -220,10 +220,13 @@ def get_time_today(args, use_ntlm_proxy=False):
         if log.isEnabledFor(logging.DEBUG):
             exception_data = {
                 sys.exc_info()[0].__name__: u(sys.exc_info()[1]),
-                'traceback': traceback.format_exc(),
+                "traceback": traceback.format_exc(),
             }
             log.error(exception_data)
-            return '{0}: {1}'.format(sys.exc_info()[0].__name__, u(sys.exc_info()[1])), API_ERROR
+            return (
+                "{0}: {1}".format(sys.exc_info()[0].__name__, u(sys.exc_info()[1])),
+                API_ERROR,
+            )
         return None, API_ERROR
 
     except:  # delete cached session when requests raises unknown exception
@@ -234,10 +237,13 @@ def get_time_today(args, use_ntlm_proxy=False):
         if log.isEnabledFor(logging.DEBUG):
             exception_data = {
                 sys.exc_info()[0].__name__: u(sys.exc_info()[1]),
-                'traceback': traceback.format_exc(),
+                "traceback": traceback.format_exc(),
             }
             log.error(exception_data)
-            return '{0}: {1}'.format(sys.exc_info()[0].__name__, u(sys.exc_info()[1])), API_ERROR
+            return (
+                "{0}: {1}".format(sys.exc_info()[0].__name__, u(sys.exc_info()[1])),
+                API_ERROR,
+            )
         return None, API_ERROR
 
     code = response.status_code if response is not None else None
@@ -245,33 +251,40 @@ def get_time_today(args, use_ntlm_proxy=False):
 
     if code == requests.codes.ok:
         try:
-            summary = response.json()['data'][0]
-            if len(summary['categories']) > 1:
-                text = ', '.join(['{0} {1}'.format(x['text'], x['name'].lower()) for x in summary['categories']])
+            summary = response.json()["data"][0]
+            if len(summary["categories"]) > 1:
+                text = ", ".join(
+                    [
+                        "{0} {1}".format(x["text"], x["name"].lower())
+                        for x in summary["categories"]
+                    ]
+                )
             else:
-                text = summary['grand_total']['text']
+                text = summary["grand_total"]["text"]
             session_cache.save(session)
             return text, SUCCESS
         except:
             if log.isEnabledFor(logging.DEBUG):
                 exception_data = {
                     sys.exc_info()[0].__name__: u(sys.exc_info()[1]),
-                    'traceback': traceback.format_exc(),
+                    "traceback": traceback.format_exc(),
                 }
                 log.error(exception_data)
-                return '{0}: {1}'.format(sys.exc_info()[0].__name__, u(sys.exc_info()[1])), API_ERROR
+                return (
+                    "{0}: {1}".format(sys.exc_info()[0].__name__, u(sys.exc_info()[1])),
+                    API_ERROR,
+                )
             return None, API_ERROR
     else:
         if should_try_ntlm:
             return get_time_today(args, use_ntlm_proxy=True)
 
         session_cache.delete()
-        log.debug({
-            'response_code': code,
-            'response_text': content,
-        })
+        log.debug(
+            {"response_code": code, "response_text": content,}
+        )
         if log.isEnabledFor(logging.DEBUG):
-            return 'Error: {0}'.format(code), API_ERROR
+            return "Error: {0}".format(code), API_ERROR
         return None, API_ERROR
 
 
@@ -286,14 +299,13 @@ def _get_verify(args):
 
 
 def _process_server_results(heartbeats, code, content, results, args, configs):
-    log.debug({
-        'response_code': code,
-        'results': results,
-    })
+    log.debug(
+        {"response_code": code, "results": results,}
+    )
 
     for i in range(len(results)):
         if len(heartbeats) <= i:
-            log.warn('Results from api not matching heartbeats sent.')
+            log.warn("Results from api not matching heartbeats sent.")
             break
 
         try:
@@ -302,16 +314,16 @@ def _process_server_results(heartbeats, code, content, results, args, configs):
             log.traceback(logging.WARNING)
             c = 0
         try:
-            text = json.dumps(results[i][0])
+            text = simplejson.dumps(results[i][0])
         except:
             log.traceback(logging.WARNING)
-            text = ''
+            text = ""
         if not _success(c):
             _handle_unsent_heartbeats([heartbeats[i]], c, text, args, configs)
 
     leftover = len(heartbeats) - len(results)
     if leftover > 0:
-        log.warn('Missing {0} results from api.'.format(leftover))
+        log.warn("Missing {0} results from api.".format(leftover))
         start = len(heartbeats) - leftover
         _handle_unsent_heartbeats(heartbeats[start:], code, content, args, configs)
 
@@ -319,30 +331,27 @@ def _process_server_results(heartbeats, code, content, results, args, configs):
 def _handle_unsent_heartbeats(heartbeats, code, content, args, configs):
     if args.offline:
         if code == 400:
-            log.error({
-                'response_code': code,
-                'response_content': content,
-            })
+            log.error(
+                {"response_code": code, "response_content": content,}
+            )
         else:
             if log.isEnabledFor(logging.DEBUG):
-                log.warn({
-                    'response_code': code,
-                    'response_content': content,
-                })
+                log.warn(
+                    {"response_code": code, "response_content": content,}
+                )
             queue = Queue(args, configs)
             queue.push_many(heartbeats)
     else:
-        log.error({
-            'response_code': code,
-            'response_content': content,
-        })
+        log.error(
+            {"response_code": code, "response_content": content,}
+        )
 
 
 def _get_results(response):
     results = []
     if response is not None:
         try:
-            results = response.json()['responses']
+            results = response.json()["responses"]
         except:
             log.traceback(logging.WARNING)
     return results

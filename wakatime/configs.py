@@ -10,19 +10,11 @@
 """
 
 
-from __future__ import print_function
-
+import configparser
 import os
 import traceback
 
-from .compat import open
 from .constants import CONFIG_FILE_PARSE_ERROR
-
-
-try:
-    import configparser
-except ImportError:  # pragma: nocover
-    from .packages import configparser
 
 
 def getConfigFile():
@@ -32,13 +24,13 @@ def getConfigFile():
     $WAKATIME_HOME/.wakatime.cfg, otherwise ~/.wakatime.cfg.
     """
 
-    fileName = '.wakatime.cfg'
+    fileName = ".wakatime.cfg"
 
-    home = os.environ.get('WAKATIME_HOME')
+    home = os.environ.get("WAKATIME_HOME")
     if home:
         return os.path.join(os.path.expanduser(home), fileName)
 
-    return os.path.join(os.path.expanduser('~'), fileName)
+    return os.path.join(os.path.expanduser("~"), fileName)
 
 
 def parseConfigFile(configFile=None):
@@ -51,9 +43,9 @@ def parseConfigFile(configFile=None):
     if not configFile:
         configFile = getConfigFile()
 
-    configs = configparser.ConfigParser(delimiters=('='), strict=False)
+    configs = configparser.ConfigParser(delimiters=("="), strict=False)
     try:
-        with open(configFile, 'r', encoding='utf-8') as fh:
+        with open(configFile, "r", encoding="utf-8") as fh:
             try:
                 configs.read_file(fh)
             except configparser.Error:

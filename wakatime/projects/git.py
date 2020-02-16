@@ -14,11 +14,10 @@ import os
 import re
 import sys
 
+from ..compat import u
 from .base import BaseProject
-from ..compat import u, open
 
-
-log = logging.getLogger('WakaTime')
+log = logging.getLogger("WakaTime")
 
 
 class Git(BaseProject):
@@ -39,7 +38,7 @@ class Git(BaseProject):
             line = self._first_line_of_file(head)
             if line is not None:
                 return self._get_branch_from_head_file(line)
-        return u('master')
+        return u("master")
 
     def folder(self):
         return self._project_folder
@@ -48,9 +47,9 @@ class Git(BaseProject):
         path = os.path.realpath(path)
         if os.path.isfile(path):
             path = os.path.split(path)[0]
-        if os.path.isfile(os.path.join(path, '.git', 'config')):
+        if os.path.isfile(os.path.join(path, ".git", "config")):
             self._project_name = os.path.basename(path)
-            self._head_file = os.path.join(path, '.git', 'HEAD')
+            self._head_file = os.path.join(path, ".git", "HEAD")
             self._project_folder = path
             return True
 
@@ -60,36 +59,36 @@ class Git(BaseProject):
             # first check if this is a worktree
             if self._is_worktree(link_path):
                 self._project_name = self._project_from_worktree(link_path)
-                self._head_file = os.path.join(link_path, 'HEAD')
+                self._head_file = os.path.join(link_path, "HEAD")
                 self._project_folder = path
                 return True
 
             # next check if this is a submodule
             if self._submodules_supported_for_path(path):
                 self._project_name = os.path.basename(path)
-                self._head_file = os.path.join(link_path, 'HEAD')
+                self._head_file = os.path.join(link_path, "HEAD")
                 self._project_folder = path
                 return True
 
         split_path = os.path.split(path)
-        if split_path[1] == '':
+        if split_path[1] == "":
             return False
         return self._find_git_config_file(split_path[0])
 
     def _get_branch_from_head_file(self, line):
-        if u(line.strip()).startswith('ref: '):
-            return u(line.strip().split('/', 2)[-1])
+        if u(line.strip()).startswith("ref: "):
+            return u(line.strip().split("/", 2)[-1])
         return None
 
     def _submodules_supported_for_path(self, path):
         if not self._configs:
             return True
 
-        disabled = self._configs.get('submodules_disabled')
+        disabled = self._configs.get("submodules_disabled")
 
-        if not disabled or disabled.strip().lower() == 'false':
+        if not disabled or disabled.strip().lower() == "false":
             return True
-        if disabled.strip().lower() == 'true':
+        if disabled.strip().lower() == "true":
             return False
 
         for pattern in disabled.split("\n"):
@@ -99,18 +98,21 @@ class Git(BaseProject):
                     if compiled.search(path):
                         return False
                 except re.error as ex:
-                    log.warning(u('Regex error ({msg}) for disable git submodules pattern: {pattern}').format(
-                        msg=u(ex),
-                        pattern=u(pattern),
-                    ))
+                    log.warning(
+                        u(
+                            "Regex error ({msg}) for disable git submodules pattern: {pattern}"
+                        ).format(
+                            msg=u(ex), pattern=u(pattern),
+                        )
+                    )
 
         return True
 
     def _is_worktree(self, link_path):
-        return os.path.basename(os.path.dirname(link_path)) == 'worktrees'
+        return os.path.basename(os.path.dirname(link_path)) == "worktrees"
 
     def _path_from_gitdir_link_file(self, path):
-        link = os.path.join(path, '.git')
+        link = os.path.join(path, ".git")
         if not os.path.isfile(link):
             return None
 
@@ -121,34 +123,34 @@ class Git(BaseProject):
         return None
 
     def _path_from_gitdir_string(self, path, line):
-        if line.startswith('gitdir: '):
-            subpath = line[len('gitdir: '):].strip()
-            if os.path.isfile(os.path.join(path, subpath, 'HEAD')):
+        if line.startswith("gitdir: "):
+            subpath = line[len("gitdir: ") :].strip()
+            if os.path.isfile(os.path.join(path, subpath, "HEAD")):
                 return os.path.realpath(os.path.join(path, subpath))
 
         return None
 
     def _project_from_worktree(self, link_path):
-        commondir = os.path.join(link_path, 'commondir')
+        commondir = os.path.join(link_path, "commondir")
         if os.path.isfile(commondir):
             line = self._first_line_of_file(commondir)
             if line:
                 gitdir = os.path.abspath(os.path.join(link_path, line))
-                if os.path.basename(gitdir) == '.git':
+                if os.path.basename(gitdir) == ".git":
                     return os.path.basename(os.path.dirname(gitdir))
 
         return None
 
     def _first_line_of_file(self, filepath):
         try:
-            with open(filepath, 'r', encoding='utf-8') as fh:
+            with open(filepath, "r", encoding="utf-8") as fh:
                 return fh.readline().strip()
         except UnicodeDecodeError:
             pass
         except IOError:
             pass
         try:
-            with open(filepath, 'r', encoding=sys.getfilesystemencoding()) as fh:
+            with open(filepath, "r", encoding=sys.getfilesystemencoding()) as fh:
                 return fh.readline().strip()
         except:
             log.traceback(logging.WARNING)

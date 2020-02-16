@@ -2,7 +2,7 @@
 
 
 from wakatime.main import execute
-from wakatime.packages import requests
+import requests
 
 import logging
 import os
@@ -11,16 +11,16 @@ import shutil
 import sys
 import uuid
 from testfixtures import log_capture
-from wakatime.compat import u, is_py3
+from wakatime.compat import u
 from wakatime.constants import (
     API_ERROR,
     AUTH_ERROR,
     MAX_FILE_SIZE_SUPPORTED,
     SUCCESS,
 )
-from wakatime.packages import tzlocal
-from wakatime.packages.requests.exceptions import RequestException
-from wakatime.packages.requests.models import Response
+import tzlocal
+from requests.exceptions import RequestException
+from requests.models import Response
 from . import utils
 from .utils import ANY, CustomResponse
 
@@ -28,7 +28,7 @@ from .utils import ANY, CustomResponse
 class MainTestCase(utils.TestCase):
     patch_these = [
         'time.sleep',
-        'wakatime.packages.requests.adapters.HTTPAdapter.send',
+        'requests.adapters.HTTPAdapter.send',
         'wakatime.offlinequeue.Queue.push',
         ['wakatime.offlinequeue.Queue.pop', None],
         ['wakatime.offlinequeue.Queue.connect', None],
@@ -41,7 +41,7 @@ class MainTestCase(utils.TestCase):
     def test_500_response(self):
         response = Response()
         response.status_code = 500
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         with utils.TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/twolinefile.txt'
@@ -73,7 +73,7 @@ class MainTestCase(utils.TestCase):
     def test_400_response(self):
         response = Response()
         response.status_code = 400
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         with utils.TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/twolinefile.txt'
@@ -105,7 +105,7 @@ class MainTestCase(utils.TestCase):
     def test_401_response(self):
         response = Response()
         response.status_code = 401
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         with utils.TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/twolinefile.txt'
@@ -141,10 +141,8 @@ class MainTestCase(utils.TestCase):
 
         response = Response()
         response.status_code = 500
-        response._content = 'fake content'
-        if is_py3:
-            response._content = 'fake content'.encode('utf8')
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        response._content = 'fake content'.encode('utf8')
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         with utils.TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/twolinefile.txt'
@@ -172,13 +170,9 @@ class MainTestCase(utils.TestCase):
             self.assertNothingPrinted()
 
             actual = self.getLogOutput(logs)
-            expected = "WakaTime ERROR {'response_code': 500, 'response_content': u'fake content'}"
+            expected = "WakaTime ERROR {'response_code': 500, 'response_content': 'fake content'}"
             if actual[-2] == '0':
-                expected = "WakaTime ERROR {'response_content': u'fake content', 'response_code': 500}"
-            if is_py3:
-                expected = "WakaTime ERROR {'response_code': 500, 'response_content': 'fake content'}"
-                if actual[-2] == '0':
-                    expected = "WakaTime ERROR {'response_content': 'fake content', 'response_code': 500}"
+                expected = "WakaTime ERROR {'response_content': 'fake content', 'response_code': 500}"
             self.assertEquals(expected, actual)
 
             self.assertHeartbeatSent(heartbeat)
@@ -190,7 +184,7 @@ class MainTestCase(utils.TestCase):
     def test_requests_exception(self, logs):
         logging.disable(logging.NOTSET)
 
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].side_effect = RequestException('requests exception')
+        self.patched['requests.adapters.HTTPAdapter.send'].side_effect = RequestException('requests exception')
 
         with utils.TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/twolinefile.txt'
@@ -222,9 +216,7 @@ class MainTestCase(utils.TestCase):
             self.assertIn(expected, actual)
             expected = 'WakaTime DEBUG Sending heartbeats to api at https://api.wakatime.com/api/v1/users/current/heartbeats.bulk'
             self.assertIn(expected, actual)
-            expected = "RequestException': u'requests exception'"
-            if is_py3:
-                expected = "RequestException': 'requests exception'"
+            expected = "RequestException': 'requests exception'"
             self.assertIn(expected, actual)
 
             self.assertHeartbeatSent(heartbeat)
@@ -236,7 +228,7 @@ class MainTestCase(utils.TestCase):
     def test_requests_exception_without_offline_logging(self, logs):
         logging.disable(logging.NOTSET)
 
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].side_effect = RequestException('requests exception')
+        self.patched['requests.adapters.HTTPAdapter.send'].side_effect = RequestException('requests exception')
 
         with utils.TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/twolinefile.txt'
@@ -253,9 +245,7 @@ class MainTestCase(utils.TestCase):
             self.assertNothingPrinted()
 
             log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
-            expected = "WakaTime ERROR {'RequestException': u'requests exception'}"
-            if is_py3:
-                expected = "WakaTime ERROR {'RequestException': 'requests exception'}"
+            expected = "WakaTime ERROR {'RequestException': 'requests exception'}"
             self.assertEquals(expected, log_output)
 
             self.assertHeartbeatSent()
@@ -267,7 +257,7 @@ class MainTestCase(utils.TestCase):
     def test_invalid_api_key(self, logs):
         logging.disable(logging.NOTSET)
 
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         config = 'tests/samples/configs/missing_api_key.cfg'
         args = ['--config', config, '--key', 'invalid-api-key']
@@ -289,14 +279,14 @@ class MainTestCase(utils.TestCase):
         self.assertSessionCacheUntouched()
 
     def test_nonascii_hostname(self):
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with utils.TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
             shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
 
-            hostname = 'test汉语' if is_py3 else 'test\xe6\xb1\x89\xe8\xaf\xad'
+            hostname = 'test汉语'
             with utils.mock.patch('socket.gethostname') as mock_gethostname:
                 mock_gethostname.return_value = hostname
                 self.assertEquals(type(hostname).__name__, 'str')
@@ -308,7 +298,7 @@ class MainTestCase(utils.TestCase):
                 self.assertNothingPrinted()
 
                 headers = {
-                    'X-Machine-Name': hostname.encode('utf-8') if is_py3 else hostname,
+                    'X-Machine-Name': hostname.encode('utf-8'),
                 }
                 self.assertHeartbeatSent(headers=headers)
                 self.assertHeartbeatNotSavedOffline()
@@ -316,7 +306,7 @@ class MainTestCase(utils.TestCase):
                 self.assertSessionCacheSaved()
 
     def test_nonascii_timezone(self):
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with utils.TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
@@ -326,10 +316,10 @@ class MainTestCase(utils.TestCase):
             class TZ(object):
                 @property
                 def zone(self):
-                    return 'tz汉语' if is_py3 else 'tz\xe6\xb1\x89\xe8\xaf\xad'
+                    return 'tz汉语'
             timezone = TZ()
 
-            with utils.mock.patch('wakatime.packages.tzlocal.get_localzone') as mock_getlocalzone:
+            with utils.mock.patch('tzlocal.get_localzone') as mock_getlocalzone:
                 mock_getlocalzone.return_value = timezone
 
                 config = 'tests/samples/configs/has_everything.cfg'
@@ -340,7 +330,7 @@ class MainTestCase(utils.TestCase):
                 self.assertNothingPrinted()
 
                 headers = {
-                    'TimeZone': u(timezone.zone).encode('utf-8') if is_py3 else timezone.zone,
+                    'TimeZone': u(timezone.zone).encode('utf-8'),
                 }
                 self.assertHeartbeatSent(headers=headers, proxies=ANY, timeout=timeout)
                 self.assertHeartbeatNotSavedOffline()
@@ -348,7 +338,7 @@ class MainTestCase(utils.TestCase):
                 self.assertSessionCacheSaved()
 
     def test_timezone_with_invalid_encoding(self):
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with utils.TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
@@ -358,13 +348,13 @@ class MainTestCase(utils.TestCase):
             class TZ(object):
                 @property
                 def zone(self):
-                    return bytes('\xab', 'utf-16') if is_py3 else '\xab'
+                    return bytes('\xab', 'utf-16')
             timezone = TZ()
 
             with self.assertRaises(UnicodeDecodeError):
                 timezone.zone.decode('utf8')
 
-            with utils.mock.patch('wakatime.packages.tzlocal.get_localzone') as mock_getlocalzone:
+            with utils.mock.patch('tzlocal.get_localzone') as mock_getlocalzone:
                 mock_getlocalzone.return_value = timezone
 
                 timeout = 15
@@ -375,7 +365,7 @@ class MainTestCase(utils.TestCase):
                 self.assertNothingPrinted()
 
                 headers = {
-                    'TimeZone': u(bytes('\xab', 'utf-16') if is_py3 else '\xab').encode('utf-8'),
+                    'TimeZone': u(bytes('\xab', 'utf-16')).encode('utf-8'),
                 }
                 self.assertHeartbeatSent(headers=headers, proxies=ANY, timeout=timeout)
                 self.assertHeartbeatNotSavedOffline()
@@ -383,14 +373,14 @@ class MainTestCase(utils.TestCase):
                 self.assertSessionCacheSaved()
 
     def test_tzlocal_exception(self):
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with utils.TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
             shutil.copy(entity, os.path.join(tempdir, 'emptyfile.txt'))
             entity = os.path.realpath(os.path.join(tempdir, 'emptyfile.txt'))
 
-            with utils.mock.patch('wakatime.packages.tzlocal.get_localzone') as mock_getlocalzone:
+            with utils.mock.patch('tzlocal.get_localzone') as mock_getlocalzone:
                 mock_getlocalzone.side_effect = Exception('tzlocal exception')
 
                 timeout = 15
@@ -409,7 +399,7 @@ class MainTestCase(utils.TestCase):
                 self.assertSessionCacheSaved()
 
     def test_timezone_header(self):
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with utils.TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
@@ -424,7 +414,7 @@ class MainTestCase(utils.TestCase):
 
             timezone = tzlocal.get_localzone()
             headers = {
-                'TimeZone': u(timezone.zone).encode('utf-8') if is_py3 else timezone.zone,
+                'TimeZone': u(timezone.zone).encode('utf-8'),
             }
             self.assertHeartbeatSent(headers=headers)
             self.assertHeartbeatNotSavedOffline()
@@ -435,7 +425,7 @@ class MainTestCase(utils.TestCase):
     def test_nonascii_filename(self, logs):
         logging.disable(logging.NOTSET)
 
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with utils.TemporaryDirectory() as tempdir:
             filename = list(filter(lambda x: x.endswith('.txt'), os.listdir(u('tests/samples/codefiles/unicode'))))[0]
@@ -476,7 +466,7 @@ class MainTestCase(utils.TestCase):
 
         response = Response()
         response.status_code = 500
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         with utils.TemporaryDirectory() as tempdir:
             filename = list(filter(lambda x: x.endswith('.txt'), os.listdir(u('tests/samples/codefiles/unicode'))))[0]
@@ -542,7 +532,7 @@ class MainTestCase(utils.TestCase):
     def test_large_file_skips_lines_count(self):
         response = Response()
         response.status_code = 0
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         entity = 'tests/samples/codefiles/twolinefile.txt'
         config = 'tests/samples/configs/good_config.cfg'

@@ -2,7 +2,7 @@
 
 
 from wakatime.main import execute
-from wakatime.packages import requests
+import requests
 
 import logging
 import os
@@ -11,9 +11,9 @@ import sys
 from testfixtures import log_capture
 from wakatime.compat import u
 from wakatime.constants import API_ERROR, SUCCESS
-from wakatime.packages import certifi
-from wakatime.packages.requests.exceptions import RequestException
-from wakatime.packages.requests.models import Response
+import certifi
+from requests.exceptions import RequestException
+from requests.models import Response
 from . import utils
 from .utils import CustomResponse
 
@@ -25,7 +25,7 @@ except ImportError:
 
 class ProxyTestCase(utils.TestCase):
     patch_these = [
-        'wakatime.packages.requests.adapters.HTTPAdapter.send',
+        'requests.adapters.HTTPAdapter.send',
         'wakatime.offlinequeue.Queue.push',
         ['wakatime.offlinequeue.Queue.pop', None],
         ['wakatime.offlinequeue.Queue.connect', None],
@@ -37,7 +37,7 @@ class ProxyTestCase(utils.TestCase):
 
     def test_proxy_without_protocol(self):
         response = CustomResponse()
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         with utils.TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
@@ -59,11 +59,11 @@ class ProxyTestCase(utils.TestCase):
             self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_called_once_with()
 
-            self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_called_once_with(ANY, cert=None, proxies={'https': proxy}, stream=False, timeout=60, verify=certifi.where())
+            self.patched['requests.adapters.HTTPAdapter.send'].assert_called_once_with(ANY, cert=None, proxies={'https': proxy}, stream=False, timeout=60, verify=certifi.where())
 
     def test_https_proxy(self):
         response = CustomResponse()
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         with utils.TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
@@ -85,11 +85,11 @@ class ProxyTestCase(utils.TestCase):
             self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_called_once_with()
 
-            self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_called_once_with(ANY, cert=None, proxies={'https': proxy}, stream=False, timeout=60, verify=certifi.where())
+            self.patched['requests.adapters.HTTPAdapter.send'].assert_called_once_with(ANY, cert=None, proxies={'https': proxy}, stream=False, timeout=60, verify=certifi.where())
 
     def test_socks_proxy(self):
         response = CustomResponse()
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         with utils.TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
@@ -111,12 +111,12 @@ class ProxyTestCase(utils.TestCase):
             self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_called_once_with()
 
-            self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_called_once_with(ANY, cert=None, proxies={'https': proxy}, stream=False, timeout=60, verify=certifi.where())
+            self.patched['requests.adapters.HTTPAdapter.send'].assert_called_once_with(ANY, cert=None, proxies={'https': proxy}, stream=False, timeout=60, verify=certifi.where())
 
     def test_ntlm_proxy_used_after_trying_normal_proxy(self):
         response = Response()
         response.status_code = 400
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         with utils.TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
@@ -142,14 +142,14 @@ class ProxyTestCase(utils.TestCase):
                 call(ANY, cert=None, proxies={'https': proxy}, stream=False, timeout=60, verify=certifi.where()),
                 call(ANY, cert=None, proxies={}, stream=False, timeout=60, verify=certifi.where()),
             ]
-            self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_has_calls(expected_calls)
+            self.patched['requests.adapters.HTTPAdapter.send'].assert_has_calls(expected_calls)
 
     @log_capture()
     def test_ntlm_proxy_used_after_normal_proxy_raises_exception(self, logs):
         logging.disable(logging.NOTSET)
 
         ex_msg = 'after exception, should still try ntlm proxy'
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].side_effect = RuntimeError(ex_msg)
+        self.patched['requests.adapters.HTTPAdapter.send'].side_effect = RuntimeError(ex_msg)
 
         with utils.TemporaryDirectory() as tempdir:
 
@@ -180,14 +180,14 @@ class ProxyTestCase(utils.TestCase):
                 call(ANY, cert=None, proxies={'https': proxy}, stream=False, timeout=60, verify=certifi.where()),
                 call(ANY, cert=None, proxies={}, stream=False, timeout=60, verify=certifi.where()),
             ]
-            self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_has_calls(expected_calls)
+            self.patched['requests.adapters.HTTPAdapter.send'].assert_has_calls(expected_calls)
 
     @log_capture()
     def test_ntlm_proxy_used_after_normal_proxy_raises_requests_exception(self, logs):
         logging.disable(logging.NOTSET)
 
         ex_msg = 'after exception, should still try ntlm proxy'
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].side_effect = RequestException(ex_msg)
+        self.patched['requests.adapters.HTTPAdapter.send'].side_effect = RequestException(ex_msg)
 
         with utils.TemporaryDirectory() as tempdir:
 
@@ -218,14 +218,14 @@ class ProxyTestCase(utils.TestCase):
                 call(ANY, cert=None, proxies={'https': proxy}, stream=False, timeout=60, verify=certifi.where()),
                 call(ANY, cert=None, proxies={}, stream=False, timeout=60, verify=certifi.where()),
             ]
-            self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_has_calls(expected_calls)
+            self.patched['requests.adapters.HTTPAdapter.send'].assert_has_calls(expected_calls)
 
     @log_capture()
     def test_invalid_proxy(self, logs):
         logging.disable(logging.NOTSET)
 
         response = CustomResponse()
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         with utils.TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
@@ -253,4 +253,4 @@ class ProxyTestCase(utils.TestCase):
             self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
-            self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_not_called()
+            self.patched['requests.adapters.HTTPAdapter.send'].assert_not_called()

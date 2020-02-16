@@ -3,7 +3,7 @@
 
 from wakatime.main import execute
 from wakatime.offlinequeue import Queue
-from wakatime.packages import requests
+import requests
 
 import logging
 import os
@@ -14,14 +14,14 @@ import uuid
 from testfixtures import log_capture
 from wakatime.compat import u
 from wakatime.constants import API_ERROR, AUTH_ERROR, SUCCESS
-from wakatime.packages.requests.models import Response
+from requests.models import Response
 from .utils import mock, json, ANY, CustomResponse, NamedTemporaryFile, TemporaryDirectory, TestCase
 
 
 class OfflineQueueTestCase(TestCase):
     patch_these = [
         'time.sleep',
-        'wakatime.packages.requests.adapters.HTTPAdapter.send',
+        'requests.adapters.HTTPAdapter.send',
         'wakatime.session_cache.SessionCache.save',
         'wakatime.session_cache.SessionCache.delete',
         ['wakatime.session_cache.SessionCache.get', requests.session],
@@ -35,7 +35,7 @@ class OfflineQueueTestCase(TestCase):
 
                 response = Response()
                 response.status_code = 500
-                self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+                self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
                 now = u(int(time.time()))
                 entity = 'tests/samples/codefiles/twolinefile.txt'
@@ -55,7 +55,7 @@ class OfflineQueueTestCase(TestCase):
 
                 response = Response()
                 response.status_code = 400
-                self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+                self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
                 now = u(int(time.time()))
                 entity = 'tests/samples/codefiles/twolinefile.txt'
@@ -75,7 +75,7 @@ class OfflineQueueTestCase(TestCase):
 
                 response = Response()
                 response.status_code = 500
-                self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+                self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
                 now = u(int(time.time()))
                 entity = 'tests/samples/codefiles/twolinefile.txt'
@@ -86,7 +86,7 @@ class OfflineQueueTestCase(TestCase):
 
                 response = CustomResponse()
                 response.response_text = '{"responses": [[null,201], [null,201], [null,201]]}'
-                self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+                self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
                 execute(args)
 
                 queue = Queue(None, None)
@@ -100,7 +100,7 @@ class OfflineQueueTestCase(TestCase):
 
                 response = Response()
                 response.status_code = 500
-                self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+                self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
                 config = 'tests/samples/configs/good_config.cfg'
 
@@ -126,7 +126,7 @@ class OfflineQueueTestCase(TestCase):
 
                 response = CustomResponse()
                 response.response_text = '{"responses": [[null,201], [null,201], [null,201]]}'
-                self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+                self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
                 execute(args)
 
                 # offline queue should be empty
@@ -134,7 +134,7 @@ class OfflineQueueTestCase(TestCase):
                 saved_heartbeat = queue.pop()
                 self.assertEquals(None, saved_heartbeat)
 
-                calls = self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].call_args_list
+                calls = self.patched['requests.adapters.HTTPAdapter.send'].call_args_list
 
                 body = calls[0][0][0].body
                 data = json.loads(body)[0]
@@ -192,7 +192,7 @@ class OfflineQueueTestCase(TestCase):
                     response = CustomResponse()
                     response.response_code = 202
                     response.response_text = '{"responses": [[null,201], [null,500], [null,201], [null, 500]]}'
-                    self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+                    self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
                     with mock.patch('wakatime.main.sys.stdin') as mock_stdin:
                         heartbeats = json.dumps([{
@@ -275,7 +275,7 @@ class OfflineQueueTestCase(TestCase):
                     response = CustomResponse()
                     response.response_code = 202
                     response.response_text = '{"responses": [[null,201], [null,500], [null,201], [null, 500]]}'
-                    self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+                    self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
                     with mock.patch('wakatime.main.sys.stdin') as mock_stdin:
                         heartbeats = json.dumps([{
@@ -330,7 +330,7 @@ class OfflineQueueTestCase(TestCase):
                     response = CustomResponse()
                     response.response_code = 202
                     response.response_text = '{"responses": [[null,201], [null,201]]}'
-                    self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+                    self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
                     with mock.patch('wakatime.main.sys.stdin') as mock_stdin:
                         heartbeats = json.dumps([{
@@ -364,7 +364,7 @@ class OfflineQueueTestCase(TestCase):
 
                 response = Response()
                 response.status_code = 500
-                self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+                self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
                 config = 'tests/samples/configs/good_config.cfg'
 
@@ -392,7 +392,7 @@ class OfflineQueueTestCase(TestCase):
                 response.second_response_code = 401
                 response.limit = 2
                 response.response_text = '{"responses": [[null,201], [null,201], [null,201]]}'
-                self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+                self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
                 retval = execute(args)
                 self.assertEquals(retval, AUTH_ERROR)
@@ -410,7 +410,7 @@ class OfflineQueueTestCase(TestCase):
 
                 response = Response()
                 response.status_code = 500
-                self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+                self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
                 config = 'tests/samples/configs/good_config.cfg'
 
@@ -438,7 +438,7 @@ class OfflineQueueTestCase(TestCase):
                 response.second_response_code = 500
                 response.limit = 2
                 response.response_text = '{"responses": [[null,201], [null,201], [null,201]]}'
-                self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+                self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
                 retval = execute(args)
                 self.assertEquals(retval, API_ERROR)
@@ -456,7 +456,7 @@ class OfflineQueueTestCase(TestCase):
 
                 response = Response()
                 response.status_code = 500
-                self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+                self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
                 now = u(int(time.time()))
                 entity = 'tests/samples/codefiles/emptyfile.txt'
@@ -477,7 +477,7 @@ class OfflineQueueTestCase(TestCase):
 
                 response = Response()
                 response.status_code = 500
-                self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+                self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
                 now = u(int(time.time()))
                 entity = 'tests/samples/codefiles/twolinefile.txt'
@@ -507,7 +507,7 @@ class OfflineQueueTestCase(TestCase):
 
                 response = Response()
                 response.status_code = 500
-                self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+                self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
                 now = u(int(time.time()))
                 entity = 'tests/samples/codefiles/twolinefile.txt'
@@ -536,7 +536,7 @@ class OfflineQueueTestCase(TestCase):
 
                 response = Response()
                 response.status_code = 500
-                self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+                self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
                 now = u(int(time.time()))
                 entity = 'tests/samples/codefiles/twolinefile.txt'
@@ -572,7 +572,7 @@ class OfflineQueueTestCase(TestCase):
 
                 response = Response()
                 response.status_code = 500
-                self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+                self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
                 now = u(int(time.time()))
                 entity = 'tests/samples/codefiles/twolinefile.txt'
@@ -609,7 +609,7 @@ class OfflineQueueTestCase(TestCase):
 
                 response = Response()
                 response.status_code = 500
-                self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+                self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
                 now = u(int(time.time()))
                 entity = 'tests/samples/codefiles/twolinefile.txt'
@@ -663,7 +663,7 @@ class OfflineQueueTestCase(TestCase):
                 mock_db_file.return_value = fh.name
 
                 exception_msg = u("Oops, requests raised an exception. This is a test.")
-                self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].side_effect = AttributeError(exception_msg)
+                self.patched['requests.adapters.HTTPAdapter.send'].side_effect = AttributeError(exception_msg)
 
                 now = u(int(time.time()))
                 entity = 'tests/samples/codefiles/twolinefile.txt'
@@ -695,7 +695,7 @@ class OfflineQueueTestCase(TestCase):
 
                 response = Response()
                 response.status_code = 500
-                self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+                self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
                 with TemporaryDirectory() as tempdir:
                     filename = list(filter(lambda x: x.endswith('.txt'), os.listdir(u('tests/samples/codefiles/unicode'))))[0]
@@ -753,7 +753,7 @@ class OfflineQueueTestCase(TestCase):
 
                 response = CustomResponse()
                 response.response_text = '{"responses": [[{id":1},201]]}'
-                self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+                self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
                 now = u(int(time.time()))
                 entity = 'tests/samples/codefiles/twolinefile.txt'
@@ -781,7 +781,7 @@ class OfflineQueueTestCase(TestCase):
 
                 response = CustomResponse()
                 response.response_text = '{"responses": [1]}'
-                self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+                self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
                 now = u(int(time.time()))
                 entity = 'tests/samples/codefiles/twolinefile.txt'
@@ -809,7 +809,7 @@ class OfflineQueueTestCase(TestCase):
 
                 response = CustomResponse()
                 response.response_text = '{"responses": [[{"id":1}]]}'
-                self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+                self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
                 now = u(int(time.time()))
                 entity = 'tests/samples/codefiles/twolinefile.txt'

@@ -14,7 +14,7 @@ from . import TokenParser
 
 class HaxeParser(TokenParser):
     exclude = [
-        r'^haxe$',
+        r"^haxe$",
     ]
     state = None
 
@@ -24,15 +24,15 @@ class HaxeParser(TokenParser):
         return self.dependencies
 
     def _process_token(self, token, content):
-        if self.partial(token) == 'Namespace':
+        if self.partial(token) == "Namespace":
             self._process_namespace(token, content)
-        elif self.partial(token) == 'Text':
+        elif self.partial(token) == "Text":
             self._process_text(token, content)
         else:
             self._process_other(token, content)
 
     def _process_namespace(self, token, content):
-        if self.state == 'import':
+        if self.state == "import":
             self.append(self._format(content))
             self.state = None
         else:

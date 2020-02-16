@@ -1,3 +1,5 @@
+.DS_Store
+
 *.py[cod]
 
 # C extensions
@@ -36,5 +38,3 @@ nosetests.xml
 
 virtualenv
 venv/
-venv3/
-.DS_Store

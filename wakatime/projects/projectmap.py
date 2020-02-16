@@ -10,7 +10,7 @@
 
         [projectmap]
         /home/user/projects/foo = new project name
-        /home/user/projects/bar(\d+)/ = project{0}
+        /home/user/projects/bar(\\d+)/ = project{0}
 
     Will result in file `/home/user/projects/foo/src/main.c` to have
     project name `new project name` and file `/home/user/projects/bar42/main.c`
@@ -24,15 +24,13 @@ import logging
 import os
 import re
 
-from .base import BaseProject
 from ..compat import u
+from .base import BaseProject
 
-
-log = logging.getLogger('WakaTime')
+log = logging.getLogger("WakaTime")
 
 
 class ProjectMap(BaseProject):
-
     def process(self):
         if not self._configs:
             return False
@@ -52,15 +50,19 @@ class ProjectMap(BaseProject):
                     try:
                         return new_proj_name.format(*match.groups())
                     except IndexError as ex:
-                        log.warning(u('Regex error ({msg}) for projectmap pattern: {pattern}').format(
-                            msg=u(ex),
-                            pattern=u(new_proj_name),
-                        ))
+                        log.warning(
+                            u(
+                                "Regex error ({msg}) for projectmap pattern: {pattern}"
+                            ).format(
+                                msg=u(ex), pattern=u(new_proj_name),
+                            )
+                        )
             except re.error as ex:
-                log.warning(u('Regex error ({msg}) for projectmap pattern: {pattern}').format(
-                    msg=u(ex),
-                    pattern=u(pattern),
-                ))
+                log.warning(
+                    u("Regex error ({msg}) for projectmap pattern: {pattern}").format(
+                        msg=u(ex), pattern=u(pattern),
+                    )
+                )
 
         return None
 

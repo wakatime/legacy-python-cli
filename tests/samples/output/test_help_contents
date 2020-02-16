@@ -3,88 +3,50 @@ Common interface for the WakaTime api.
 
 optional arguments:
   -h, --help            show this help message and exit
-  --entity FILE         Absolute path to file for the heartbeat. Can also be a
-                        url, domain or app when --entity-type is not file.
-  --key API_KEY         Your wakatime api key; uses api_key from
-                        ~/.wakatime.cfg by default.
-  --write               When set, tells api this heartbeat was triggered from
-                        writing to a file.
-  --plugin PLUGIN       Optional text editor plugin name and version for User-
-                        Agent header.
-  --time time           Optional floating-point unix epoch timestamp. Uses
-                        current time by default.
-  --lineno INT          Optional line number. This is the current line being
-                        edited.
+  --entity FILE         Absolute path to file for the heartbeat. Can also be a url, domain or app when --entity-type is not file.
+  --key API_KEY         Your wakatime api key; uses api_key from ~/.wakatime.cfg by default.
+  --write               When set, tells api this heartbeat was triggered from writing to a file.
+  --plugin PLUGIN       Optional text editor plugin name and version for User-Agent header.
+  --time time           Optional floating-point unix epoch timestamp. Uses current time by default.
+  --lineno INT          Optional line number. This is the current line being edited.
   --cursorpos INT       Optional cursor position in the current file.
   --entity-type ENTITY_TYPE
-                        Entity type for this heartbeat. Can be "file",
-                        "domain" or "app". Defaults to "file".
-  --category CATEGORY   Category of this heartbeat activity. Can be "coding",
-                        "building", "indexing", "debugging", "running tests",
-                        "writing tests", "manual testing", "code reviewing",
-                        "browsing", or "designing". Defaults to "coding".
-  --proxy PROXY         Optional proxy configuration. Supports HTTPS and SOCKS
-                        proxies. For example: https://user:pass@host:port or
-                        socks5://user:pass@host:port or domain\user:pass
-  --no-ssl-verify       Disables SSL certificate verification for HTTPS
-                        requests. By default, SSL certificates are verified.
+                        Entity type for this heartbeat. Can be "file", "domain" or "app". Defaults to "file".
+  --category CATEGORY   Category of this heartbeat activity. Can be "coding", "building", "indexing", "debugging", "running tests", "writing tests", "manual testing", "code reviewing", "browsing", or
+                        "designing". Defaults to "coding".
+  --proxy PROXY         Optional proxy configuration. Supports HTTPS and SOCKS proxies. For example: https://user:pass@host:port or socks5://user:pass@host:port or domain\user:pass
+  --no-ssl-verify       Disables SSL certificate verification for HTTPS requests. By default, SSL certificates are verified.
   --ssl-certs-file FILE
-                        Override the bundled Python Requests CA certs file. By
-                        default, uses certifi for ca certs.
+                        Override the bundled Python Requests CA certs file. By default, uses certifi for ca certs.
   --project PROJECT     Optional project name.
   --alternate-project PROJECT
-                        Optional alternate project name. Auto-discovered
-                        project takes priority.
-  --language LANGUAGE   Optional language name. If valid, takes priority over
-                        auto-detected language.
-  --local-file FILE     Absolute path to local file for the heartbeat. When
-                        --entity is a remote file, this local file will be
-                        used for stats and just the value of --entity sent
-                        with heartbeat.
+                        Optional alternate project name. Auto-discovered project takes priority.
+  --language LANGUAGE   Optional language name. If valid, takes priority over auto-detected language.
+  --local-file FILE     Absolute path to local file for the heartbeat. When --entity is a remote file, this local file will be used for stats and just the value of --entity sent with heartbeat.
   --hostname HOSTNAME   Hostname of current machine.
-  --disable-offline     Disables offline time logging instead of queuing
-                        logged time.
+  --disable-offline     Disables offline time logging instead of queuing logged time.
   --hide-file-names     Obfuscate filenames. Will not send file names to api.
-  --hide-project-names  Obfuscate project names. When a project folder is
-                        detected instead of using the folder name as the
-                        project, a .wakatime-project file is created with a
-                        random project name.
-  --hide-branch-names   Obfuscate branch names. Will not send revision control
-                        branch names to api.
-  --exclude PATH        Filename patterns to exclude from logging. POSIX regex
-                        syntax. Can be used more than once.
+  --hide-project-names  Obfuscate project names. When a project folder is detected instead of using the folder name as the project, a .wakatime-project file is created with a random project name.
+  --hide-branch-names   Obfuscate branch names. Will not send revision control branch names to api.
+  --exclude PATH        Filename patterns to exclude from logging. POSIX regex syntax. Can be used more than once.
   --exclude-unknown-project
-                        When set, any activity where the project cannot be
-                        detected will be ignored.
-  --include PATH        Filename patterns to log. When used in combination
-                        with --exclude, files matching include will still be
-                        logged. POSIX regex syntax. Can be used more than
-                        once.
+                        When set, any activity where the project cannot be detected will be ignored.
+  --include PATH        Filename patterns to log. When used in combination with --exclude, files matching include will still be logged. POSIX regex syntax. Can be used more than once.
   --include-only-with-project-file
-                        Disables tracking folders unless they contain a
-                        .wakatime-project file. Defaults to false.
-  --extra-heartbeats    Reads extra heartbeats from STDIN as a JSON array
-                        until EOF.
+                        Disables tracking folders unless they contain a .wakatime-project file. Defaults to false.
+  --extra-heartbeats    Reads extra heartbeats from STDIN as a JSON array until EOF.
   --log-file FILE       Defaults to ~/.wakatime.log.
   --api-url URL         Heartbeats api url. For debugging with a local server.
-  --timeout SECONDS     Number of seconds to wait when sending heartbeats to
-                        api. Defaults to 60 seconds.
+  --timeout SECONDS     Number of seconds to wait when sending heartbeats to api. Defaults to 60 seconds.
   --sync-offline-activity AMOUNT
-                        Amount of offline activity to sync from your local
-                        ~/.wakatime.db sqlite3 file to your WakaTime Dashboard
-                        before exiting. Can be "none" or a positive integer
-                        number. Defaults to 100, meaning for every heartbeat
-                        sent while online, 100 offline heartbeats are synced.
-                        Can be used without --entity to only sync offline
-                        activity without generating new heartbeats.
+                        Amount of offline activity to sync from your local ~/.wakatime.db sqlite3 file to your WakaTime Dashboard before exiting. Can be "none" or a positive integer number. Defaults to 100,
+                        meaning for every heartbeat sent while online, 100 offline heartbeats are synced. Can be used without --entity to only sync offline activity without generating new heartbeats.
   --today               Prints dashboard time for Today, then exits.
   --config FILE         Defaults to ~/.wakatime.cfg.
   --config-section SECTION
-                        Optional config section when reading or writing a
-                        config key. Defaults to [settings].
+                        Optional config section when reading or writing a config key. Defaults to [settings].
   --config-read KEY     Prints value for the given config key, then exits.
   --config-write KEY VALUE
-                        Writes value to a config key, then exits. Expects two
-                        arguments, key and value.
+                        Writes value to a config key, then exits. Expects two arguments, key and value.
   --verbose             Turns on debug messages in log file.
   --version             show program's version number and exit

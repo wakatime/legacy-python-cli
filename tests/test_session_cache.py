@@ -9,7 +9,7 @@ from . import utils
 
 class SessionCacheTestCase(utils.TestCase):
     patch_these = [
-        'wakatime.packages.requests.adapters.HTTPAdapter.send',
+        'requests.adapters.HTTPAdapter.send',
         'wakatime.offlinequeue.Queue.push',
         ['wakatime.offlinequeue.Queue.pop', None],
         ['wakatime.offlinequeue.Queue.connect', None],

@@ -2,29 +2,26 @@
 
 
 from wakatime.main import execute
-from wakatime.packages import requests
+import requests
 
 import logging
 import os
 import time
 import shutil
 from testfixtures import log_capture
-from wakatime.compat import is_py26, u
+from wakatime.compat import u
 from wakatime.constants import SUCCESS
 from wakatime.exceptions import NotYetImplemented
 from wakatime.dependencies import DependencyParser, TokenParser
 from wakatime.stats import get_lexer_by_name
 from .utils import mock, ANY, CustomResponse, TemporaryDirectory, TestCase
 
-if is_py26:
-    from wakatime.packages.py26.pygments.lexers import ClassNotFound, PythonLexer
-else:
-    from wakatime.packages.py27.pygments.lexers import ClassNotFound, PythonLexer
+from pygments.lexers import ClassNotFound, PythonLexer
 
 
 class DependenciesTestCase(TestCase):
     patch_these = [
-        'wakatime.packages.requests.adapters.HTTPAdapter.send',
+        'requests.adapters.HTTPAdapter.send',
         'wakatime.offlinequeue.Queue.push',
         ['wakatime.offlinequeue.Queue.pop', None],
         ['wakatime.offlinequeue.Queue.connect', None],
@@ -35,7 +32,7 @@ class DependenciesTestCase(TestCase):
     ]
 
     def shared(self, expected_dependencies=[], expected_language=ANY, expected_lines=ANY, entity='', config='good_config.cfg', extra_args=[]):
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         config = os.path.join('tests/samples/configs', config)
 

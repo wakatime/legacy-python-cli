@@ -2,7 +2,7 @@
 
 
 from wakatime.main import execute
-from wakatime.packages import requests
+import requests
 
 import base64
 import logging
@@ -13,19 +13,19 @@ import shutil
 import sys
 import uuid
 from testfixtures import log_capture
-from wakatime.compat import u, is_py3
+from wakatime.compat import u
 from wakatime.constants import (
     AUTH_ERROR,
     CONFIG_FILE_PARSE_ERROR,
     SUCCESS,
 )
-from wakatime.packages.requests.models import Response
+from requests.models import Response
 from .utils import mock, ANY, CustomResponse, TemporaryDirectory, TestCase
 
 
 class ConfigsTestCase(TestCase):
     patch_these = [
-        'wakatime.packages.requests.adapters.HTTPAdapter.send',
+        'requests.adapters.HTTPAdapter.send',
         'wakatime.offlinequeue.Queue.push',
         ['wakatime.offlinequeue.Queue.pop', None],
         ['wakatime.offlinequeue.Queue.connect', None],
@@ -36,7 +36,7 @@ class ConfigsTestCase(TestCase):
     ]
 
     def test_config_file_not_passed_in_command_line_args(self):
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
@@ -64,7 +64,7 @@ class ConfigsTestCase(TestCase):
     def test_config_file_from_env(self, logs):
         logging.disable(logging.NOTSET)
 
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
@@ -114,7 +114,7 @@ class ConfigsTestCase(TestCase):
         self.patched['wakatime.session_cache.SessionCache.get'].assert_not_called()
 
     def test_good_config_file(self):
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
@@ -143,7 +143,7 @@ class ConfigsTestCase(TestCase):
             apikey = XXX
         """
 
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
@@ -196,7 +196,7 @@ class ConfigsTestCase(TestCase):
     def test_non_hidden_filename(self, logs):
         logging.disable(logging.NOTSET)
 
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/twolinefile.txt'
@@ -234,7 +234,7 @@ class ConfigsTestCase(TestCase):
             self.assertSessionCacheSaved()
 
     def test_hide_all_filenames(self):
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/python.py'
@@ -269,7 +269,7 @@ class ConfigsTestCase(TestCase):
             self.assertSessionCacheSaved()
 
     def test_legacy_hidefilenames_config_supported(self):
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/python.py'
@@ -304,7 +304,7 @@ class ConfigsTestCase(TestCase):
             self.assertSessionCacheSaved()
 
     def test_hide_all_filenames_from_cli_arg(self):
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/python.py'
@@ -339,7 +339,7 @@ class ConfigsTestCase(TestCase):
             self.assertSessionCacheSaved()
 
     def test_hide_matching_filenames(self):
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/python.py'
@@ -368,7 +368,7 @@ class ConfigsTestCase(TestCase):
                 'user_agent': ANY,
             }
             headers = {
-                'Authorization': u('Basic {0}').format(u(base64.b64encode(str.encode(key) if is_py3 else key))),
+                'Authorization': u('Basic {0}').format(u(base64.b64encode(str.encode(key)))),
             }
             self.assertHeartbeatSent(heartbeat, headers=headers)
 
@@ -377,7 +377,7 @@ class ConfigsTestCase(TestCase):
             self.assertSessionCacheSaved()
 
     def test_does_not_hide_unmatching_filenames(self):
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/python.py'
@@ -416,7 +416,7 @@ class ConfigsTestCase(TestCase):
     def test_does_not_hide_file_names_from_invalid_regex(self, logs):
         logging.disable(logging.NOTSET)
 
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
@@ -459,7 +459,7 @@ class ConfigsTestCase(TestCase):
             self.assertSessionCacheSaved()
 
     def test_hide_matching_filenames_showing_branch_names(self):
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with TemporaryDirectory() as tempdir:
             shutil.copytree('tests/samples/projects/git', os.path.join(tempdir, 'git'))
@@ -493,7 +493,7 @@ class ConfigsTestCase(TestCase):
             self.assertSessionCacheSaved()
 
     def test_obfuscte_project_names(self):
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with TemporaryDirectory() as tempdir:
             shutil.copytree('tests/samples/projects/git', os.path.join(tempdir, 'git'))
@@ -536,7 +536,7 @@ class ConfigsTestCase(TestCase):
             self.assertSessionCacheSaved()
 
     def test_obfuscate_project_names_showing_branch_names(self):
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with TemporaryDirectory() as tempdir:
             shutil.copytree('tests/samples/projects/git', os.path.join(tempdir, 'git'))
@@ -584,7 +584,7 @@ class ConfigsTestCase(TestCase):
 
         response = Response()
         response.status_code = 0
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
@@ -612,7 +612,7 @@ class ConfigsTestCase(TestCase):
 
         response = Response()
         response.status_code = 0
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
@@ -640,7 +640,7 @@ class ConfigsTestCase(TestCase):
 
         response = Response()
         response.status_code = 0
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
@@ -666,7 +666,7 @@ class ConfigsTestCase(TestCase):
     def test_include_file_with_project_file(self, logs):
         logging.disable(logging.NOTSET)
 
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
@@ -706,7 +706,7 @@ class ConfigsTestCase(TestCase):
             self.assertSessionCacheSaved()
 
     def test_hostname_set_from_config_file(self):
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
@@ -721,7 +721,7 @@ class ConfigsTestCase(TestCase):
             self.assertNothingPrinted()
 
             headers = {
-                'X-Machine-Name': hostname.encode('utf-8') if is_py3 else hostname,
+                'X-Machine-Name': hostname.encode('utf-8'),
             }
             self.assertHeartbeatSent(headers=headers, proxies=ANY, timeout=15)
 
@@ -730,7 +730,7 @@ class ConfigsTestCase(TestCase):
             self.assertSessionCacheSaved()
 
     def test_no_ssl_verify_from_config_file(self):
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'
@@ -750,7 +750,7 @@ class ConfigsTestCase(TestCase):
             self.assertSessionCacheSaved()
 
     def test_ssl_custom_ca_certs_file(self):
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'

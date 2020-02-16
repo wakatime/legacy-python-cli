@@ -12,7 +12,6 @@
 import os
 import sys
 
-
 # get path to local wakatime package
 package_folder = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -31,5 +30,5 @@ except (TypeError, ImportError):
     import wakatime
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(wakatime.execute(sys.argv[1:]))

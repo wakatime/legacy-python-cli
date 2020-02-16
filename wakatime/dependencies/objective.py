@@ -17,7 +17,7 @@ from . import TokenParser
 class SwiftParser(TokenParser):
     state = None
     exclude = [
-        r'^foundation$',
+        r"^foundation$",
     ]
 
     def parse(self):
@@ -26,9 +26,9 @@ class SwiftParser(TokenParser):
         return self.dependencies
 
     def _process_token(self, token, content):
-        if self.partial(token) == 'Declaration':
+        if self.partial(token) == "Declaration":
             self._process_declaration(token, content)
-        elif self.partial(token) == 'Class':
+        elif self.partial(token) == "Class":
             self._process_class(token, content)
         else:
             self._process_other(token, content)
@@ -38,7 +38,7 @@ class SwiftParser(TokenParser):
             self.state = content
 
     def _process_class(self, token, content):
-        if self.state == 'import':
+        if self.state == "import":
             self.append(content)
         self.state = None
 
@@ -48,7 +48,7 @@ class SwiftParser(TokenParser):
 
 class ObjectiveCParser(TokenParser):
     state = None
-    extension = re.compile(r'\.[mh]$')
+    extension = re.compile(r"\.[mh]$")
 
     def parse(self):
         for index, token, content in self.tokens:
@@ -56,7 +56,7 @@ class ObjectiveCParser(TokenParser):
         return self.dependencies
 
     def _process_token(self, token, content):
-        if self.partial(token) == 'Preproc':
+        if self.partial(token) == "Preproc":
             self._process_preproc(token, content)
         else:
             self._process_other(token, content)
@@ -68,7 +68,7 @@ class ObjectiveCParser(TokenParser):
         self.state = content
 
     def _process_import(self, token, content):
-        if self.state == '#' and content.startswith('import '):
+        if self.state == "#" and content.startswith("import "):
             self.append(self._format(content))
         self.state = None
 
@@ -76,9 +76,9 @@ class ObjectiveCParser(TokenParser):
         pass
 
     def _format(self, content):
-        content = content.strip().lstrip('import ').strip()
+        content = content.strip().lstrip("import ").strip()
         content = content.strip('"').strip("'").strip()
-        content = content.strip('<').strip('>').strip()
-        content = content.split('/')[0]
-        content = self.extension.sub('', content, count=1)
+        content = content.strip("<").strip(">").strip()
+        content = content.split("/")[0]
+        content = self.extension.sub("", content, count=1)
         return content

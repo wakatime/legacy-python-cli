@@ -21,11 +21,11 @@ class ElmParser(TokenParser):
         return self.dependencies
 
     def _process_token(self, token, content):
-        if self.partial(token) == 'Namespace':
+        if self.partial(token) == "Namespace":
             self._process_namespace(token, content)
-        elif self.partial(token) == 'Text':
+        elif self.partial(token) == "Text":
             self._process_text(token, content)
-        elif self.partial(token) == 'Class':
+        elif self.partial(token) == "Class":
             self._process_class(token, content)
         else:
             self._process_other(token, content)
@@ -34,7 +34,7 @@ class ElmParser(TokenParser):
         self.state = content.strip()
 
     def _process_class(self, token, content):
-        if self.state == 'import':
+        if self.state == "import":
             self.append(self._format(content))
 
     def _process_text(self, token, content):
@@ -44,4 +44,4 @@ class ElmParser(TokenParser):
         self.state = None
 
     def _format(self, content):
-        return content.strip().split('.')[0].strip()
+        return content.strip().split(".")[0].strip()

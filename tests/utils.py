@@ -1,34 +1,20 @@
 # -*- coding: utf-8 -*-
 
+import certifi
 import logging
 import os
 import platform
 import re
 import sys
 import tempfile
+import simplejson as json
+from requests.models import Response
+import unittest
+import unittest.mock as mock
+from unittest.mock import ANY
 
 from wakatime.compat import u
-from wakatime.packages import certifi
-from wakatime.packages.requests.models import Response
 from wakatime.utils import BACKSLASH_REPLACE_PATTERN, WINDOWS_DRIVE_PATTERN
-
-
-try:
-    import mock
-    from mock import ANY
-except ImportError:
-    import unittest.mock as mock
-    from unittest.mock import ANY
-try:
-    # Python 2.6
-    import unittest2 as unittest
-except ImportError:
-    # Python >= 2.7
-    import unittest
-try:
-    from .packages import simplejson as json
-except (ImportError, SyntaxError):
-    import json
 
 
 class TestCase(unittest.TestCase):
@@ -40,7 +26,7 @@ class TestCase(unittest.TestCase):
 
         self.maxDiff = None
 
-        patch_getproxies = mock.patch('wakatime.packages.requests.sessions.get_environ_proxies')
+        patch_getproxies = mock.patch('requests.sessions.get_environ_proxies')
         mocked_getproxies = patch_getproxies.start()
         mocked_getproxies.reset_mock()
         mocked_getproxies.return_value = {}
@@ -92,18 +78,18 @@ class TestCase(unittest.TestCase):
             self.assertEquals(self.normalize_path(first_path), self.normalize_path(second_path))
 
     def assertHeartbeatNotSent(self):
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_not_called()
+        self.patched['requests.adapters.HTTPAdapter.send'].assert_not_called()
 
     def assertHeartbeatSent(self, heartbeat=None, extra_heartbeats=[], headers=None, cert=None, proxies={}, stream=False, timeout=60, verify=certifi.where()):
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].assert_called_once_with(
+        self.patched['requests.adapters.HTTPAdapter.send'].assert_called_once_with(
             ANY, cert=cert, proxies=proxies, stream=stream, timeout=timeout, verify=verify,
         )
 
-        body = json.loads(self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].call_args[0][0].body)
+        body = json.loads(self.patched['requests.adapters.HTTPAdapter.send'].call_args[0][0].body)
         self.assertIsInstance(body, list)
 
         if headers:
-            actual_headers = self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].call_args[0][0].headers
+            actual_headers = self.patched['requests.adapters.HTTPAdapter.send'].call_args[0][0].headers
             for key, val in headers.items():
                 self.assertEquals(actual_headers.get(key), val, u('Expected api request to have header {0}={1}, instead {0}={2}').format(u(key), u(actual_headers.get(key)), u(val)))
 

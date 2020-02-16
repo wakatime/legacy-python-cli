@@ -1,11 +1,12 @@
 [run]
 branch = true
-omit =
-    wakatime/cli.py
-    wakatime/packages/*
+source = wakatime
 [report]
-omit =
-    wakatime/cli.py
-    wakatime/packages/*
-    */python?.?/*
-    */site-packages/nose/*
+exclude_lines =
+  pragma: no cover
+  def __repr__
+  if self\.debug
+  raise AssertionError
+  raise NotImplementedError
+  if 0:
+  if __name__ == .__main__.:

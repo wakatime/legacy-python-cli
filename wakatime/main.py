@@ -9,43 +9,41 @@
     :license: BSD, see LICENSE for more details.
 """
 
-from __future__ import print_function
 
 import logging
-import os
 import sys
 import time
 import traceback
 
-pwd = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.dirname(pwd))
-sys.path.insert(0, os.path.join(pwd, 'packages'))
-
-from .compat import is_py26
-
-if is_py26:
-    sys.path.insert(0, os.path.join(pwd, 'packages', 'py26'))
-else:
-    sys.path.insert(0, os.path.join(pwd, 'packages', 'py27'))
+import simplejson
 
 from .__about__ import __version__
-from .api import send_heartbeats, get_time_today
+from .api import get_time_today, send_heartbeats
 from .arguments import parse_arguments
-from .compat import u, json
-from .constants import SUCCESS, UNKNOWN_ERROR, HEARTBEATS_PER_REQUEST
-from .logger import setup_logging
-
-
-log = logging.getLogger('WakaTime')
-
-
+from .compat import u
+from .constants import HEARTBEATS_PER_REQUEST, SUCCESS, UNKNOWN_ERROR
 from .heartbeat import Heartbeat
+from .logger import setup_logging
 from .offlinequeue import Queue
+
+
+try:
+    from urllib3.contrib import pyopenssl
+
+    def noop():
+        pass
+
+    pyopenssl.inject_into_urllib3 = noop
+except ImportError:
+    pass
+
+
+log = logging.getLogger("WakaTime")
 
 
 def execute(argv=None):
     if argv:
-        sys.argv = ['wakatime'] + argv
+        sys.argv = ["wakatime"] + argv
 
     try:
         args, configs = parse_arguments()
@@ -71,16 +69,16 @@ def execute(argv=None):
 
         if args.extra_heartbeats:
             try:
-                for extra_data in json.loads(sys.stdin.readline()):
+                for extra_data in simplejson.loads(sys.stdin.readline()):
                     hb = Heartbeat(extra_data, args, configs)
                     if hb:
                         heartbeats.append(hb)
                     else:
                         log.debug(hb.skip)
-            except json.JSONDecodeError as ex:
-                log.warning(u('Malformed extra heartbeats json: {msg}').format(
-                    msg=u(ex),
-                ))
+            except simplejson.JSONDecodeError as ex:
+                log.warning(
+                    u("Malformed extra heartbeats json: {msg}").format(msg=u(ex),)
+                )
 
         retval = SUCCESS
         while heartbeats:

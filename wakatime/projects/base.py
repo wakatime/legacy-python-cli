@@ -13,8 +13,7 @@ import logging
 
 from ..exceptions import NotYetImplemented
 
-
-log = logging.getLogger('WakaTime')
+log = logging.getLogger("WakaTime")
 
 
 class BaseProject(object):

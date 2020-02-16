@@ -2,7 +2,7 @@
 
 
 from wakatime.main import execute
-from wakatime.packages import requests
+import requests
 
 import os
 import time
@@ -15,7 +15,7 @@ from .utils import ANY, CustomResponse
 
 class LanguagesTestCase(utils.TestCase):
     patch_these = [
-        'wakatime.packages.requests.adapters.HTTPAdapter.send',
+        'requests.adapters.HTTPAdapter.send',
         'wakatime.offlinequeue.Queue.push',
         ['wakatime.offlinequeue.Queue.pop', None],
         ['wakatime.offlinequeue.Queue.connect', None],
@@ -26,7 +26,7 @@ class LanguagesTestCase(utils.TestCase):
     ]
 
     def shared(self, expected_language='', entity='', entity_type='file', extra_args=[]):
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         config = 'tests/samples/configs/good_config.cfg'
         if entity_type == 'file':
@@ -250,7 +250,7 @@ class LanguagesTestCase(utils.TestCase):
         )
 
     def test_heartbeat_skipped_when_matlab_same_accuracy(self):
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         entity = 'matlab/without_headers/empty.m'
 

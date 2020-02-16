@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 
-from wakatime.compat import is_py3, u
+from wakatime.compat import u
 from wakatime.main import execute
-from wakatime.packages import requests
-from wakatime.packages.requests.models import Response
+import requests
+from requests.models import Response
 
 import logging
 import os
@@ -18,7 +18,7 @@ from .utils import unittest
 
 class LoggingTestCase(utils.TestCase):
     patch_these = [
-        'wakatime.packages.requests.adapters.HTTPAdapter.send',
+        'requests.adapters.HTTPAdapter.send',
         'wakatime.offlinequeue.Queue.push',
         ['wakatime.offlinequeue.Queue.pop', None],
         ['wakatime.offlinequeue.Queue.connect', None],
@@ -34,7 +34,7 @@ class LoggingTestCase(utils.TestCase):
 
         response = Response()
         response.status_code = 0
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         now = u(int(time.time()))
         entity = 'tests/samples/codefiles/python.py'
@@ -64,7 +64,7 @@ class LoggingTestCase(utils.TestCase):
 
         response = Response()
         response.status_code = 0
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         with utils.NamedTemporaryFile() as fh:
             now = u(int(time.time()))
@@ -90,7 +90,7 @@ class LoggingTestCase(utils.TestCase):
 
         response = Response()
         response.status_code = 0
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         now = u(int(time.time()))
 
@@ -103,7 +103,7 @@ class LoggingTestCase(utils.TestCase):
             config = os.path.realpath(os.path.join(tempdir, '.wakatime.cfg'))
             expected_logfile = os.path.realpath(os.path.join(tempdir, '.wakatime.log'))
 
-            with utils.mock.patch('wakatime.main.os.environ.get') as mock_env:
+            with utils.mock.patch('wakatime.configs.os.environ.get') as mock_env:
                 mock_env.return_value = tempdir
 
                 args = ['--file', entity, '--config', config, '--time', now]
@@ -125,7 +125,7 @@ class LoggingTestCase(utils.TestCase):
 
         response = Response()
         response.status_code = 0
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         now = u(int(time.time()))
         entity = 'tests/samples/codefiles/python.py'
@@ -159,7 +159,7 @@ class LoggingTestCase(utils.TestCase):
 
         response = Response()
         response.status_code = 0
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         now = u(int(time.time()))
         entity = 'tests/samples/codefiles/python.py'
@@ -183,7 +183,7 @@ class LoggingTestCase(utils.TestCase):
 
         response = Response()
         response.status_code = 0
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         now = u(int(time.time()))
         entity = 'tests/samples/codefiles/python.py'
@@ -204,7 +204,7 @@ class LoggingTestCase(utils.TestCase):
     def test_can_log_invalid_utf8(self, logs):
         logging.disable(logging.NOTSET)
 
-        data = bytes('\xab', 'utf-16') if is_py3 else '\xab'
+        data = bytes('\xab', 'utf-16')
 
         with self.assertRaises(UnicodeDecodeError):
             data.decode('utf8')

@@ -11,13 +11,13 @@ from .utils import ANY, CustomResponse, NamedTemporaryFile, TestCase, mock
 from wakatime.compat import u
 from wakatime.constants import SUCCESS
 from wakatime.main import execute
-from wakatime.packages import requests
+import requests
 from wakatime.stats import number_lines_in_file
 
 
 class StatsTestCase(TestCase):
     patch_these = [
-        'wakatime.packages.requests.adapters.HTTPAdapter.send',
+        'requests.adapters.HTTPAdapter.send',
         'wakatime.session_cache.SessionCache.save',
         'wakatime.session_cache.SessionCache.delete',
         ['wakatime.session_cache.SessionCache.get', requests.session],
@@ -27,7 +27,7 @@ class StatsTestCase(TestCase):
     @log_capture()
     def test_guess_lexer_using_filename_analyse_text_exception(self, logs):
         logging.disable(logging.NOTSET)
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with NamedTemporaryFile() as fh:
             with mock.patch('wakatime.offlinequeue.Queue._get_db_file') as mock_db_file:
@@ -63,7 +63,7 @@ class StatsTestCase(TestCase):
     @log_capture()
     def test_guess_lexer_using_filename_analyse_text_exception_and_logs_error_when_debugging(self, logs):
         logging.disable(logging.NOTSET)
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with NamedTemporaryFile() as fh:
             with mock.patch('wakatime.offlinequeue.Queue._get_db_file') as mock_db_file:

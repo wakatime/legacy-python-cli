@@ -2,8 +2,8 @@
 
 
 from wakatime.main import execute
-from wakatime.packages import requests
-from wakatime.packages.requests.models import Response
+import requests
+from requests.models import Response
 
 import logging
 import os
@@ -11,7 +11,7 @@ import shutil
 import tempfile
 import time
 from testfixtures import log_capture
-from wakatime.compat import u, open
+from wakatime.compat import u
 from wakatime.constants import API_ERROR, SUCCESS
 from wakatime.exceptions import NotYetImplemented
 from wakatime.project import generate_project_name
@@ -22,7 +22,7 @@ from .utils import ANY, DynamicIterable, TestCase, TemporaryDirectory, CustomRes
 
 class ProjectTestCase(TestCase):
     patch_these = [
-        'wakatime.packages.requests.adapters.HTTPAdapter.send',
+        'requests.adapters.HTTPAdapter.send',
         'wakatime.offlinequeue.Queue.push',
         ['wakatime.offlinequeue.Queue.pop', None],
         ['wakatime.offlinequeue.Queue.connect', None],
@@ -33,7 +33,7 @@ class ProjectTestCase(TestCase):
     ]
 
     def shared(self, expected_project='', expected_branch=ANY, entity='', config='good_config.cfg', extra_args=[]):
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         config = os.path.join('tests/samples/configs', config)
         if not os.path.exists(entity):
@@ -80,7 +80,7 @@ class ProjectTestCase(TestCase):
     def test_project_argument_overrides_detected_project(self):
         response = Response()
         response.status_code = 0
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         now = u(int(time.time()))
         entity = 'tests/samples/projects/git/emptyfile.txt'
@@ -95,7 +95,7 @@ class ProjectTestCase(TestCase):
     def test_alternate_project_argument_does_not_override_detected_project(self):
         response = Response()
         response.status_code = 0
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         now = u(int(time.time()))
         entity = 'tests/samples/projects/git/emptyfile.txt'
@@ -111,7 +111,7 @@ class ProjectTestCase(TestCase):
     def test_alternate_project_argument_does_not_override_project_argument(self):
         response = Response()
         response.status_code = 0
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         now = u(int(time.time()))
         entity = 'tests/samples/projects/git/emptyfile.txt'
@@ -126,7 +126,7 @@ class ProjectTestCase(TestCase):
     def test_alternate_project_argument_used_when_project_not_detected(self):
         response = Response()
         response.status_code = 0
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         tempdir = tempfile.mkdtemp()
         entity = 'tests/samples/projects/git/emptyfile.txt'
@@ -142,7 +142,7 @@ class ProjectTestCase(TestCase):
         args = ['--file', entity, '--config', config, '--time', now, '--alternate-project', 'alt-project']
         execute(args)
 
-        calls = self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].call_args_list
+        calls = self.patched['requests.adapters.HTTPAdapter.send'].call_args_list
 
         body = calls[0][0][0].body
         data = json.loads(body)[0]
@@ -182,7 +182,7 @@ class ProjectTestCase(TestCase):
     def test_git_project_not_used_when_project_names_hidden(self):
         response = Response()
         response.status_code = 0
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         tempdir = tempfile.mkdtemp()
         shutil.copytree('tests/samples/projects/git', os.path.join(tempdir, 'git'))
@@ -221,7 +221,7 @@ class ProjectTestCase(TestCase):
     def test_branch_used_when_project_names_hidden_but_branch_names_visible(self):
         response = Response()
         response.status_code = 0
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         tempdir = tempfile.mkdtemp()
         shutil.copytree('tests/samples/projects/git', os.path.join(tempdir, 'git'))
@@ -343,7 +343,7 @@ class ProjectTestCase(TestCase):
     def test_svn_on_mac_with_xcode_tools_installed(self):
         response = Response()
         response.status_code = 0
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         now = u(int(time.time()))
         entity = 'tests/samples/projects/svn/afolder/emptyfile.txt'
@@ -383,7 +383,7 @@ class ProjectTestCase(TestCase):
     def test_mercurial_project_detected(self):
         response = Response()
         response.status_code = 0
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         with mock.patch('wakatime.projects.git.Git.process') as mock_git:
             mock_git.return_value = False
@@ -402,7 +402,7 @@ class ProjectTestCase(TestCase):
     def test_mercurial_project_branch_with_slash_detected(self):
         response = Response()
         response.status_code = 0
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         with mock.patch('wakatime.projects.git.Git.process') as mock_git:
             mock_git.return_value = False
@@ -424,7 +424,7 @@ class ProjectTestCase(TestCase):
 
         response = Response()
         response.status_code = 0
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         with mock.patch('wakatime.projects.git.Git.process') as mock_git:
             mock_git.return_value = False
@@ -704,7 +704,7 @@ class ProjectTestCase(TestCase):
 
         response = Response()
         response.status_code = 0
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         now = u(int(time.time()))
         entity = 'tests/samples/projects/project_map/emptyfile.txt'
@@ -725,7 +725,7 @@ class ProjectTestCase(TestCase):
 
         response = Response()
         response.status_code = 0
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         now = u(int(time.time()))
         entity = 'tests/samples/projects/project_map42/emptyfile.txt'
@@ -743,7 +743,7 @@ class ProjectTestCase(TestCase):
     @log_capture()
     def test_project_map_with_invalid_regex(self, logs):
         logging.disable(logging.NOTSET)
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         now = u(int(time.time()))
         entity = 'tests/samples/projects/project_map42/emptyfile.txt'
@@ -766,7 +766,7 @@ class ProjectTestCase(TestCase):
 
         response = Response()
         response.status_code = 0
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         now = u(int(time.time()))
         entity = 'tests/samples/projects/project_map42/emptyfile.txt'
@@ -778,7 +778,7 @@ class ProjectTestCase(TestCase):
         self.assertEquals(retval, API_ERROR)
         self.assertNothingPrinted()
         actual = self.getLogOutput(logs)
-        expected = u('WakaTime WARNING Regex error (tuple index out of range) for projectmap pattern: proj-map{3}')
+        expected = u('WakaTime WARNING Regex error (Replacement index 3 out of range for positional args tuple) for projectmap pattern: proj-map{3}')
         self.assertEquals(expected, actual)
 
     @log_capture()
@@ -787,7 +787,7 @@ class ProjectTestCase(TestCase):
 
         response = Response()
         response.status_code = 0
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         now = u(int(time.time()))
         entity = 'tests/samples/projects/project_map/emptyfile.txt'
@@ -808,7 +808,7 @@ class ProjectTestCase(TestCase):
 
         response = Response()
         response.status_code = 0
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         now = u(int(time.time()))
         entity = 'tests/samples/projects/project_map/emptyfile.txt'
@@ -829,7 +829,7 @@ class ProjectTestCase(TestCase):
 
         response = Response()
         response.status_code = 0
-        self.patched['wakatime.packages.requests.adapters.HTTPAdapter.send'].return_value = response
+        self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
         with TemporaryDirectory() as tempdir:
             entity = 'tests/samples/codefiles/emptyfile.txt'

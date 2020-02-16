@@ -14,69 +14,60 @@ import os
 import re
 import sys
 
-from .compat import is_py26, u, open
+import simplejson
+from pygments.lexers import (
+    ClassNotFound,
+    CppLexer,
+    _fn_matches,
+    _iter_lexerclasses,
+    basename,
+    find_lexer_class,
+    get_lexer_by_name,
+)
+from pygments.modeline import get_filetype_from_buffer
+
+from .compat import u
 from .constants import MAX_FILE_SIZE_SUPPORTED
 from .dependencies import DependencyParser
 from .exceptions import SkipHeartbeat
 from .language_priorities import LANGUAGES
 
-if is_py26:
-    from .packages.py26.pygments.lexers import (
-        _iter_lexerclasses,
-        _fn_matches,
-        basename,
-        ClassNotFound,
-        CppLexer,
-        find_lexer_class,
-        get_lexer_by_name,
-    )
-    from .packages.py26.pygments.modeline import get_filetype_from_buffer
-else:
-    from .packages.py27.pygments.lexers import (
-        _iter_lexerclasses,
-        _fn_matches,
-        basename,
-        ClassNotFound,
-        CppLexer,
-        find_lexer_class,
-        get_lexer_by_name,
-    )
-    from .packages.py27.pygments.modeline import get_filetype_from_buffer
+log = logging.getLogger("WakaTime")
 
 
-try:
-    from .packages import simplejson as json  # pragma: nocover
-except (ImportError, SyntaxError):  # pragma: nocover
-    import json
-
-
-log = logging.getLogger('WakaTime')
-
-
-def get_file_stats(file_name, entity_type='file', lineno=None, cursorpos=None,
-                   plugin=None, language=None, local_file=None):
+def get_file_stats(
+    file_name,
+    entity_type="file",
+    lineno=None,
+    cursorpos=None,
+    plugin=None,
+    language=None,
+    local_file=None,
+):
     """Returns a hash of information about the entity."""
 
     language = standardize_language(language, plugin)
     stats = {
-        'language': language,
-        'dependencies': [],
-        'lines': None,
-        'lineno': lineno,
-        'cursorpos': cursorpos,
+        "language": language,
+        "dependencies": [],
+        "lines": None,
+        "lineno": lineno,
+        "cursorpos": cursorpos,
     }
 
-    if entity_type == 'file':
+    if entity_type == "file":
         lexer = get_lexer(language)
         if not lexer:
             lexer = guess_lexer(file_name, local_file)
             language = root_language(lexer)
         parser = DependencyParser(local_file or file_name, lexer)
-        stats.update({
-            'language': standardize_language(language),
-            'dependencies': parser.parse(),
-            'lines': number_lines_in_file(local_file or file_name),
-        })
+        stats.update(
+            {
+                "language": standardize_language(language),
+                "dependencies": parser.parse(),
+                "lines": number_lines_in_file(local_file or file_name),
+            }
+        )
 
     return stats
 
@@ -101,8 +92,11 @@ def guess_lexer(file_name, local_file):
         lexer2, accuracy2 = guess_lexer_using_modeline(text)
         if lexer1:
             lexer = lexer1
-        if (lexer2 and accuracy2 is not None and
-                (accuracy1 is None or accuracy2 > accuracy1)):
+        if (
+            lexer2
+            and accuracy2 is not None
+            and (accuracy1 is None or accuracy2 > accuracy1)
+        ):
             lexer = lexer2
 
     return lexer
@@ -170,35 +164,49 @@ def get_language_from_extension(file_name):
     filepart, extension = os.path.splitext(file_name)
     pathpart, filename = os.path.split(file_name)
 
-    if filename == 'go.mod':
-        return 'Go'
+    if filename == "go.mod":
+        return "Go"
 
-    if re.match(r'\.h.*$', extension, re.IGNORECASE) or re.match(r'\.c.*$', extension, re.IGNORECASE):
+    if re.match(r"\.h.*$", extension, re.IGNORECASE) or re.match(
+        r"\.c.*$", extension, re.IGNORECASE
+    ):
 
-        if os.path.exists(u('{0}{1}').format(u(filepart), u('.c'))) or os.path.exists(u('{0}{1}').format(u(filepart), u('.C'))):
-            return 'C'
+        if os.path.exists(u("{0}{1}").format(u(filepart), u(".c"))) or os.path.exists(
+            u("{0}{1}").format(u(filepart), u(".C"))
+        ):
+            return "C"
 
-        if os.path.exists(u('{0}{1}').format(u(filepart), u('.m'))) or os.path.exists(u('{0}{1}').format(u(filepart), u('.M'))):
-            return 'Objective-C'
+        if os.path.exists(u("{0}{1}").format(u(filepart), u(".m"))) or os.path.exists(
+            u("{0}{1}").format(u(filepart), u(".M"))
+        ):
+            return "Objective-C"
 
-        if os.path.exists(u('{0}{1}').format(u(filepart), u('.mm'))) or os.path.exists(u('{0}{1}').format(u(filepart), u('.MM'))):
-            return 'Objective-C++'
+        if os.path.exists(u("{0}{1}").format(u(filepart), u(".mm"))) or os.path.exists(
+            u("{0}{1}").format(u(filepart), u(".MM"))
+        ):
+            return "Objective-C++"
 
         available_extensions = extensions_in_same_folder(file_name)
 
         for ext in CppLexer.filenames:
-            ext = ext.lstrip('*')
+            ext = ext.lstrip("*")
             if ext in available_extensions:
-                return 'C++'
+                return "C++"
 
-        if '.c' in available_extensions:
-            return 'C'
+        if ".c" in available_extensions:
+            return "C"
 
-    if re.match(r'\.m$', extension, re.IGNORECASE) and (os.path.exists(u('{0}{1}').format(u(filepart), u('.h'))) or os.path.exists(u('{0}{1}').format(u(filepart), u('.H')))):
-        return 'Objective-C'
+    if re.match(r"\.m$", extension, re.IGNORECASE) and (
+        os.path.exists(u("{0}{1}").format(u(filepart), u(".h")))
+        or os.path.exists(u("{0}{1}").format(u(filepart), u(".H")))
+    ):
+        return "Objective-C"
 
-    if re.match(r'\.mm$', extension, re.IGNORECASE) and (os.path.exists(u('{0}{1}').format(u(filepart), u('.h'))) or os.path.exists(u('{0}{1}').format(u(filepart), u('.H')))):
-        return 'Objective-C++'
+    if re.match(r"\.mm$", extension, re.IGNORECASE) and (
+        os.path.exists(u("{0}{1}").format(u(filepart), u(".h")))
+        or os.path.exists(u("{0}{1}").format(u(filepart), u(".H")))
+    ):
+        return "Objective-C++"
 
     return None
 
@@ -211,12 +219,12 @@ def number_lines_in_file(file_name):
         pass
     lines = 0
     try:
-        with open(file_name, 'r', encoding='utf-8') as fh:
+        with open(file_name, "r", encoding="utf-8") as fh:
             for line in fh:
                 lines += 1
     except:  # pragma: nocover
         try:
-            with open(file_name, 'r', encoding=sys.getfilesystemencoding()) as fh:
+            with open(file_name, "r", encoding=sys.getfilesystemencoding()) as fh:
                 for line in fh:
                     lines += 1
         except:
@@ -234,12 +242,12 @@ def standardize_language(language, plugin=None):
         return None
 
     if plugin:
-        plugin = plugin.split(' ')[-1].split('/')[0].split('-')[0]
+        plugin = plugin.split(" ")[-1].split("/")[0].split("-")[0]
         standardized = get_language_from_json(language, plugin)
         if standardized is not None:
             language = standardized
 
-    standardized = get_language_from_json(language, 'default')
+    standardized = get_language_from_json(language, "default")
     if standardized is not None:
         language = standardized
 
@@ -261,10 +269,11 @@ def get_lexer(language):
 
 def root_language(lexer):
     if lexer:
-        prevent_using_root = set([
-            'coldfusion html',
-        ])
-        if hasattr(lexer, 'root_lexer') and u(lexer.name).lower() not in prevent_using_root:
+        prevent_using_root = set(["coldfusion html",])
+        if (
+            hasattr(lexer, "root_lexer")
+            and u(lexer.name).lower() not in prevent_using_root
+        ):
             lexer = lexer.root_lexer
         return u(lexer.name)
     return None
@@ -273,15 +282,14 @@ def root_language(lexer):
 def get_language_from_json(language, key):
     """Finds the given language in a json file."""
 
-    file_name = os.path.join(
-        os.path.dirname(__file__),
-        'languages',
-        '{0}.json').format(key.lower())
+    file_name = os.path.join(os.path.dirname(__file__), "languages", "{0}.json").format(
+        key.lower()
+    )
 
     if os.path.exists(file_name):
         try:
-            with open(file_name, 'r', encoding='utf-8') as fh:
-                languages = json.loads(fh.read())
+            with open(file_name, "r", encoding="utf-8") as fh:
+                languages = simplejson.loads(fh.read())
                 if languages.get(language.lower()):
                     return languages[language.lower()]
         except:
@@ -295,11 +303,11 @@ def get_file_head(file_name):
 
     text = None
     try:
-        with open(file_name, 'r', encoding='utf-8') as fh:
+        with open(file_name, "r", encoding="utf-8") as fh:
             text = fh.read(512000)
     except:
         try:
-            with open(file_name, 'r', encoding=sys.getfilesystemencoding()) as fh:
+            with open(file_name, "r", encoding=sys.getfilesystemencoding()) as fh:
                 text = fh.read(512000)  # pragma: nocover
         except:
             log.traceback(logging.DEBUG)
@@ -323,7 +331,7 @@ def custom_pygments_guess_lexer_for_filename(_fn, _text, **options):
                 matching_lexers.add(lexer)
                 primary[lexer] = False
     if not matching_lexers:
-        raise ClassNotFound('no lexer for filename %r found' % fn)
+        raise ClassNotFound("no lexer for filename %r found" % fn)
     if len(matching_lexers) == 1:
         return matching_lexers.pop()(**options)
     result = []
@@ -333,11 +341,11 @@ def custom_pygments_guess_lexer_for_filename(_fn, _text, **options):
             return lexer(**options)
         result.append(customize_lexer_priority(_fn, rv, lexer))
 
-    matlab = list(filter(lambda x: x[2].name.lower() == 'matlab', result))
+    matlab = list(filter(lambda x: x[2].name.lower() == "matlab", result))
     if len(matlab) > 0:
-        objc = list(filter(lambda x: x[2].name.lower() == 'objective-c', result))
+        objc = list(filter(lambda x: x[2].name.lower() == "objective-c", result))
         if objc and objc[0][0] == matlab[0][0]:
-            raise SkipHeartbeat('Skipping because not enough language accuracy.')
+            raise SkipHeartbeat("Skipping because not enough language accuracy.")
 
     def type_sort(t):
         # sort by:
@@ -346,6 +354,7 @@ def custom_pygments_guess_lexer_for_filename(_fn, _text, **options):
         # - priority
         # - last resort: class name
         return (t[0], primary[t[2]], t[1], t[2].__name__)
+
     result.sort(key=type_sort)
 
     return result[-1][2](**options)
@@ -356,22 +365,22 @@ def customize_lexer_priority(file_name, accuracy, lexer):
 
     priority = lexer.priority
 
-    lexer_name = lexer.name.lower().replace('sharp', '#')
+    lexer_name = lexer.name.lower().replace("sharp", "#")
     if lexer_name in LANGUAGES:
         priority = LANGUAGES[lexer_name]
-    elif lexer_name == 'matlab':
+    elif lexer_name == "matlab":
         available_extensions = extensions_in_same_folder(file_name)
-        if '.mat' in available_extensions:
+        if ".mat" in available_extensions:
             accuracy += 0.01
-        if '.h' not in available_extensions:
+        if ".h" not in available_extensions:
             accuracy += 0.01
-    elif lexer_name == 'objective-c':
+    elif lexer_name == "objective-c":
         available_extensions = extensions_in_same_folder(file_name)
-        if '.mat' in available_extensions:
+        if ".mat" in available_extensions:
             accuracy -= 0.01
         else:
             accuracy += 0.01
-        if '.h' in available_extensions:
+        if ".h" in available_extensions:
             accuracy += 0.01
 
     return (accuracy, priority, lexer)
