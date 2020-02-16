@@ -11,12 +11,12 @@ init:
 
 install:
   - python --version
-  - pip install pyenv-win --upgrade --target %USERPROFILE%/.pyenv
+  - python -m pip install -U pyenv-win --upgrade --target %USERPROFILE%/.pyenv
   - set PATH=%USERPROFILE%\.pyenv\pyenv-win\bin;%PATH%
   - set PATH=%USERPROFILE%\.pyenv\pyenv-win\shims;%PATH%
   - refreshenv
   - pyenv install --skip-existing
-  - pip install pipenv --upgrade
+  - python -m pip install -U pipenv --upgrade
   - pipenv install --dev --ignore-pipfile
 
 build: false
