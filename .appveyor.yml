@@ -16,7 +16,7 @@ install:
   - py -3.8 -mpip install pyenv-win --upgrade --target %USERPROFILE%/.pyenv
   - pyenv install --skip-existing
   - py -3.8 -mpip install -U pipenv --upgrade
-  - pipenv --python %USERPROFILE%/.pyenv/shims/python install --dev --ignore-pipfile
+  - py -3.8 -mpipenv --python %USERPROFILE%/.pyenv/shims/python install --dev --ignore-pipfile
 
 build: false
 
