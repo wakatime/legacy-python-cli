@@ -1,32 +1,34 @@
 language: python
-cache: pip
-matrix:
+jobs:
   include:
-    - name: "Python 3.7.1 on Xenial Linux"
-      python: 3.7 # this works for Linux but is ignored on macOS or Windows
-    - name: "Python 3.7.2 on macOS"
+    - name: "Linux"
+      python: 3.8 # this works for Linux but is ignored on macOS and Windows
+      before_install:
+        - python3 --version
+    - name: "Mac"
       os: osx
-      osx_image: xcode11 # Python 3.7.2 running on macOS 10.14.3
+      osx_image: xcode11.3  # Python 3.7.4 running on macOS 10.14.4
       language: shell # 'language: python' is an error on Travis CI macOS
       before_install:
-        - sw_vers
-    - name: "Python 3.7.4 on Windows"
+        - python3 --version
+    - name: "Windows"
       os: windows # Windows 10.0.17134 N/A Build 17134
       language: shell # 'language: python' is an error on Travis CI Windows
       before_install:
-        - choco install python # this install takes at least 1 min 30 sec
+        - choco install python --version 3.8.1
         - choco install make
         - python -m pip install --upgrade pip
-      env: PATH=/c/Python37:/c/Python37/Scripts:$PATH
+      env: PATH=/c/Python38:/c/Python38/Scripts:$PATH
 install:
-  - python3 --version
-  - pip3 install --upgrade pip
-  - make
+  - pip3 install pip --upgrade
+  - pip3 install pipenv --upgrade
+  - pipenv install --dev --ignore-pipfile
 script:
-  - make test
+  - pipenv run nosetests
 after_success:
     - coveralls
 notifications:
   email: false
 env:
   - PIPENV_YES=1
+cache: pip
