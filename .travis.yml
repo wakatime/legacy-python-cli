@@ -11,6 +11,10 @@ jobs:
         - curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer | bash
         - export PATH="$HOME/.pyenv/bin:$PATH"
         - pyenv install --skip-existing
+      install:
+        - pip3 install pip --upgrade
+        - pip3 install pipenv --upgrade
+        - pipenv install --dev --ignore-pipfile
     - name: "Mac"
       os: osx
       osx_image: xcode11.3  # Python 3.7.4 running on macOS 10.14.4
@@ -23,6 +27,10 @@ jobs:
         - curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer | bash
         - export PATH="$HOME/.pyenv/bin:$PATH"
         - pyenv install --skip-existing
+      install:
+        - pip3 install pip --upgrade
+        - pip3 install pipenv --upgrade
+        - pipenv --python /Users/travis/.pyenv/versions/3.8.1 install --dev --ignore-pipfile
     - name: "Windows"
       os: windows # Windows 10.0.17134 N/A Build 17134
       language: shell # 'language: python' is an error on Travis CI Windows
@@ -31,10 +39,10 @@ jobs:
         - choco install make
         - python -m pip install --upgrade pip
       env: PATH=/c/Python38:/c/Python38/Scripts:$PATH
-install:
-  - pip3 install pip --upgrade
-  - pip3 install pipenv --upgrade
-  - pipenv install --dev --ignore-pipfile
+      install:
+        - pip3 install pip --upgrade
+        - pip3 install pipenv --upgrade
+        - pipenv install --dev --ignore-pipfile
 script:
   - pipenv run nosetests
 after_success:
