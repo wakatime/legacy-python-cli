@@ -5,6 +5,8 @@ jobs:
       python: 3.8 # this works for Linux but is ignored on macOS and Windows
       before_install:
         - python3 --version
+        - pyenv versions
+        - pyenv install --skip-existing
     - name: "Mac"
       os: osx
       osx_image: xcode11.3  # Python 3.7.4 running on macOS 10.14.4
