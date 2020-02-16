@@ -27,4 +27,4 @@ simplejson = "*"
 certifi = "*"
 
 [requires]
-python_version = "3.8"
+python_full_version = "3.8.1"

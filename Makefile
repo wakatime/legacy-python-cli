@@ -2,7 +2,7 @@
 
 init:
 	pip install pipenv --upgrade
-	pipenv install --dev
+	pipenv install --dev --ignore-pipfile
 
 test:
 	pipenv run nosetests
