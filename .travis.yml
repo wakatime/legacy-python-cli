@@ -26,3 +26,5 @@ after_success:
     - coveralls
 notifications:
   email: false
+env:
+  - PIPENV_IGNORE_VIRTUALENVS=1
