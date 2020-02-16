@@ -1,4 +1,4 @@
-.. image:: https://travis-ci.org/wakatime/wakatime.svg
+.. image:: https://travis-ci.org/wakatime/wakatime.svg?branch=master
     :target: https://travis-ci.org/wakatime/wakatime
     :alt: Tests
 

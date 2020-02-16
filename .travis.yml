@@ -1,19 +1,28 @@
 language: python
+cache: pip
 matrix:
   include:
-    - python: 2.6
-      dist: trusty
-    - python: 2.7
-    - python: 3.3
-      dist: trusty
-    - python: 3.4
-    - python: 3.5
-    - python: 3.6
-    - python: 3.7
-      sudo: true
+    - name: "Python 3.7.1 on Xenial Linux"
+      python: 3.7 # this works for Linux but is ignored on macOS or Windows
+    - name: "Python 3.7.2 on macOS"
+      os: osx
+      osx_image: xcode11 # Python 3.7.2 running on macOS 10.14.3
+      language: shell # 'language: python' is an error on Travis CI macOS
+      before_install: python3 --version ; pip3 --version ; sw_vers
+    - name: "Python 3.7.4 on Windows"
+      os: windows # Windows 10.0.17134 N/A Build 17134
+      language: shell # 'language: python' is an error on Travis CI Windows
+      before_install:
+        - choco install python # this install takes at least 1 min 30 sec
+        - choco install make
+        - python -m pip install --upgrade pip
+      env: PATH=/c/Python37:/c/Python37/Scripts:$PATH
 install:
-    - if [[ $TRAVIS_PYTHON_VERSION != '2.6' ]]; then travis_retry pip install coveralls; fi
-    - travis_retry pip install -r dev-requirements.txt
-script: nosetests
+  - pip3 install --upgrade pip # all three OSes agree about 'pip3'
+  - make
+script:
+  - make test
 after_success:
-    - if [[ $TRAVIS_PYTHON_VERSION != '2.6' ]]; then coveralls; fi
+    - coveralls
+notifications:
+  email: false
