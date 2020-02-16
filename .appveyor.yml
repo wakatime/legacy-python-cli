@@ -15,9 +15,9 @@ install:
   - set PATH=%USERPROFILE%\.pyenv\pyenv-win\bin;%PATH%
   - set PATH=%USERPROFILE%\.pyenv\pyenv-win\shims;%PATH%
   - refreshenv
-  - pyenv install --skip-existing
+  - python -m pyenv install --skip-existing
   - python -m pip install -U pipenv --upgrade
-  - pipenv install --dev --ignore-pipfile
+  - python -m pipenv install --dev --ignore-pipfile
 
 build: false
 
