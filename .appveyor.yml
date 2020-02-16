@@ -13,9 +13,9 @@ init:
 
 install:
   - python --version
-  - pip3 install pyenv-win --upgrade --target %USERPROFILE%/.pyenv
+  - py -3.8 -mpip install pyenv-win --upgrade --target %USERPROFILE%/.pyenv
   - pyenv install --skip-existing
-  - pip3 install -U pipenv --upgrade
+  - py -3.8 -mpip install -U pipenv --upgrade
   - pipenv install --dev --ignore-pipfile
 
 build: false
