@@ -4,23 +4,12 @@ matrix:
   include:
     - name: "Python 3.7.1 on Xenial Linux"
       python: 3.7 # this works for Linux but is ignored on macOS or Windows
-      before_install:
-        - unset PYENV_ROOT
-        - curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer | bash
-        - export PATH="$HOME/.pyenv/bin:$PATH"
-        - pyenv install
     - name: "Python 3.7.2 on macOS"
       os: osx
       osx_image: xcode11 # Python 3.7.2 running on macOS 10.14.3
       language: shell # 'language: python' is an error on Travis CI macOS
       before_install:
-        - python3 --version
-        - pip3 --version
         - sw_vers
-        - unset PYENV_ROOT
-        - curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer | bash
-        - export PATH="$HOME/.pyenv/bin:$PATH"
-        - pyenv install
     - name: "Python 3.7.4 on Windows"
       os: windows # Windows 10.0.17134 N/A Build 17134
       language: shell # 'language: python' is an error on Travis CI Windows
@@ -30,7 +19,8 @@ matrix:
         - python -m pip install --upgrade pip
       env: PATH=/c/Python37:/c/Python37/Scripts:$PATH
 install:
-  - pip3 install --upgrade pip # all three OSes agree about 'pip3'
+  - python3 --version
+  - pip3 install --upgrade pip
   - make
 script:
   - make test
@@ -39,4 +29,4 @@ after_success:
 notifications:
   email: false
 env:
-  - PIPENV_IGNORE_VIRTUALENVS=1
+  - PIPENV_YES=1
