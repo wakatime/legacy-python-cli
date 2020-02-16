@@ -11,10 +11,11 @@ init:
 
 install:
   - python --version
-  - choco install pyenv-win
-  - C:\ProgramData\chocolatey\bin\RefreshEnv
+  - pip install pyenv-win --upgrade --target %USERPROFILE%/.pyenv
+  - set PATH=%USERPROFILE%\.pyenv\pyenv-win\bin;%PATH%
+  - set PATH=%USERPROFILE%\.pyenv\pyenv-win\shims;%PATH%
+  - refreshenv
   - pyenv install --skip-existing
-  - python -m pip install -U tox
   - pip install pipenv --upgrade
   - pipenv install --dev --ignore-pipfile
 
