@@ -3,18 +3,24 @@ environment:
     TOXENV: py
 
   matrix:
+    - PYTHON: C:\Python38
     - PYTHON: C:\Python38-x64
 
 init:
   - SET PATH=%PYTHON%;%PATH%
 
 install:
+  - python --version
+  - choco install pyenv-win
+  - pyenv install --skip-existing
   - python -m pip install -U tox
+  - pip install pipenv --upgrade
+  - pipenv install --dev --ignore-pipfile
 
 build: false
 
 test_script:
-  - python -m tox
+  - pipenv run nosetests
 
 branches:
   only:
