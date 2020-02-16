@@ -1,7 +1,7 @@
 .PHONY: init test flake8 coverage publish
 
 init:
-	pip install pipenv --upgrade
+	pip3 install pipenv --upgrade
 	pipenv install --dev --ignore-pipfile
 
 test:
