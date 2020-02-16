@@ -12,6 +12,7 @@ init:
 install:
   - python --version
   - choco install pyenv-win
+  - C:\ProgramData\chocolatey\bin\RefreshEnv
   - pyenv install --skip-existing
   - python -m pip install -U tox
   - pip install pipenv --upgrade
