@@ -37,11 +37,11 @@ jobs:
       before_install:
         - choco install python --version 3.8.1
         - choco install make
-        - python -m pip install --upgrade pip
-      env: PATH=/c/Python38:/c/Python38/Scripts:$PATH
-      install:
+        - python --version
         - pip3 install pip --upgrade
         - pip3 install pipenv --upgrade
+      env: PATH=/c/Python38:/c/Python38/Scripts:$PATH
+      install:
         - pipenv install --dev --ignore-pipfile
 script:
   - pipenv run nosetests
