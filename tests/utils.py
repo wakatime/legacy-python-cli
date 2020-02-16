@@ -26,12 +26,16 @@ class TestCase(unittest.TestCase):
 
         self.maxDiff = None
 
+        self.patched = {}
+
+        self.patched['os.get_terminal_size'] = mock.patch('os.get_terminal_size').start()
+        self.patched['os.get_terminal_size'].return_value = os.terminal_size((80, 60))
+
         patch_getproxies = mock.patch('requests.sessions.get_environ_proxies')
         mocked_getproxies = patch_getproxies.start()
         mocked_getproxies.reset_mock()
         mocked_getproxies.return_value = {}
 
-        self.patched = {}
         if hasattr(self, 'patch_these'):
             for patch_this in self.patch_these:
                 namespace = patch_this[0] if isinstance(patch_this, (list, set)) else patch_this
