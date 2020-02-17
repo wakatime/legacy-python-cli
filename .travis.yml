@@ -44,7 +44,7 @@ jobs:
         - pip3 install pipenv --upgrade
         - pipenv install --dev --ignore-pipfile
 script:
-  - pipenv run nosetests
+  - pipenv run pytest
 after_success:
     - coveralls
 notifications:
