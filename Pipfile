@@ -4,6 +4,7 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+atomicwrites = {version = "*", sys_platform = "== 'win32'"}
 black = "==19.10b0"
 isort = "*"
 flake8 = "*"
