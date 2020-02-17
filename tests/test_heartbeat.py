@@ -4,17 +4,12 @@
 from wakatime.heartbeat import Heartbeat
 
 import os
-import logging
-from testfixtures import log_capture
 from .utils import DynamicIterable, TestCase, mock
 
 
 class HeartbeatTestCase(TestCase):
 
-    @log_capture()
-    def test_sanitize_removes_sensitive_data(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_sanitize_removes_sensitive_data(self):
         class Args(object):
             exclude = []
             hide_file_names = ['.*']
@@ -45,12 +40,9 @@ class HeartbeatTestCase(TestCase):
             self.assertIsNone(getattr(sanitized, item))
 
         self.assertNothingPrinted()
-        self.assertNothingLogged(logs)
+        self.assertNothingLogged()
 
-    @log_capture()
-    def test_sanitize_removes_sensitive_data_but_still_shows_branch(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_sanitize_removes_sensitive_data_but_still_shows_branch(self):
         class Args(object):
             exclude = []
             hide_file_names = ['.*']
@@ -82,12 +74,9 @@ class HeartbeatTestCase(TestCase):
             self.assertIsNone(getattr(sanitized, item))
 
         self.assertNothingPrinted()
-        self.assertNothingLogged(logs)
+        self.assertNothingLogged()
 
-    @log_capture()
-    def test_sanitize_does_nothing_when_hidefilenames_false(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_sanitize_does_nothing_when_hidefilenames_false(self):
         class Args(object):
             exclude = []
             hide_file_names = []
@@ -110,12 +99,9 @@ class HeartbeatTestCase(TestCase):
         self.assertEquals(data['branch'], sanitized.branch)
 
         self.assertNothingPrinted()
-        self.assertNothingLogged(logs)
+        self.assertNothingLogged()
 
-    @log_capture()
-    def test_sanitize_does_nothing_when_missing_entity(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_sanitize_does_nothing_when_missing_entity(self):
         class Args(object):
             hide_file_names = ['.*']
             hide_project_names = []
@@ -133,12 +119,9 @@ class HeartbeatTestCase(TestCase):
         self.assertEquals(branch, sanitized.branch)
 
         self.assertNothingPrinted()
-        self.assertNothingLogged(logs)
+        self.assertNothingLogged()
 
-    @log_capture()
-    def test_sanitize_does_nothing_when_type_not_file(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_sanitize_does_nothing_when_type_not_file(self):
         class Args(object):
             hide_file_names = ['.*']
             hide_project_names = []
@@ -156,7 +139,7 @@ class HeartbeatTestCase(TestCase):
         self.assertEquals(branch, sanitized.branch)
 
         self.assertNothingPrinted()
-        self.assertNothingLogged(logs)
+        self.assertNothingLogged()
 
     def test_parsing(self):
 

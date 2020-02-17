@@ -4,12 +4,8 @@
 from wakatime.main import execute
 import requests
 
-import logging
 import os
 import shutil
-import sys
-from testfixtures import log_capture
-from wakatime.compat import u
 from wakatime.constants import API_ERROR, SUCCESS
 import certifi
 from requests.exceptions import RequestException
@@ -48,9 +44,9 @@ class ProxyTestCase(utils.TestCase):
             args = ['--file', entity, '--config', config, '--proxy', proxy]
 
             retval = execute(args)
-            self.assertEquals(retval, SUCCESS)
-            self.assertEquals(sys.stdout.getvalue(), '')
-            self.assertEquals(sys.stderr.getvalue(), '')
+            assert retval == SUCCESS
+
+            self.assertNothingPrinted()
 
             self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
             self.patched['wakatime.session_cache.SessionCache.delete'].assert_not_called()
@@ -74,9 +70,9 @@ class ProxyTestCase(utils.TestCase):
             args = ['--file', entity, '--config', config, '--proxy', proxy]
 
             retval = execute(args)
-            self.assertEquals(retval, SUCCESS)
-            self.assertEquals(sys.stdout.getvalue(), '')
-            self.assertEquals(sys.stderr.getvalue(), '')
+            assert retval == SUCCESS
+
+            self.assertNothingPrinted()
 
             self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
             self.patched['wakatime.session_cache.SessionCache.delete'].assert_not_called()
@@ -100,9 +96,9 @@ class ProxyTestCase(utils.TestCase):
             args = ['--file', entity, '--config', config, '--proxy', proxy]
 
             retval = execute(args)
-            self.assertEquals(retval, SUCCESS)
-            self.assertEquals(sys.stdout.getvalue(), '')
-            self.assertEquals(sys.stderr.getvalue(), '')
+            assert retval == SUCCESS
+
+            self.assertNothingPrinted()
 
             self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
             self.patched['wakatime.session_cache.SessionCache.delete'].assert_not_called()
@@ -127,9 +123,9 @@ class ProxyTestCase(utils.TestCase):
             args = ['--file', entity, '--config', config, '--proxy', proxy]
 
             retval = execute(args)
-            self.assertEquals(retval, API_ERROR)
-            self.assertEquals(sys.stdout.getvalue(), '')
-            self.assertEquals(sys.stderr.getvalue(), '')
+            assert retval == API_ERROR
+
+            self.assertNothingPrinted()
 
             self.patched['wakatime.session_cache.SessionCache.get'].assert_has_calls([call(), call()])
             self.patched['wakatime.session_cache.SessionCache.delete'].assert_called_once_with()
@@ -144,10 +140,7 @@ class ProxyTestCase(utils.TestCase):
             ]
             self.patched['requests.adapters.HTTPAdapter.send'].assert_has_calls(expected_calls)
 
-    @log_capture()
-    def test_ntlm_proxy_used_after_normal_proxy_raises_exception(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_ntlm_proxy_used_after_normal_proxy_raises_exception(self):
         ex_msg = 'after exception, should still try ntlm proxy'
         self.patched['requests.adapters.HTTPAdapter.send'].side_effect = RuntimeError(ex_msg)
 
@@ -161,13 +154,11 @@ class ProxyTestCase(utils.TestCase):
             args = ['--file', entity, '--config', config, '--proxy', proxy]
 
             retval = execute(args)
+            assert retval == API_ERROR
 
-            self.assertEquals(retval, API_ERROR)
-            self.assertEquals(sys.stdout.getvalue(), '')
-            self.assertEquals(sys.stderr.getvalue(), '')
+            self.assertNothingPrinted()
 
-            log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
-            self.assertIn(ex_msg, log_output)
+            assert ex_msg in self.getLogOutput()
 
             self.patched['wakatime.session_cache.SessionCache.get'].assert_has_calls([call(), call()])
             self.patched['wakatime.session_cache.SessionCache.delete'].assert_called_once_with()
@@ -182,10 +173,7 @@ class ProxyTestCase(utils.TestCase):
             ]
             self.patched['requests.adapters.HTTPAdapter.send'].assert_has_calls(expected_calls)
 
-    @log_capture()
-    def test_ntlm_proxy_used_after_normal_proxy_raises_requests_exception(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_ntlm_proxy_used_after_normal_proxy_raises_requests_exception(self):
         ex_msg = 'after exception, should still try ntlm proxy'
         self.patched['requests.adapters.HTTPAdapter.send'].side_effect = RequestException(ex_msg)
 
@@ -199,13 +187,10 @@ class ProxyTestCase(utils.TestCase):
             args = ['--file', entity, '--config', config, '--proxy', proxy]
 
             retval = execute(args)
+            assert retval == API_ERROR
 
-            self.assertEquals(retval, API_ERROR)
-            self.assertEquals(sys.stdout.getvalue(), '')
-            self.assertEquals(sys.stderr.getvalue(), '')
-
-            log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
-            self.assertEquals('', log_output)
+            self.assertNothingPrinted()
+            self.assertNothingLogged()
 
             self.patched['wakatime.session_cache.SessionCache.get'].assert_has_calls([call(), call()])
             self.patched['wakatime.session_cache.SessionCache.delete'].assert_called_once_with()
@@ -220,10 +205,7 @@ class ProxyTestCase(utils.TestCase):
             ]
             self.patched['requests.adapters.HTTPAdapter.send'].assert_has_calls(expected_calls)
 
-    @log_capture()
-    def test_invalid_proxy(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_invalid_proxy(self):
         response = CustomResponse()
         self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
 
@@ -236,15 +218,15 @@ class ProxyTestCase(utils.TestCase):
             args = ['--file', entity, '--config', config, '--proxy', proxy]
 
             retval = execute(args)
+            assert retval == 2
 
-            self.assertEquals(retval, 2)
-            self.assertEquals(sys.stdout.getvalue(), '')
+            captured = self._capsys.readouterr()
+
+            assert captured.out == ''
             expected = 'error: Invalid proxy. Must be in format https://user:pass@host:port or socks5://user:pass@host:port or domain\\user:pass.'
-            self.assertIn(expected, sys.stderr.getvalue())
+            assert expected in captured.err
 
-            log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
-            expected = ''
-            self.assertEquals(log_output, expected)
+            self.assertNothingLogged()
 
             self.patched['wakatime.session_cache.SessionCache.get'].assert_not_called()
             self.patched['wakatime.session_cache.SessionCache.delete'].assert_not_called()

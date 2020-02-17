@@ -4,13 +4,10 @@
 from wakatime.main import execute
 import requests
 
-import logging
 import os
 import time
 import shutil
-import sys
 import uuid
-from testfixtures import log_capture
 from wakatime.compat import u
 from wakatime.constants import (
     API_ERROR,
@@ -135,10 +132,7 @@ class MainTestCase(utils.TestCase):
             self.assertOfflineHeartbeatsNotSynced()
             self.assertSessionCacheDeleted()
 
-    @log_capture()
-    def test_500_response_without_offline_logging(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_500_response_without_offline_logging(self):
         response = Response()
         response.status_code = 500
         response._content = 'fake content'.encode('utf8')
@@ -169,21 +163,18 @@ class MainTestCase(utils.TestCase):
             self.assertEquals(retval, API_ERROR)
             self.assertNothingPrinted()
 
-            actual = self.getLogOutput(logs)
-            expected = "WakaTime ERROR {'response_code': 500, 'response_content': 'fake content'}"
-            if actual[-2] == '0':
-                expected = "WakaTime ERROR {'response_content': 'fake content', 'response_code': 500}"
-            self.assertEquals(expected, actual)
+            log_output = self.getLogOutput()
+            expected = "'response_code': 500"
+            assert expected in log_output
+            expected = "'response_content': 'fake content'"
+            assert expected in log_output
 
             self.assertHeartbeatSent(heartbeat)
             self.assertHeartbeatNotSavedOffline()
             self.assertOfflineHeartbeatsNotSynced()
             self.assertSessionCacheDeleted()
 
-    @log_capture()
-    def test_requests_exception(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_requests_exception(self):
         self.patched['requests.adapters.HTTPAdapter.send'].side_effect = RequestException('requests exception')
 
         with utils.TemporaryDirectory() as tempdir:
@@ -211,23 +202,20 @@ class MainTestCase(utils.TestCase):
             self.assertEquals(retval, API_ERROR)
             self.assertNothingPrinted()
 
-            actual = self.getLogOutput(logs)
+            actual = self.getLogOutput()
             expected = 'Parsing dependencies not supported for special.TextParser'
-            self.assertIn(expected, actual)
-            expected = 'WakaTime DEBUG Sending heartbeats to api at https://api.wakatime.com/api/v1/users/current/heartbeats.bulk'
-            self.assertIn(expected, actual)
+            assert expected in actual
+            expected = 'Sending heartbeats to api at https://api.wakatime.com/api/v1/users/current/heartbeats.bulk'
+            assert expected in actual
             expected = "RequestException': 'requests exception'"
-            self.assertIn(expected, actual)
+            assert expected in actual
 
             self.assertHeartbeatSent(heartbeat)
             self.assertHeartbeatSavedOffline()
             self.assertOfflineHeartbeatsNotSynced()
             self.assertSessionCacheDeleted()
 
-    @log_capture()
-    def test_requests_exception_without_offline_logging(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_requests_exception_without_offline_logging(self):
         self.patched['requests.adapters.HTTPAdapter.send'].side_effect = RequestException('requests exception')
 
         with utils.TemporaryDirectory() as tempdir:
@@ -244,34 +232,30 @@ class MainTestCase(utils.TestCase):
             self.assertEquals(retval, API_ERROR)
             self.assertNothingPrinted()
 
-            log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
-            expected = "WakaTime ERROR {'RequestException': 'requests exception'}"
-            self.assertEquals(expected, log_output)
+            expected = "{'RequestException': 'requests exception'}"
+            assert expected in self.getLogOutput()
 
             self.assertHeartbeatSent()
             self.assertHeartbeatNotSavedOffline()
             self.assertOfflineHeartbeatsNotSynced()
             self.assertSessionCacheDeleted()
 
-    @log_capture()
-    def test_invalid_api_key(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_invalid_api_key(self):
         self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         config = 'tests/samples/configs/missing_api_key.cfg'
         args = ['--config', config, '--key', 'invalid-api-key']
 
         retval = execute(args)
+        assert retval == AUTH_ERROR
 
-        self.assertEquals(retval, AUTH_ERROR)
-        self.assertEquals(sys.stdout.getvalue(), '')
+        captured = self._capsys.readouterr()
+
+        assert captured.out == ''
         expected = 'error: Invalid api key. Find your api key from wakatime.com/settings/api-key.'
-        self.assertIn(expected, sys.stderr.getvalue())
+        assert expected in captured.err
 
-        log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
-        expected = ''
-        self.assertEquals(log_output, expected)
+        self.assertNothingLogged()
 
         self.assertHeartbeatNotSent()
         self.assertHeartbeatNotSavedOffline()
@@ -421,10 +405,7 @@ class MainTestCase(utils.TestCase):
             self.assertOfflineHeartbeatsSynced()
             self.assertSessionCacheSaved()
 
-    @log_capture()
-    def test_nonascii_filename(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_nonascii_filename(self):
         self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         with utils.TemporaryDirectory() as tempdir:
@@ -452,7 +433,7 @@ class MainTestCase(utils.TestCase):
             retval = execute(args)
             self.assertEquals(retval, SUCCESS)
             self.assertNothingPrinted()
-            self.assertNothingLogged(logs)
+            self.assertNothingLogged()
 
             self.assertHeartbeatSent(heartbeat)
 
@@ -460,10 +441,7 @@ class MainTestCase(utils.TestCase):
             self.assertOfflineHeartbeatsSynced()
             self.assertSessionCacheSaved()
 
-    @log_capture()
-    def test_nonascii_filename_saved_when_offline(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_nonascii_filename_saved_when_offline(self):
         response = Response()
         response.status_code = 500
         self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
@@ -493,7 +471,7 @@ class MainTestCase(utils.TestCase):
             retval = execute(args)
             self.assertEquals(retval, API_ERROR)
             self.assertNothingPrinted()
-            self.assertNothingLogged(logs)
+            self.assertNothingLogged()
 
             self.assertHeartbeatSent(heartbeat)
 
@@ -501,10 +479,7 @@ class MainTestCase(utils.TestCase):
             self.assertOfflineHeartbeatsNotSynced()
             self.assertSessionCacheDeleted()
 
-    @log_capture()
-    def test_unhandled_exception(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_unhandled_exception(self):
         with utils.mock.patch('wakatime.main.send_heartbeats') as mock_send:
             ex_msg = 'testing unhandled exception'
             mock_send.side_effect = RuntimeError(ex_msg)
@@ -517,11 +492,11 @@ class MainTestCase(utils.TestCase):
 
             execute(args)
 
-            self.assertIn(ex_msg, sys.stdout.getvalue())
-            self.assertEquals(sys.stderr.getvalue(), '')
+            captured = self._capsys.readouterr()
 
-            log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
-            self.assertIn(ex_msg, log_output)
+            assert ex_msg in captured.out
+            assert captured.err == ''
+            assert ex_msg in self.getLogOutput()
 
             self.assertHeartbeatNotSent()
 

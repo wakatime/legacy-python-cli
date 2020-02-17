@@ -10,9 +10,7 @@ import os
 import time
 import re
 import shutil
-import sys
 import uuid
-from testfixtures import log_capture
 from wakatime.compat import u
 from wakatime.constants import (
     AUTH_ERROR,
@@ -51,17 +49,17 @@ class ConfigsTestCase(TestCase):
                     mock_open.side_effect = IOError('')
 
                     retval = execute(args)
+                    assert retval == AUTH_ERROR
 
-        self.assertEquals(retval, AUTH_ERROR)
-        expected_stdout = u('')
+        captured = self._capsys.readouterr()
+        assert captured.out == ''
         expected_stderr = open('tests/samples/output/common_usage_header').read()
         expected_stderr += open('tests/samples/output/configs_test_config_file_not_passed_in_command_line_args').read()
-        self.assertEquals(sys.stdout.getvalue(), expected_stdout)
-        self.assertEquals(sys.stderr.getvalue(), expected_stderr)
+        assert captured.err == expected_stderr
+
         self.patched['wakatime.session_cache.SessionCache.get'].assert_not_called()
 
-    @log_capture()
-    def test_config_file_from_env(self, logs):
+    def test_config_file_from_env(self):
         logging.disable(logging.NOTSET)
 
         self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
@@ -79,12 +77,14 @@ class ConfigsTestCase(TestCase):
 
                 args = ['--file', entity, '--log-file', '~/.wakatime.log']
                 retval = execute(args)
-                self.assertEquals(retval, SUCCESS)
+                assert retval == SUCCESS
+
+                captured = self._capsys.readouterr()
                 expected_stdout = open('tests/samples/output/configs_test_good_config_file').read()
                 traceback_file = os.path.realpath('wakatime/arguments.py')
-                lineno = int(re.search(r' line (\d+),', sys.stdout.getvalue()).group(1))
-                self.assertEquals(sys.stdout.getvalue(), expected_stdout.format(file=traceback_file, lineno=lineno))
-                self.assertEquals(sys.stderr.getvalue(), '')
+                lineno = int(re.search(r' line (\d+),', captured.out).group(1))
+                self.assertEquals(captured.out, expected_stdout.format(file=traceback_file, lineno=lineno))
+                self.assertEquals(captured.err, '')
 
                 self.assertHeartbeatSent(proxies=ANY, verify=ANY)
 
@@ -105,11 +105,12 @@ class ConfigsTestCase(TestCase):
 
         self.assertEquals(retval, AUTH_ERROR)
 
+        captured = self._capsys.readouterr()
         expected_stdout = u('')
         expected_stderr = open('tests/samples/output/common_usage_header').read()
         expected_stderr += open('tests/samples/output/configs_test_missing_config_file').read()
-        self.assertEquals(sys.stdout.getvalue(), expected_stdout)
-        self.assertEquals(sys.stderr.getvalue(), expected_stderr)
+        assert captured.out == expected_stdout
+        assert captured.err == expected_stderr
 
         self.patched['wakatime.session_cache.SessionCache.get'].assert_not_called()
 
@@ -124,12 +125,14 @@ class ConfigsTestCase(TestCase):
             config = 'tests/samples/configs/has_everything.cfg'
             args = ['--file', entity, '--config', config, '--log-file', '~/.wakatime.log']
             retval = execute(args)
-            self.assertEquals(retval, SUCCESS)
+            assert retval == SUCCESS
+
+            captured = self._capsys.readouterr()
             expected_stdout = open('tests/samples/output/configs_test_good_config_file').read()
             traceback_file = os.path.realpath('wakatime/arguments.py')
-            lineno = int(re.search(r' line (\d+),', sys.stdout.getvalue()).group(1))
-            self.assertEquals(sys.stdout.getvalue(), expected_stdout.format(file=traceback_file, lineno=lineno))
-            self.assertEquals(sys.stderr.getvalue(), '')
+            lineno = int(re.search(r' line (\d+),', captured.out).group(1))
+            assert captured.out == expected_stdout.format(file=traceback_file, lineno=lineno)
+            assert captured.err == ''
 
             self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
             self.patched['wakatime.session_cache.SessionCache.delete'].assert_not_called()
@@ -153,9 +156,9 @@ class ConfigsTestCase(TestCase):
             config = 'tests/samples/configs/sample_alternate_apikey.cfg'
             args = ['--file', entity, '--config', config, '--log-file', '~/.wakatime.log']
             retval = execute(args)
-            self.assertEquals(retval, SUCCESS)
-            self.assertEquals(sys.stdout.getvalue(), '')
-            self.assertEquals(sys.stderr.getvalue(), '')
+            assert retval == SUCCESS
+
+            self.assertNothingPrinted()
 
             self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
             self.patched['wakatime.session_cache.SessionCache.delete'].assert_not_called()
@@ -164,8 +167,7 @@ class ConfigsTestCase(TestCase):
             self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
             self.patched['wakatime.offlinequeue.Queue.pop'].assert_called_once_with()
 
-    @log_capture()
-    def test_bad_config_file(self, logs):
+    def test_bad_config_file(self):
         logging.disable(logging.NOTSET)
 
         with TemporaryDirectory() as tempdir:
@@ -177,23 +179,20 @@ class ConfigsTestCase(TestCase):
             args = ['--file', entity, '--config', config, '--log-file', '~/.wakatime.log']
 
             retval = execute(args)
+            assert retval == CONFIG_FILE_PARSE_ERROR
 
-            self.assertEquals(retval, CONFIG_FILE_PARSE_ERROR)
-            self.assertIn('ParsingError', sys.stdout.getvalue())
-            expected_stderr = ''
-            self.assertEquals(sys.stderr.getvalue(), expected_stderr)
+            captured = self._capsys.readouterr()
+            assert 'ParsingError' in captured.out
+            assert captured.err == ''
 
-            log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
-            expected = ''
-            self.assertEquals(log_output, expected)
+            self.assertNothingLogged()
 
             self.patched['wakatime.offlinequeue.Queue.push'].assert_not_called()
             self.patched['wakatime.session_cache.SessionCache.get'].assert_not_called()
             self.patched['wakatime.session_cache.SessionCache.delete'].assert_not_called()
             self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
 
-    @log_capture()
-    def test_non_hidden_filename(self, logs):
+    def test_non_hidden_filename(self):
         logging.disable(logging.NOTSET)
 
         self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
@@ -211,7 +210,7 @@ class ConfigsTestCase(TestCase):
             retval = execute(args)
             self.assertEquals(retval, SUCCESS)
             self.assertNothingPrinted()
-            self.assertNothingLogged(logs)
+            self.assertNothingLogged()
 
             heartbeat = {
                 'entity': os.path.realpath(entity),
@@ -412,8 +411,7 @@ class ConfigsTestCase(TestCase):
             self.assertOfflineHeartbeatsSynced()
             self.assertSessionCacheSaved()
 
-    @log_capture()
-    def test_does_not_hide_file_names_from_invalid_regex(self, logs):
+    def test_does_not_hide_file_names_from_invalid_regex(self):
         logging.disable(logging.NOTSET)
 
         self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
@@ -429,14 +427,12 @@ class ConfigsTestCase(TestCase):
             args = ['--file', entity, '--key', key, '--config', config, '--time', now, '--log-file', '~/.wakatime.log']
 
             retval = execute(args)
-            self.assertEquals(retval, SUCCESS)
+            assert retval == SUCCESS
+
             self.assertNothingPrinted()
 
-            actual = self.getLogOutput(logs)
-            expected = u('WakaTime WARNING Regex error (unbalanced parenthesis) for hide_file_names pattern: invalid(regex')
-            if self.isPy35OrNewer:
-                expected = 'WakaTime WARNING Regex error (missing ), unterminated subpattern at position 7) for hide_file_names pattern: invalid(regex'
-            self.assertEquals(expected, actual)
+            expected = 'Regex error (missing ), unterminated subpattern at position 7) for hide_file_names pattern: invalid(regex'
+            assert expected in self.getLogOutput()
 
             heartbeat = {
                 'language': 'Text only',
@@ -578,8 +574,7 @@ class ConfigsTestCase(TestCase):
             self.assertOfflineHeartbeatsSynced()
             self.assertSessionCacheSaved()
 
-    @log_capture()
-    def test_exclude_file(self, logs):
+    def test_exclude_file(self):
         logging.disable(logging.NOTSET)
 
         response = Response()
@@ -594,11 +589,13 @@ class ConfigsTestCase(TestCase):
 
             args = ['--file', entity, '--config', config, '--exclude', 'empty', '--verbose', '--log-file', '~/.wakatime.log']
             retval = execute(args)
-            self.assertEquals(retval, SUCCESS)
+            assert retval == SUCCESS
+
             self.assertNothingPrinted()
-            actual = self.getLogOutput(logs)
-            expected = 'WakaTime DEBUG Skipping because matches exclude pattern: empty'
-            self.assertEquals(actual, expected)
+
+            actual = self.getLogOutput()
+            expected = 'Skipping because matches exclude pattern: empty'
+            assert expected in actual
 
             self.assertHeartbeatNotSent()
 
@@ -606,8 +603,7 @@ class ConfigsTestCase(TestCase):
             self.assertOfflineHeartbeatsSynced()
             self.assertSessionCacheUntouched()
 
-    @log_capture()
-    def test_exclude_file_without_project_file(self, logs):
+    def test_exclude_file_without_project_file(self):
         logging.disable(logging.NOTSET)
 
         response = Response()
@@ -622,11 +618,13 @@ class ConfigsTestCase(TestCase):
 
             args = ['--file', entity, '--config', config, '--verbose', '--log-file', '~/.wakatime.log']
             retval = execute(args)
-            self.assertEquals(retval, SUCCESS)
+            assert retval == SUCCESS
+
             self.assertNothingPrinted()
-            actual = self.getLogOutput(logs)
-            expected = 'WakaTime DEBUG Skipping because missing .wakatime-project file in parent path.'
-            self.assertEquals(actual, expected)
+
+            actual = self.getLogOutput()
+            expected = 'Skipping because missing .wakatime-project file in parent path.'
+            assert expected in actual
 
             self.assertHeartbeatNotSent()
 
@@ -634,8 +632,7 @@ class ConfigsTestCase(TestCase):
             self.assertOfflineHeartbeatsSynced()
             self.assertSessionCacheUntouched()
 
-    @log_capture()
-    def test_exclude_file_because_project_unknown(self, logs):
+    def test_exclude_file_because_project_unknown(self):
         logging.disable(logging.NOTSET)
 
         response = Response()
@@ -650,11 +647,13 @@ class ConfigsTestCase(TestCase):
 
             args = ['--file', entity, '--config', config, '--verbose', '--log-file', '~/.wakatime.log']
             retval = execute(args)
-            self.assertEquals(retval, SUCCESS)
+            assert retval == SUCCESS
+
             self.assertNothingPrinted()
-            actual = self.getLogOutput(logs)
-            expected = 'WakaTime DEBUG Skipping because project unknown.'
-            self.assertEquals(actual, expected)
+
+            actual = self.getLogOutput()
+            expected = 'Skipping because project unknown.'
+            assert expected in actual
 
             self.assertHeartbeatNotSent()
 
@@ -662,8 +661,7 @@ class ConfigsTestCase(TestCase):
             self.assertOfflineHeartbeatsSynced()
             self.assertSessionCacheUntouched()
 
-    @log_capture()
-    def test_include_file_with_project_file(self, logs):
+    def test_include_file_with_project_file(self):
         logging.disable(logging.NOTSET)
 
         self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()

@@ -5,7 +5,6 @@ import logging
 import os
 import time
 import uuid
-from testfixtures import log_capture
 from .utils import ANY, CustomResponse, NamedTemporaryFile, TestCase, mock
 
 from wakatime.compat import u
@@ -24,8 +23,7 @@ class StatsTestCase(TestCase):
         ['wakatime.session_cache.SessionCache.connect', None],
     ]
 
-    @log_capture()
-    def test_guess_lexer_using_filename_analyse_text_exception(self, logs):
+    def test_guess_lexer_using_filename_analyse_text_exception(self):
         logging.disable(logging.NOTSET)
         self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
@@ -44,7 +42,7 @@ class StatsTestCase(TestCase):
                     self.assertEquals(retval, SUCCESS)
 
                     self.assertNothingPrinted()
-                    self.assertNothingLogged(logs)
+                    self.assertNothingLogged()
 
                     heartbeat = {
                         'entity': entity,
@@ -60,8 +58,7 @@ class StatsTestCase(TestCase):
                     }
                     self.assertHeartbeatSent(heartbeat)
 
-    @log_capture()
-    def test_guess_lexer_using_filename_analyse_text_exception_and_logs_error_when_debugging(self, logs):
+    def test_guess_lexer_using_filename_analyse_text_exception_and_logs_error_when_debugging(self):
         logging.disable(logging.NOTSET)
         self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
@@ -80,9 +77,7 @@ class StatsTestCase(TestCase):
                     self.assertEquals(retval, SUCCESS)
 
                     self.assertNothingPrinted()
-                    actual = self.getLogOutput(logs)
-                    expected = 'Exception: foobar'
-                    self.assertIn(expected, actual)
+                    assert 'Exception: foobar' in self.getLogOutput()
 
                     heartbeat = {
                         'entity': entity,
@@ -98,8 +93,7 @@ class StatsTestCase(TestCase):
                     }
                     self.assertHeartbeatSent(heartbeat)
 
-    @log_capture()
-    def test_number_lines_in_file_getsize_os_error(self, logs):
+    def test_number_lines_in_file_getsize_os_error(self):
         logging.disable(logging.NOTSET)
 
         with mock.patch('wakatime.stats.os.path.getsize') as mock_getsize:
@@ -110,4 +104,4 @@ class StatsTestCase(TestCase):
             self.assertEquals(result, 22)
 
             self.assertNothingPrinted()
-            self.assertNothingLogged(logs)
+            self.assertNothingLogged()

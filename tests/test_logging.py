@@ -11,7 +11,6 @@ import os
 import platform
 import time
 import shutil
-from testfixtures import log_capture
 from . import utils
 from .utils import unittest
 
@@ -28,10 +27,7 @@ class LoggingTestCase(utils.TestCase):
         ['wakatime.session_cache.SessionCache.connect', None],
     ]
 
-    @log_capture()
-    def test_default_log_file_used(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_default_log_file_used(self):
         response = Response()
         response.status_code = 0
         self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
@@ -48,20 +44,11 @@ class LoggingTestCase(utils.TestCase):
         self.assertEquals(logging.WARNING, logging.getLogger('WakaTime').level)
         logfile = os.path.realpath(os.path.expanduser('~/.wakatime.log'))
         self.assertEquals(logfile, logging.getLogger('WakaTime').handlers[0].baseFilename)
-        output = [u(' ').join(x) for x in logs.actual()]
-        expected = u('WakaTime WARNING Regex error (unbalanced parenthesis) for include pattern: \\(invalid regex)')
-        if self.isPy35OrNewer:
-            expected = u('WakaTime WARNING Regex error (unbalanced parenthesis at position 15) for include pattern: \\(invalid regex)')
-        self.assertEquals(output[0], expected)
-        expected = u('WakaTime WARNING Regex error (unbalanced parenthesis) for exclude pattern: \\(invalid regex)')
-        if self.isPy35OrNewer:
-            expected = u('WakaTime WARNING Regex error (unbalanced parenthesis at position 15) for exclude pattern: \\(invalid regex)')
-        self.assertEquals(output[1], expected)
 
-    @log_capture()
-    def test_log_file_location_can_be_changed(self, logs):
-        logging.disable(logging.NOTSET)
+        expected = 'Regex error (unbalanced parenthesis at position 15) for include pattern: \\(invalid regex)'
+        assert expected in self.getLogOutput()
 
+    def test_log_file_location_can_be_changed(self):
         response = Response()
         response.status_code = 0
         self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
@@ -81,13 +68,11 @@ class LoggingTestCase(utils.TestCase):
 
             self.assertEquals(logging.WARNING, logging.getLogger('WakaTime').level)
             self.assertEquals(logfile, logging.getLogger('WakaTime').handlers[0].baseFilename)
-            logs.check()
+
+            self.assertNothingLogged()
 
     @unittest.skipIf(platform.system() == 'Windows', 'Windows file issue')
-    @log_capture()
-    def test_log_file_location_can_be_set_from_env_variable(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_log_file_location_can_be_set_from_env_variable(self):
         response = Response()
         response.status_code = 0
         self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
@@ -117,12 +102,10 @@ class LoggingTestCase(utils.TestCase):
                 self.assertEquals(logging.WARNING, logging.getLogger('WakaTime').level)
                 logfile = os.path.realpath(logging.getLogger('WakaTime').handlers[0].baseFilename)
                 self.assertEquals(logfile, expected_logfile)
-                logs.check()
 
-    @log_capture()
-    def test_verbose_flag_enables_verbose_logging(self, logs):
-        logging.disable(logging.NOTSET)
+                self.assertNothingLogged()
 
+    def test_verbose_flag_enables_verbose_logging(self):
         response = Response()
         response.status_code = 0
         self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
@@ -139,24 +122,16 @@ class LoggingTestCase(utils.TestCase):
         self.assertEquals(logging.DEBUG, logging.getLogger('WakaTime').level)
         logfile = os.path.realpath(os.path.expanduser('~/.wakatime.log'))
         self.assertEquals(logfile, logging.getLogger('WakaTime').handlers[0].baseFilename)
-        output = [u(' ').join(x) for x in logs.actual()]
 
-        expected = u('WakaTime WARNING Regex error (unbalanced parenthesis) for include pattern: \\(invalid regex)')
-        if self.isPy35OrNewer:
-            expected = u('WakaTime WARNING Regex error (unbalanced parenthesis at position 15) for include pattern: \\(invalid regex)')
-        self.assertEquals(output[0], expected)
-        expected = u('WakaTime WARNING Regex error (unbalanced parenthesis) for exclude pattern: \\(invalid regex)')
-        if self.isPy35OrNewer:
-            expected = u('WakaTime WARNING Regex error (unbalanced parenthesis at position 15) for exclude pattern: \\(invalid regex)')
-        self.assertEquals(output[1], expected)
-        self.assertEquals(output[2], u('WakaTime DEBUG Sending heartbeats to api at https://api.wakatime.com/api/v1/users/current/heartbeats.bulk'))
-        self.assertIn('Python', output[3])
-        self.assertIn('response_code', output[4])
+        log_output = self.getLogOutput()
+        expected = 'Regex error (unbalanced parenthesis at position 15) for include pattern: \\(invalid regex)'
+        assert expected in log_output
+        expected = 'Sending heartbeats to api at https://api.wakatime.com/api/v1/users/current/heartbeats.bulk'
+        assert expected in log_output
+        assert 'Python' in log_output
+        assert 'response_code' in log_output
 
-    @log_capture()
-    def test_exception_traceback_logged_in_debug_mode(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_exception_traceback_logged_in_debug_mode(self):
         response = Response()
         response.status_code = 0
         self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
@@ -173,14 +148,11 @@ class LoggingTestCase(utils.TestCase):
             self.assertEquals(retval, 102)
             self.assertNothingPrinted()
 
-            log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
-            self.assertIn(u('WakaTime DEBUG Traceback (most recent call last):'), log_output)
-            self.assertIn(u('Exception: FooBar'), log_output)
+            log_output = self.getLogOutput()
+            assert 'Traceback (most recent call last):' in log_output
+            assert 'Exception: FooBar' in log_output
 
-    @log_capture()
-    def test_exception_traceback_not_logged_normally(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_exception_traceback_not_logged_normally(self):
         response = Response()
         response.status_code = 0
         self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
@@ -196,14 +168,9 @@ class LoggingTestCase(utils.TestCase):
             retval = execute(args)
             self.assertEquals(retval, 102)
             self.assertNothingPrinted()
+            self.assertNothingLogged()
 
-            log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
-            self.assertEquals(u(''), log_output)
-
-    @log_capture()
-    def test_can_log_invalid_utf8(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_can_log_invalid_utf8(self):
         data = bytes('\xab', 'utf-16')
 
         with self.assertRaises(UnicodeDecodeError):
@@ -212,8 +179,4 @@ class LoggingTestCase(utils.TestCase):
         logger = logging.getLogger('WakaTime')
         logger.error(data)
 
-        found = False
-        for msg in list(logs.actual())[0]:
-            if u(msg) == u(data):
-                found = True
-        self.assertTrue(found)
+        assert u(data) in self.getLogOutput()

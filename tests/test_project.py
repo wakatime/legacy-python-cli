@@ -5,12 +5,10 @@ from wakatime.main import execute
 import requests
 from requests.models import Response
 
-import logging
 import os
 import shutil
 import tempfile
 import time
-from testfixtures import log_capture
 from wakatime.compat import u
 from wakatime.constants import API_ERROR, SUCCESS
 from wakatime.exceptions import NotYetImplemented
@@ -197,7 +195,7 @@ class ProjectTestCase(TestCase):
         execute(args)
         self.assertHeartbeatSavedOffline()
 
-        self.assertNotEquals('git', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
+        assert 'git' != self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project']
         self.assertEquals(None, self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['branch'])
         proj = open(os.path.join(tempdir, 'git', '.wakatime-project')).read()
         self.assertEquals(proj, self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
@@ -236,8 +234,8 @@ class ProjectTestCase(TestCase):
         execute(args)
         self.assertHeartbeatSavedOffline()
 
-        self.assertNotEquals('git', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
-        self.assertNotEquals(None, self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['branch'])
+        assert self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'] != 'git'
+        assert self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['branch'] is not None
         proj = open(os.path.join(tempdir, 'git', '.wakatime-project')).read()
         self.assertEquals(proj, self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
 
@@ -245,10 +243,7 @@ class ProjectTestCase(TestCase):
 
         self.assertEquals(proj, self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
 
-    @log_capture()
-    def test_ioerror_when_reading_git_branch(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_ioerror_when_reading_git_branch(self):
         tempdir = tempfile.mkdtemp()
         shutil.copytree('tests/samples/projects/git', os.path.join(tempdir, 'git'))
         shutil.move(os.path.join(tempdir, 'git', 'dot_git'), os.path.join(tempdir, 'git', '.git'))
@@ -265,9 +260,7 @@ class ProjectTestCase(TestCase):
             )
 
         self.assertNothingPrinted()
-        actual = self.getLogOutput(logs)
-        expected = 'OSError' if self.isPy33OrNewer else 'IOError'
-        self.assertIn(expected, actual)
+        assert 'OSError' in self.getLogOutput()
 
     def test_git_detached_head_not_used_as_branch(self):
         tempdir = tempfile.mkdtemp()
@@ -299,10 +292,7 @@ class ProjectTestCase(TestCase):
                         entity='projects/svn/afolder/emptyfile.txt',
                     )
 
-    @log_capture()
-    def test_svn_exception_handled(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_svn_exception_handled(self):
         with mock.patch('wakatime.projects.git.Git.process') as mock_git:
             mock_git.return_value = False
 
@@ -321,7 +311,7 @@ class ProjectTestCase(TestCase):
                         )
 
                         self.assertNothingPrinted()
-                        self.assertNothingLogged(logs)
+                        self.assertNothingLogged()
 
     def test_svn_on_mac_without_xcode_tools_installed(self):
         with mock.patch('wakatime.projects.git.Git.process') as mock_git:
@@ -418,10 +408,7 @@ class ProjectTestCase(TestCase):
             self.assertEquals('hg-branch-with-slash', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
             self.assertEquals('branch/with/slash', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['branch'])
 
-    @log_capture()
-    def test_ioerror_when_reading_mercurial_branch(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_ioerror_when_reading_mercurial_branch(self):
         response = Response()
         response.status_code = 0
         self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
@@ -443,9 +430,7 @@ class ProjectTestCase(TestCase):
             self.assertEquals('default', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['branch'])
 
             self.assertNothingPrinted()
-            actual = self.getLogOutput(logs)
-            expected = 'OSError' if self.isPy33OrNewer else 'IOError'
-            self.assertIn(expected, actual)
+            assert 'OSError' in self.getLogOutput()
 
     def test_git_submodule_detected(self):
         tempdir = tempfile.mkdtemp()
@@ -536,10 +521,7 @@ class ProjectTestCase(TestCase):
             config='git-submodules-enabled-using-regex.cfg',
         )
 
-    @log_capture()
-    def test_git_submodule_detected_with_invalid_regex(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_git_submodule_detected_with_invalid_regex(self):
         tempdir = tempfile.mkdtemp()
         shutil.copytree('tests/samples/projects/git-with-submodule', os.path.join(tempdir, 'git'))
         shutil.move(os.path.join(tempdir, 'git', 'dot_git'), os.path.join(tempdir, 'git', '.git'))
@@ -555,11 +537,8 @@ class ProjectTestCase(TestCase):
         )
 
         self.assertNothingPrinted()
-        actual = self.getLogOutput(logs)
-        expected = u('WakaTime WARNING Regex error (unbalanced parenthesis) for disable git submodules pattern: \\(invalid regex)')
-        if self.isPy35OrNewer:
-            expected = 'WakaTime WARNING Regex error (unbalanced parenthesis at position 15) for disable git submodules pattern: \\(invalid regex)'
-        self.assertEquals(expected, actual)
+        expected = 'Regex error (unbalanced parenthesis at position 15) for disable git submodules pattern: \\(invalid regex)'
+        assert expected in self.getLogOutput()
 
     def test_git_worktree_detected(self):
         tempdir = tempfile.mkdtemp()
@@ -593,10 +572,7 @@ class ProjectTestCase(TestCase):
             entity=entity,
         )
 
-    @log_capture()
-    def test_git_path_from_gitdir_link_file(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_git_path_from_gitdir_link_file(self):
         tempdir = tempfile.mkdtemp()
         shutil.copytree('tests/samples/projects/git-with-submodule', os.path.join(tempdir, 'git'))
         shutil.move(os.path.join(tempdir, 'git', 'dot_git'), os.path.join(tempdir, 'git', '.git'))
@@ -610,12 +586,9 @@ class ProjectTestCase(TestCase):
         expected = os.path.realpath(os.path.join(tempdir, 'git', '.git', 'modules', 'asubmodule'))
         self.assertEquals(expected, result)
         self.assertNothingPrinted()
-        self.assertNothingLogged(logs)
+        self.assertNothingLogged()
 
-    @log_capture()
-    def test_git_path_from_gitdir_link_file_handles_exceptions(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_git_path_from_gitdir_link_file_handles_exceptions(self):
         tempdir = tempfile.mkdtemp()
         shutil.copytree('tests/samples/projects/git-with-submodule', os.path.join(tempdir, 'git'))
         shutil.move(os.path.join(tempdir, 'git', 'dot_git'), os.path.join(tempdir, 'git', '.git'))
@@ -641,7 +614,7 @@ class ProjectTestCase(TestCase):
             expected = os.path.realpath(os.path.join(tempdir, 'git', '.git', 'modules', 'asubmodule'))
             self.assertEquals(expected, result)
             self.assertNothingPrinted()
-            self.assertNothingLogged(logs)
+            self.assertNothingLogged()
 
         with mock.patch('wakatime.projects.git.open') as mock_open:
             mock_open.side_effect = UnicodeDecodeError('utf8', ''.encode('utf8'), 0, 0, '')
@@ -652,9 +625,7 @@ class ProjectTestCase(TestCase):
 
             self.assertIsNone(result)
             self.assertNothingPrinted()
-            actual = self.getLogOutput(logs)
-            expected = 'UnicodeDecodeError'
-            self.assertIn(expected, actual)
+            assert 'UnicodeDecodeError' in self.getLogOutput()
 
         with mock.patch('wakatime.projects.git.open') as mock_open:
             mock_open.side_effect = IOError('')
@@ -665,14 +636,9 @@ class ProjectTestCase(TestCase):
 
             self.assertIsNone(result)
             self.assertNothingPrinted()
-            actual = self.getLogOutput(logs)
-            expected = 'OSError' if self.isPy33OrNewer else 'IOError'
-            self.assertIn(expected, actual)
+            assert 'OSError' in self.getLogOutput()
 
-    @log_capture()
-    def test_git_path_from_gitdir_link_file_handles_invalid_link(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_git_path_from_gitdir_link_file_handles_invalid_link(self):
         tempdir = tempfile.mkdtemp()
         shutil.copytree('tests/samples/projects/git-with-submodule', os.path.join(tempdir, 'git'))
         shutil.move(os.path.join(tempdir, 'git', 'asubmodule', 'dot_git'), os.path.join(tempdir, 'git', 'asubmodule', '.git'))
@@ -685,7 +651,7 @@ class ProjectTestCase(TestCase):
         expected = None
         self.assertEquals(expected, result)
         self.assertNothingPrinted()
-        self.assertNothingLogged(logs)
+        self.assertNothingLogged()
 
     def test_git_branch_with_slash(self):
         tempdir = tempfile.mkdtemp()
@@ -698,10 +664,7 @@ class ProjectTestCase(TestCase):
             entity=os.path.join(tempdir, 'git', 'emptyfile.txt'),
         )
 
-    @log_capture()
-    def test_project_map(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_project_map(self):
         response = Response()
         response.status_code = 0
         self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
@@ -717,12 +680,9 @@ class ProjectTestCase(TestCase):
         self.assertEquals('proj-map', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
 
         self.assertNothingPrinted()
-        self.assertNothingLogged(logs)
+        self.assertNothingLogged()
 
-    @log_capture()
-    def test_project_map_group_usage(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_project_map_group_usage(self):
         response = Response()
         response.status_code = 0
         self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
@@ -738,11 +698,9 @@ class ProjectTestCase(TestCase):
         self.assertEquals('proj-map42', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
 
         self.assertNothingPrinted()
-        self.assertNothingLogged(logs)
+        self.assertNothingLogged()
 
-    @log_capture()
-    def test_project_map_with_invalid_regex(self, logs):
-        logging.disable(logging.NOTSET)
+    def test_project_map_with_invalid_regex(self):
         self.patched['requests.adapters.HTTPAdapter.send'].return_value = CustomResponse()
 
         now = u(int(time.time()))
@@ -754,16 +712,10 @@ class ProjectTestCase(TestCase):
         self.assertEquals(retval, SUCCESS)
 
         self.assertNothingPrinted()
-        actual = self.getLogOutput(logs)
-        expected = u('WakaTime WARNING Regex error (unexpected end of regular expression) for projectmap pattern: invalid[({regex')
-        if self.isPy35OrNewer:
-            expected = u('WakaTime WARNING Regex error (unterminated character set at position 7) for projectmap pattern: invalid[({regex')
-        self.assertEquals(expected, actual)
+        expected = 'Regex error (unterminated character set at position 7) for projectmap pattern: invalid[({regex'
+        assert expected in self.getLogOutput()
 
-    @log_capture()
-    def test_project_map_with_replacement_group_index_error(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_project_map_with_replacement_group_index_error(self):
         response = Response()
         response.status_code = 0
         self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
@@ -777,14 +729,10 @@ class ProjectTestCase(TestCase):
 
         self.assertEquals(retval, API_ERROR)
         self.assertNothingPrinted()
-        actual = self.getLogOutput(logs)
-        expected = u('WakaTime WARNING Regex error (Replacement index 3 out of range for positional args tuple) for projectmap pattern: proj-map{3}')
-        self.assertEquals(expected, actual)
+        expected = 'Regex error (Replacement index 3 out of range for positional args tuple) for projectmap pattern: proj-map{3}'
+        assert expected in self.getLogOutput()
 
-    @log_capture()
-    def test_project_map_allows_duplicate_keys(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_project_map_allows_duplicate_keys(self):
         response = Response()
         response.status_code = 0
         self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
@@ -800,12 +748,9 @@ class ProjectTestCase(TestCase):
         self.assertEquals('proj-map-duplicate-5', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
 
         self.assertNothingPrinted()
-        self.assertNothingLogged(logs)
+        self.assertNothingLogged()
 
-    @log_capture()
-    def test_project_map_allows_colon_in_key(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_project_map_allows_colon_in_key(self):
         response = Response()
         response.status_code = 0
         self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
@@ -821,12 +766,9 @@ class ProjectTestCase(TestCase):
         self.assertEquals('proj-map-match', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
 
         self.assertNothingPrinted()
-        self.assertNothingLogged(logs)
+        self.assertNothingLogged()
 
-    @log_capture()
-    def test_exclude_unknown_project_when_project_detected(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_exclude_unknown_project_when_project_detected(self):
         response = Response()
         response.status_code = 0
         self.patched['requests.adapters.HTTPAdapter.send'].return_value = response
@@ -841,7 +783,7 @@ class ProjectTestCase(TestCase):
             execute(args)
 
             self.assertNothingPrinted()
-            self.assertNothingLogged(logs)
+            self.assertNothingLogged()
             self.assertEquals('proj-arg', self.patched['wakatime.offlinequeue.Queue.push'].call_args[0][0]['project'])
 
     def test_generate_project_name(self):

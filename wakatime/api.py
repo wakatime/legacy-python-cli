@@ -116,7 +116,7 @@ def send_heartbeats(heartbeats, args, configs, use_ntlm_proxy=False):
                 queue = Queue(args, configs)
                 queue.push_many(heartbeats)
                 if log.isEnabledFor(logging.DEBUG):
-                    log.warn(exception_data)
+                    log.warning(exception_data)
             else:
                 log.error(exception_data)
 
@@ -131,7 +131,7 @@ def send_heartbeats(heartbeats, args, configs, use_ntlm_proxy=False):
             if args.offline:
                 queue = Queue(args, configs)
                 queue.push_many(heartbeats)
-                log.warn(exception_data)
+                log.warning(exception_data)
 
     else:
         code = response.status_code if response is not None else None
@@ -305,7 +305,7 @@ def _process_server_results(heartbeats, code, content, results, args, configs):
 
     for i in range(len(results)):
         if len(heartbeats) <= i:
-            log.warn("Results from api not matching heartbeats sent.")
+            log.warning("Results from api not matching heartbeats sent.")
             break
 
         try:
@@ -323,7 +323,7 @@ def _process_server_results(heartbeats, code, content, results, args, configs):
 
     leftover = len(heartbeats) - len(results)
     if leftover > 0:
-        log.warn("Missing {0} results from api.".format(leftover))
+        log.warning("Missing {0} results from api.".format(leftover))
         start = len(heartbeats) - leftover
         _handle_unsent_heartbeats(heartbeats[start:], code, content, args, configs)
 
@@ -336,7 +336,7 @@ def _handle_unsent_heartbeats(heartbeats, code, content, args, configs):
             )
         else:
             if log.isEnabledFor(logging.DEBUG):
-                log.warn(
+                log.warning(
                     {"response_code": code, "response_content": content,}
                 )
             queue = Queue(args, configs)

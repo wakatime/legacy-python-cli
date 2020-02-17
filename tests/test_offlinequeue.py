@@ -5,13 +5,11 @@ from wakatime.main import execute
 from wakatime.offlinequeue import Queue
 import requests
 
-import logging
 import os
 import sqlite3
 import shutil
 import time
 import uuid
-from testfixtures import log_capture
 from wakatime.compat import u
 from wakatime.constants import API_ERROR, AUTH_ERROR, SUCCESS
 from requests.models import Response
@@ -166,10 +164,7 @@ class OfflineQueueTestCase(TestCase):
                 self.assertEquals(data.get('project'), project2)
                 self.assertEquals(u(int(data.get('time'))), now2)
 
-    @log_capture()
-    def test_heartbeats_sent_not_saved_from_bulk_response(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_heartbeats_sent_not_saved_from_bulk_response(self):
         with NamedTemporaryFile() as fh:
             with mock.patch('wakatime.offlinequeue.Queue._get_db_file') as mock_db_file:
                 mock_db_file.return_value = fh.name
@@ -242,17 +237,14 @@ class OfflineQueueTestCase(TestCase):
                         self.assertPathsEqual(queue._get_db_file(), fh.name)
                         saved_heartbeats = next(queue.pop_many())
                         self.assertNothingPrinted()
-                        self.assertNothingLogged(logs)
+                        self.assertNothingLogged()
 
                         # make sure only heartbeats with error code responses were saved
                         self.assertEquals(sum(1 for x in saved_heartbeats), 2)
                         self.assertPathsEqual(saved_heartbeats[0].entity, os.path.realpath(os.path.join(tempdir, entities[1])))
                         self.assertPathsEqual(saved_heartbeats[1].entity, os.path.realpath(os.path.join(tempdir, entities[3])))
 
-    @log_capture()
-    def test_offline_heartbeats_sent_after_partial_success_from_bulk_response(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_offline_heartbeats_sent_after_partial_success_from_bulk_response(self):
         with NamedTemporaryFile() as fh:
             with mock.patch('wakatime.offlinequeue.Queue._get_db_file') as mock_db_file:
                 mock_db_file.return_value = fh.name
@@ -290,9 +282,8 @@ class OfflineQueueTestCase(TestCase):
                         self.assertEquals(retval, SUCCESS)
                         self.assertNothingPrinted()
 
-                        expected = 'WakaTime WARNING Results from api not matching heartbeats sent.'
-                        actual = self.getLogOutput(logs)
-                        self.assertEquals(actual, expected)
+                        expected = 'Results from api not matching heartbeats sent.'
+                        assert expected in self.getLogOutput()
 
                         queue = Queue(None, None)
                         self.assertEquals(queue._get_db_file(), fh.name)
@@ -302,10 +293,7 @@ class OfflineQueueTestCase(TestCase):
                         # make sure all offline heartbeats were sent, so queue should only have 1 heartbeat left from the second 500 response
                         self.assertEquals(len(saved_heartbeats), 1)
 
-    @log_capture()
-    def test_leftover_heartbeats_saved_when_bulk_response_not_matching_length(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_leftover_heartbeats_saved_when_bulk_response_not_matching_length(self):
         with NamedTemporaryFile() as fh:
             with mock.patch('wakatime.offlinequeue.Queue._get_db_file') as mock_db_file:
                 mock_db_file.return_value = fh.name
@@ -350,9 +338,11 @@ class OfflineQueueTestCase(TestCase):
                         saved_heartbeats = next(queue.pop_many())
                         self.assertNothingPrinted()
 
-                        expected = "WakaTime WARNING Missing 4 results from api.\nWakaTime WARNING Missing 2 results from api."
-                        actual = self.getLogOutput(logs)
-                        self.assertEquals(actual, expected)
+                        log_output = self.getLogOutput()
+                        expected = "Missing 4 results from api."
+                        assert expected in log_output
+                        expected = "Missing 2 results from api."
+                        assert expected in log_output
 
                         # make sure extra heartbeats not matching server response were saved
                         self.assertEquals(len(saved_heartbeats), 2)
@@ -526,10 +516,7 @@ class OfflineQueueTestCase(TestCase):
                 saved_heartbeat = queue.pop()
                 self.assertEquals(None, saved_heartbeat)
 
-    @log_capture()
-    def test_push_handles_exception_on_execute(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_push_handles_exception_on_execute(self):
         with NamedTemporaryFile() as fh:
             with mock.patch('wakatime.offlinequeue.Queue._get_db_file') as mock_db_file:
                 mock_db_file.return_value = fh.name
@@ -562,10 +549,7 @@ class OfflineQueueTestCase(TestCase):
 
                 self.assertNothingPrinted()
 
-    @log_capture()
-    def test_push_handles_exception_on_commit(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_push_handles_exception_on_commit(self):
         with NamedTemporaryFile() as fh:
             with mock.patch('wakatime.offlinequeue.Queue._get_db_file') as mock_db_file:
                 mock_db_file.return_value = fh.name
@@ -599,10 +583,7 @@ class OfflineQueueTestCase(TestCase):
 
                 self.assertNothingPrinted()
 
-    @log_capture()
-    def test_push_handles_exception_on_close(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_push_handles_exception_on_close(self):
         with NamedTemporaryFile() as fh:
             with mock.patch('wakatime.offlinequeue.Queue._get_db_file') as mock_db_file:
                 mock_db_file.return_value = fh.name
@@ -654,10 +635,7 @@ class OfflineQueueTestCase(TestCase):
                 actual = queue._get_db_file()
                 self.assertEquals(actual, expected)
 
-    @log_capture()
-    def test_heartbeat_saved_when_requests_raises_exception(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_heartbeat_saved_when_requests_raises_exception(self):
         with NamedTemporaryFile() as fh:
             with mock.patch('wakatime.offlinequeue.Queue._get_db_file') as mock_db_file:
                 mock_db_file.return_value = fh.name
@@ -678,17 +656,13 @@ class OfflineQueueTestCase(TestCase):
 
                 self.assertNothingPrinted()
 
-                output = [u(' ').join(x) for x in logs.actual()]
-                self.assertIn(exception_msg, output[0])
+                assert exception_msg in self.getLogOutput()
 
                 self.patched['wakatime.session_cache.SessionCache.get'].assert_called_once_with()
                 self.patched['wakatime.session_cache.SessionCache.delete'].assert_called_once_with()
                 self.patched['wakatime.session_cache.SessionCache.save'].assert_not_called()
 
-    @log_capture()
-    def test_nonascii_heartbeat_saved(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_nonascii_heartbeat_saved(self):
         with NamedTemporaryFile() as fh:
             with mock.patch('wakatime.offlinequeue.Queue._get_db_file') as mock_db_file:
                 mock_db_file.return_value = fh.name
@@ -732,7 +706,7 @@ class OfflineQueueTestCase(TestCase):
                             execute(args)
 
                     self.assertNothingPrinted()
-                    self.assertNothingLogged(logs)
+                    self.assertNothingLogged()
 
                     self.assertHeartbeatSent(heartbeat)
 
@@ -743,10 +717,7 @@ class OfflineQueueTestCase(TestCase):
                     self.assertEquals(u(project), saved_heartbeat['project'])
                     self.assertEquals(u(branch), saved_heartbeat['branch'])
 
-    @log_capture()
-    def test_heartbeat_saved_when_bulk_result_json_decode_error(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_heartbeat_saved_when_bulk_result_json_decode_error(self):
         with NamedTemporaryFile() as fh:
             with mock.patch('wakatime.offlinequeue.Queue._get_db_file') as mock_db_file:
                 mock_db_file.return_value = fh.name
@@ -768,13 +739,10 @@ class OfflineQueueTestCase(TestCase):
 
                 self.assertNothingPrinted()
                 expected = 'JSONDecodeError'
-                actual = self.getLogOutput(logs)
-                self.assertIn(expected, actual)
+                actual = self.getLogOutput()
+                assert expected in actual
 
-    @log_capture()
-    def test_heartbeat_saved_from_result_type_error(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_heartbeat_saved_from_result_type_error(self):
         with NamedTemporaryFile() as fh:
             with mock.patch('wakatime.offlinequeue.Queue._get_db_file') as mock_db_file:
                 mock_db_file.return_value = fh.name
@@ -796,13 +764,10 @@ class OfflineQueueTestCase(TestCase):
 
                 self.assertNothingPrinted()
                 expected = 'TypeError'
-                actual = self.getLogOutput(logs)
-                self.assertIn(expected, actual)
+                actual = self.getLogOutput()
+                assert expected in actual
 
-    @log_capture()
-    def test_heartbeat_saved_from_result_index_error(self, logs):
-        logging.disable(logging.NOTSET)
-
+    def test_heartbeat_saved_from_result_index_error(self):
         with NamedTemporaryFile() as fh:
             with mock.patch('wakatime.offlinequeue.Queue._get_db_file') as mock_db_file:
                 mock_db_file.return_value = fh.name
@@ -824,5 +789,5 @@ class OfflineQueueTestCase(TestCase):
 
                 self.assertNothingPrinted()
                 expected = 'IndexError'
-                actual = self.getLogOutput(logs)
-                self.assertIn(expected, actual)
+                actual = self.getLogOutput()
+                assert expected in actual

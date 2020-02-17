@@ -4,6 +4,7 @@ import certifi
 import logging
 import os
 import platform
+import pytest
 import re
 import sys
 import tempfile
@@ -20,12 +21,13 @@ from wakatime.utils import BACKSLASH_REPLACE_PATTERN, WINDOWS_DRIVE_PATTERN
 class TestCase(unittest.TestCase):
     patch_these = []
 
+    @pytest.fixture(autouse=True)
+    def inject_fixtures(self, caplog, capsys):
+        self._caplog = caplog
+        self._capsys = capsys
+
     def setUp(self):
-        # disable logging while testing
-        logging.disable(logging.CRITICAL)
-
-        self.maxDiff = None
-
+        logging.disable(logging.NOTSET)
         self.patched = {}
 
         self.patched['os.get_terminal_size'] = mock.patch('os.get_terminal_size').start()
@@ -57,17 +59,23 @@ class TestCase(unittest.TestCase):
     def normalize_list(self, items):
         return sorted([u(x) for x in items])
 
+    def assertEquals(self, one, two, message=None):
+        if message:
+            assert one == two, message
+        else:
+            assert one == two
+
     def assertListsEqual(self, first_list, second_list, message=None):
         if isinstance(first_list, list) and isinstance(second_list, list):
             if message:
-                self.assertEquals(self.normalize_list(first_list), self.normalize_list(second_list), message)
+                assert self.normalize_list(first_list) == self.normalize_list(second_list), message
             else:
-                self.assertEquals(self.normalize_list(first_list), self.normalize_list(second_list))
+                assert self.normalize_list(first_list) == self.normalize_list(second_list)
         else:
             if message:
-                self.assertEquals(first_list, second_list, message)
+                assert first_list == second_list, message
             else:
-                self.assertEquals(first_list, second_list)
+                assert first_list == second_list
 
     def normalize_path(self, path):
         filepath = re.sub(BACKSLASH_REPLACE_PATTERN, '/', path)
@@ -77,9 +85,9 @@ class TestCase(unittest.TestCase):
 
     def assertPathsEqual(self, first_path, second_path, message=None):
         if message:
-            self.assertEquals(self.normalize_path(first_path), self.normalize_path(second_path), message)
+            assert self.normalize_path(first_path) == self.normalize_path(second_path), message
         else:
-            self.assertEquals(self.normalize_path(first_path), self.normalize_path(second_path))
+            assert self.normalize_path(first_path) == self.normalize_path(second_path)
 
     def assertHeartbeatNotSent(self):
         self.patched['requests.adapters.HTTPAdapter.send'].assert_not_called()
@@ -90,12 +98,12 @@ class TestCase(unittest.TestCase):
         )
 
         body = json.loads(self.patched['requests.adapters.HTTPAdapter.send'].call_args[0][0].body)
-        self.assertIsInstance(body, list)
+        assert isinstance(body, list)
 
         if headers:
             actual_headers = self.patched['requests.adapters.HTTPAdapter.send'].call_args[0][0].headers
             for key, val in headers.items():
-                self.assertEquals(actual_headers.get(key), val, u('Expected api request to have header {0}={1}, instead {0}={2}').format(u(key), u(actual_headers.get(key)), u(val)))
+                assert actual_headers.get(key) == val, u('Expected api request to have header {0}={1}, instead {0}={2}').format(u(key), u(actual_headers.get(key)), u(val))
 
         if heartbeat:
             keys = list(body[0].keys()) + list(heartbeat.keys())
@@ -106,7 +114,7 @@ class TestCase(unittest.TestCase):
                     if key == 'entity':
                         self.assertPathsEqual(heartbeat.get(key), body[0].get(key), u('Expected heartbeat to be sent with {1} {0}={2}, instead {3} {0}={4}').format(u(key), type(heartbeat.get(key)).__name__, u(heartbeat.get(key)), type(body[0].get(key)).__name__, u(body[0].get(key))))
                     else:
-                        self.assertEquals(heartbeat.get(key), body[0].get(key), u('Expected heartbeat to be sent with {1} {0}={2}, instead {3} {0}={4}').format(u(key), type(heartbeat.get(key)).__name__, u(heartbeat.get(key)), type(body[0].get(key)).__name__, u(body[0].get(key))))
+                        assert heartbeat.get(key) == body[0].get(key), u('Expected heartbeat to be sent with {1} {0}={2}, instead {3} {0}={4}').format(u(key), type(heartbeat.get(key)).__name__, u(heartbeat.get(key)), type(body[0].get(key)).__name__, u(body[0].get(key)))
 
         if extra_heartbeats:
             for i in range(len(extra_heartbeats)):
@@ -118,7 +126,7 @@ class TestCase(unittest.TestCase):
                         if key == 'entity':
                             self.assertPathsEqual(extra_heartbeats[i].get(key), body[i + 1].get(key), u('Expected extra heartbeat {5} to be sent with {1} {0}={2}, instead {3} {0}={4}').format(u(key), type(extra_heartbeats[i].get(key)).__name__, u(extra_heartbeats[i].get(key)), type(body[i + 1].get(key)).__name__, u(body[i + 1].get(key)), i))
                         else:
-                            self.assertEquals(extra_heartbeats[i].get(key), body[i + 1].get(key), u('Expected extra heartbeat {5} to be sent with {1} {0}={2}, instead {3} {0}={4}').format(u(key), type(extra_heartbeats[i].get(key)).__name__, u(extra_heartbeats[i].get(key)), type(body[i + 1].get(key)).__name__, u(body[i + 1].get(key)), i))
+                            assert extra_heartbeats[i].get(key) == body[i + 1].get(key), u('Expected extra heartbeat {5} to be sent with {1} {0}={2}, instead {3} {0}={4}').format(u(key), type(extra_heartbeats[i].get(key)).__name__, u(extra_heartbeats[i].get(key)), type(body[i + 1].get(key)).__name__, u(body[i + 1].get(key)), i)
 
     def assertSessionCacheUntouched(self):
         self.patched['wakatime.session_cache.SessionCache.delete'].assert_not_called()
@@ -149,17 +157,19 @@ class TestCase(unittest.TestCase):
         self.patched['wakatime.offlinequeue.Queue.pop'].assert_not_called()
 
     def assertNothingPrinted(self):
-        self.assertEquals(sys.stdout.getvalue(), '')
-        self.assertEquals(sys.stderr.getvalue(), '')
+        captured = self._capsys.readouterr()
+        assert captured.out == ''
+        assert captured.err == ''
 
     def getPrintedOutput(self):
-        return sys.stdout.getvalue() or '' + sys.stderr.getvalue() or ''
+        captured = self._capsys.readouterr()
+        return captured.out or '' + captured.err or ''
 
-    def assertNothingLogged(self, logs):
-        self.assertEquals(self.getLogOutput(logs), '')
+    def assertNothingLogged(self):
+        assert self._caplog.text == ''
 
-    def getLogOutput(self, logs):
-        return u("\n").join([u(' ').join(x) for x in logs.actual()])
+    def getLogOutput(self):
+        return self._caplog.text
 
     def resetMocks(self):
         for key in self.patched:

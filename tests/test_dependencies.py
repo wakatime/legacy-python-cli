@@ -8,7 +8,6 @@ import logging
 import os
 import time
 import shutil
-from testfixtures import log_capture
 from wakatime.compat import u
 from wakatime.constants import SUCCESS
 from wakatime.exceptions import NotYetImplemented
@@ -91,8 +90,7 @@ class DependenciesTestCase(TestCase):
         ]
         self.assertEquals(parser.dependencies, expected)
 
-    @log_capture()
-    def test_dependency_parser(self, logs):
+    def test_dependency_parser(self):
         logging.disable(logging.NOTSET)
 
         lexer = PythonLexer
@@ -101,16 +99,13 @@ class DependenciesTestCase(TestCase):
 
         dependencies = parser.parse()
 
-        log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
-        self.assertEquals(log_output, '')
-
+        self.assertNothingLogged()
         self.assertNothingPrinted()
 
         expected = []
         self.assertEquals(dependencies, expected)
 
-    @log_capture()
-    def test_missing_dependency_parser_in_debug_mode(self, logs):
+    def test_missing_dependency_parser_in_debug_mode(self):
         logging.disable(logging.NOTSET)
 
         # turn on debug mode
@@ -124,17 +119,15 @@ class DependenciesTestCase(TestCase):
         # parse dependencies
         dependencies = parser.parse()
 
-        log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
-        expected = 'WakaTime DEBUG Parsing dependencies not supported for python.FooClass'
-        self.assertEquals(log_output, expected)
+        expected = 'Parsing dependencies not supported for python.FooClass'
+        assert expected in self.getLogOutput()
 
         self.assertNothingPrinted()
 
         expected = []
         self.assertEquals(dependencies, expected)
 
-    @log_capture()
-    def test_missing_dependency_parser_importerror_in_debug_mode(self, logs):
+    def test_missing_dependency_parser_importerror_in_debug_mode(self):
         logging.disable(logging.NOTSET)
 
         # turn on debug mode
@@ -151,9 +144,8 @@ class DependenciesTestCase(TestCase):
             # parse dependencies
             dependencies = parser.parse()
 
-        log_output = u("\n").join([u(' ').join(x) for x in logs.actual()])
-        expected = 'WakaTime DEBUG Parsing dependencies not supported for python.FooClass'
-        self.assertEquals(log_output, expected)
+        expected = 'Parsing dependencies not supported for python.FooClass'
+        assert expected in self.getLogOutput()
 
         self.assertNothingPrinted()
 

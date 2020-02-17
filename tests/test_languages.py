@@ -36,7 +36,8 @@ class LanguagesTestCase(utils.TestCase):
         args = ['--entity', entity, '--config', config, '--time', now] + extra_args
 
         retval = execute(args)
-        self.assertEquals(retval, SUCCESS)
+        assert retval == SUCCESS
+
         self.assertNothingPrinted()
 
         heartbeat = {
