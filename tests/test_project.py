@@ -6,9 +6,11 @@ import requests
 from requests.models import Response
 
 import os
+import platform
 import shutil
 import tempfile
 import time
+import unittest
 from wakatime.compat import u
 from wakatime.constants import API_ERROR, SUCCESS
 from wakatime.exceptions import NotYetImplemented
@@ -275,6 +277,7 @@ class ProjectTestCase(TestCase):
             entity=entity,
         )
 
+    @unittest.skipIf(platform.system() == 'Windows', 'Windows file issue')
     def test_svn_project_detected(self):
         with mock.patch('wakatime.projects.git.Git.process') as mock_git:
             mock_git.return_value = False

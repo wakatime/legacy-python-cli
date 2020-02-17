@@ -11,8 +11,8 @@ import os
 import platform
 import time
 import shutil
+import unittest
 from . import utils
-from .utils import unittest
 
 
 class LoggingTestCase(utils.TestCase):
