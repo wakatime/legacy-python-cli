@@ -142,6 +142,7 @@ Contributing
 
 Get [pyenv](https://github.com/pyenv/pyenv#installation) and [pipenv](https://github.com/pypa/pipenv#installation), then install the wakatime-cli dev environment with::
 
+    env PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install
     pipenv install
 
 Make sure tests pass::
