@@ -58,4 +58,4 @@ addons:
   artifacts:
     s3_region: "us-west-2"
     paths:
-      - $(ls -1 dist/* | tr "\n" ":")
+      - $( ls ${TRAVIS_BUILD_DIR}/dist/*/* | tr "\n" ":" )
