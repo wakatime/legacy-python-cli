@@ -49,6 +49,7 @@ if __name__ == '__main__':
     )
     with open(binary, 'rb') as fh:
         client.upload_fileobj(fh, bucket, s3_filename)
+    print('Uploaded artifact {} to s3.'.format(s3_filename))
 
     s3_filename = '{os}-{arch}/wakatime'.format(
         os=OS,
@@ -56,3 +57,4 @@ if __name__ == '__main__':
     )
     with open(binary, 'rb') as fh:
         client.upload_fileobj(fh, bucket, s3_filename)
+    print('Uploaded artifact {} to s3.'.format(s3_filename))
