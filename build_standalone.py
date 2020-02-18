@@ -8,7 +8,7 @@ from zipfile import ZipFile
 
 CWD = Path(__file__).resolve().parent
 OS = platform.system().lower().replace('darwin', 'mac').replace('dows', '')
-MACHINE = platform.machine().lower()
+ARCH = 'x86' + ('-64' if '64' in platform.machine() else '')
 
 
 ABOUT = {}
@@ -17,7 +17,7 @@ with open(Path(CWD, "wakatime/__about__.py")) as f:
 
 
 if __name__ == '__main__':
-    dist = Path(CWD, 'dist')
+    dist = Path(CWD, 'dist', ARCH)
     subprocess.run(
         [
             'pyinstaller',
@@ -32,10 +32,10 @@ if __name__ == '__main__':
         check=True,
     )
 
-    filename = 'wakatime-{ver}-{os}-{machine}.zip'.format(
+    filename = 'wakatime-{ver}-{os}-{arch}.zip'.format(
         ver=ABOUT["__version__"],
         os=OS,
-        machine=MACHINE,
+        arch=ARCH,
     )
 
     with ZipFile(str(Path(dist, filename)), 'w') as myzip:

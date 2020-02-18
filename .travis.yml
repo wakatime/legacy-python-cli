@@ -57,6 +57,6 @@ after_success:
 addons:
   artifacts:
     s3_region: "us-west-2"
-    working_dir: dist
+    working_dir: ./dist
     paths:
-      - $(ls *.zip)
+      - $(ls -1 */*.zip | tr "\n" ":")
