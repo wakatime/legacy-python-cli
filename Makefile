@@ -1,4 +1,4 @@
-.PHONY: init test flake8 coverage publish build
+.PHONY: init test flake8 coverage build
 
 init:
 	pipenv install --dev --ignore-pipfile
@@ -14,6 +14,3 @@ coverage:
 
 build:
 	pipenv run python ./build_standalone.py
-
-publish:
-	python setup.py sdist upload

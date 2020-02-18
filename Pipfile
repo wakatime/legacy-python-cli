@@ -20,6 +20,7 @@ testfixtures = "==6.8.2"
 pytest = "*"
 pytest-cov = "*"
 pyinstaller = "*"
+boto3 = "*"
 
 [packages]
 requests = "*"

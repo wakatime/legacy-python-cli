@@ -54,10 +54,3 @@ script: make test
 after_success:
   - coveralls
   - make build
-addons:
-  artifacts:
-    s3_region: "us-west-2"
-    paths:
-      - $( ls ${TRAVIS_BUILD_DIR}/dist/*/* | tr "\n" ":" )
-    target_paths:
-      - /$TRAVIS_OS_NAME
