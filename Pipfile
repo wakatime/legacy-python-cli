@@ -9,6 +9,7 @@ black = "==19.10b0"
 isort = "*"
 flake8 = "*"
 nose = "==1.3.7"
+pywin32-ctypes = {version = "*",sys_platform = "== 'win32'"}
 PyYAML = "<=3.13"
 coverage = "==4.5.3"
 nose-capturestderr = "==1.2"
