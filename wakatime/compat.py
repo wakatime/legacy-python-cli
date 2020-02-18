@@ -15,6 +15,7 @@ import platform
 import subprocess
 import sys
 
+
 is_win = platform.system() == "Windows"
 
 
@@ -51,6 +52,9 @@ class Popen(subprocess.Popen):
                 pass
         kwargs["startupinfo"] = startupinfo
         if "env" not in kwargs:
-            kwargs["env"] = os.environ.copy()
-            kwargs["env"]["LANG"] = "en-US" if is_win else "en_US.UTF-8"
+            env = os.environ.copy()
+            env["LANG"] = "en-US" if is_win else "en_US.UTF-8"
+            if env.get("LD_LIBRARY_PATH_ORIG"):
+                env["LD_LIBRARY_PATH"] = env["LD_LIBRARY_PATH_ORIG"]
+            kwargs["env"] = env
         subprocess.Popen.__init__(self, *args, **kwargs)
