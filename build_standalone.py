@@ -7,8 +7,8 @@ from zipfile import ZipFile
 
 
 CWD = Path(__file__).resolve().parent
-OS = platform.system().lower().replace('darwin', 'mac')
-MACHINE = platform.machine()
+OS = platform.system().lower().replace('darwin', 'mac').replace('dows', '')
+MACHINE = platform.machine().lower()
 
 
 ABOUT = {}
