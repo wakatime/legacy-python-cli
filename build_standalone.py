@@ -17,7 +17,7 @@ with open(Path(CWD, "wakatime/__about__.py")) as f:
 
 
 if __name__ == '__main__':
-    dist = Path(CWD, 'dist', ARCH)
+    dist = Path(CWD, 'dist', OS + '-' + ARCH)
     subprocess.run(
         [
             'pyinstaller',
@@ -39,4 +39,4 @@ if __name__ == '__main__':
     )
 
     with ZipFile(str(Path(dist, filename)), 'w') as myzip:
-        myzip.write(str(Path(CWD, 'dist', 'wakatime')), arcname='wakatime')
+        myzip.write(str(Path(dist, 'wakatime')), arcname='wakatime')
