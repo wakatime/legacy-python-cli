@@ -58,4 +58,6 @@ addons:
   artifacts:
     s3_region: "us-west-2"
     paths:
-      - $(ls -1 dist/*/*.zip | tr "\n" ":")
+      - $(ls -1 dist/* | tr "\n" ":")
+    target_paths:
+      - /
