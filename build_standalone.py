@@ -51,7 +51,7 @@ if __name__ == '__main__':
         arch=ARCH,
     )
     with open(binary, 'rb') as fh:
-        client.upload_fileobj(fh, bucket, s3_filename)
+        client.upload_fileobj(fh, bucket, s3_filename, ExtraArgs={'ACL': 'public-read'})
     print('{timestamp} Uploaded artifact {filename} to s3.'.format(
         timestamp=datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
         filename=s3_filename,
@@ -62,7 +62,7 @@ if __name__ == '__main__':
         arch=ARCH,
     )
     with open(binary, 'rb') as fh:
-        client.upload_fileobj(fh, bucket, s3_filename)
+        client.upload_fileobj(fh, bucket, s3_filename, ExtraArgs={'ACL': 'public-read'})
     print('{timestamp} Uploaded artifact {filename} to s3.'.format(
         timestamp=datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
         filename=s3_filename,
