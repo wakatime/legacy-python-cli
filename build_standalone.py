@@ -12,9 +12,8 @@ from pathlib import Path
 
 CWD = Path(__file__).resolve().parent
 OS = platform.system().lower().replace('darwin', 'mac')
-ARCH = 'x86' + ('-64' if '64' in platform.machine() else '')
-print(platform.architecture())
-print(sys.maxsize > 2**32)
+IS_64BIT = sys.maxsize > 2**32
+ARCH = 'x86-' + ('64' if IS_64BIT else '32')
 
 
 ABOUT = {}
