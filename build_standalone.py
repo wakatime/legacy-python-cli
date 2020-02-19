@@ -49,7 +49,7 @@ if __name__ == '__main__':
 
     filename = Path(CWD, 'dist', 'wakatime.exe' if OS == 'windows' else 'wakatime')
 
-    print('{timestamp} Created standalone binary wakatime-{ver}-{os}-{arch} in {minutes}minute{mplural} {seconds}second{splural}'.format(
+    print('{timestamp} Created standalone binary wakatime-{ver}-{os}-{arch} in {minutes} minute{mplural} {seconds} second{splural}.'.format(
         timestamp=datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
         ver=ABOUT["__version__"],
         os=OS,
