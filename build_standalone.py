@@ -118,3 +118,7 @@ if __name__ == '__main__':
             arch=ARCH,
         )
         client.upload_file(verfile, bucket, s3_filename, ExtraArgs={'ACL': 'public-read'})
+        print('{timestamp} Uploaded {filename} to s3.'.format(
+            timestamp=datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+            filename=s3_filename,
+        ))
