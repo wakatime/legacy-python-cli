@@ -85,7 +85,7 @@ if __name__ == '__main__':
         with open(shafile, 'w') as fh:
             fh.write(sha3sum)
 
-        s3_filename = '{os}-{arch}/wakatime-{ver}-{os}-{arch}'.format(
+        s3_filename = '{os}-{arch}/releases/wakatime-{ver}-{os}-{arch}'.format(
             ver=ABOUT["__version__"],
             os=OS,
             arch=ARCH,
@@ -109,3 +109,12 @@ if __name__ == '__main__':
             timestamp=datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
             filename=s3_filename,
         ))
+
+        verfile = str(Path(CWD, 'dist', 'current_version.txt'))
+        with open(verfile, 'w') as fh:
+            fh.write(ABOUT["__version__"])
+        s3_filename = '{os}-{arch}/current_version.txt'.format(
+            os=OS,
+            arch=ARCH,
+        )
+        client.upload_file(verfile, bucket, s3_filename, ExtraArgs={'ACL': 'public-read'})
