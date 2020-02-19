@@ -6,6 +6,7 @@ env:
   global:
     - PYTHON_CONFIGURE_OPTS="--enable-shared"
     - PIPENV_YES=1
+    - UPLOAD_ARTIFACTS=1
 jobs:
   include:
     - name: "Linux"
