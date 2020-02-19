@@ -5,12 +5,16 @@ import boto3
 import os
 import platform
 import subprocess
+import sys
+from datetime import datetime
 from pathlib import Path
 
 
 CWD = Path(__file__).resolve().parent
-OS = platform.system().lower().replace('darwin', 'mac').replace('dows', '')
+OS = platform.system().lower().replace('darwin', 'mac')
 ARCH = 'x86' + ('-64' if '64' in platform.machine() else '')
+print(platform.architecture())
+print(sys.maxsize > 2**32)
 
 
 ABOUT = {}
@@ -39,7 +43,7 @@ if __name__ == '__main__':
         aws_access_key_id=os.environ['ARTIFACTS_KEY'],
         aws_secret_access_key=os.environ['ARTIFACTS_SECRET'],
     )
-    filename = 'wakatime.exe' if OS == 'win' else 'wakatime'
+    filename = 'wakatime.exe' if OS == 'windows' else 'wakatime'
     binary = Path(CWD, 'dist', filename)
 
     s3_filename = '{os}-{arch}/wakatime-{ver}-{os}-{arch}'.format(
@@ -49,7 +53,10 @@ if __name__ == '__main__':
     )
     with open(binary, 'rb') as fh:
         client.upload_fileobj(fh, bucket, s3_filename)
-    print('Uploaded artifact {} to s3.'.format(s3_filename))
+    print('{timestamp} Uploaded artifact {filename} to s3.'.format(
+        timestamp=datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+        filename=s3_filename,
+    ))
 
     s3_filename = '{os}-{arch}/wakatime'.format(
         os=OS,
@@ -57,4 +64,7 @@ if __name__ == '__main__':
     )
     with open(binary, 'rb') as fh:
         client.upload_fileobj(fh, bucket, s3_filename)
-    print('Uploaded artifact {} to s3.'.format(s3_filename))
+    print('{timestamp} Uploaded artifact {filename} to s3.'.format(
+        timestamp=datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+        filename=s3_filename,
+    ))
