@@ -81,14 +81,17 @@ if __name__ == '__main__':
             aws_secret_access_key=os.environ['ARTIFACTS_SECRET'],
         )
 
-        shafile = str(Path(CWD, 'dist', 'wakatime.sha3-512'))
+        ext = '.exe' if OS == 'windows' else ''
+
+        shafile = str(Path(CWD, 'dist', 'wakatime{}.sha3-512'.format(ext)))
         with open(shafile, 'w') as fh:
             fh.write(sha3sum)
 
-        s3_filename = '{os}-{arch}/releases/wakatime-{ver}-{os}-{arch}'.format(
+        s3_filename = '{os}-{arch}/releases/wakatime-{ver}-{os}-{arch}{ext}'.format(
             ver=ABOUT["__version__"],
             os=OS,
             arch=ARCH,
+            ext=ext,
         )
         client.upload_file(shafile, bucket, s3_filename + '.sha3-512', ExtraArgs={'ACL': 'public-read'})
         with open(filename, 'rb') as fh:
@@ -98,9 +101,10 @@ if __name__ == '__main__':
             filename=s3_filename,
         ))
 
-        s3_filename = '{os}-{arch}/wakatime'.format(
+        s3_filename = '{os}-{arch}/wakatime{ext}'.format(
             os=OS,
             arch=ARCH,
+            ext=ext,
         )
         client.upload_file(shafile, bucket, s3_filename + '.sha3-512', ExtraArgs={'ACL': 'public-read'})
         with open(filename, 'rb') as fh:
