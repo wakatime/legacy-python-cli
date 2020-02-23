@@ -82,9 +82,10 @@ def main():
         splural='' if seconds == 1 else 's',
     ))
 
-    folder = str(Path(CWD, 'dist', 'wakatime-cli'))
-    make_archive(folder, 'zip', folder, 'wakatime-cli')
-    zipfile = folder + '.zip'
+    distFolder = str(Path(CWD, 'dist'))
+    zipfile = str(Path(CWD, 'dist', 'wakatime-cli'))
+    make_archive(zipfile, 'zip', distFolder, 'wakatime-cli')
+    zipfile = zipfile + '.zip'
 
     sha3 = hashlib.sha3_512()
     with open(zipfile, 'rb') as fh:
