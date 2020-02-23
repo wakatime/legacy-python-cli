@@ -21,6 +21,7 @@ pytest = "*"
 pytest-cov = "*"
 pyinstaller = "*"
 boto3 = "*"
+nuitka = "*"
 
 [packages]
 requests = "*"

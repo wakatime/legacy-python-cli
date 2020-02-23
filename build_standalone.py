@@ -2,13 +2,16 @@
 
 
 import boto3
+import certifi
 import hashlib
+import inspect
 import os
 import platform
 import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
+from pygments.lexer import Lexer
 
 
 CWD = Path(__file__).resolve().parent
@@ -23,16 +26,9 @@ with open(Path(CWD, "wakatime/__about__.py")) as fh:
     exec(fh.read(), ABOUT)
 
 
-if __name__ == '__main__':
-    print('{timestamp} Building standalone binary wakatime-{ver}-{os}-{arch}'.format(
-        timestamp=datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
-        ver=ABOUT["__version__"],
-        os=OS,
-        arch=ARCH,
-    ))
-    start = datetime.utcnow()
-    subprocess.run(
-        [
+def build_command(tool):
+    if tool == 'pyinstaller':
+        return [
             'pyinstaller',
             '--onefile',
             '--noconfirm',
@@ -41,9 +37,37 @@ if __name__ == '__main__':
             '--distpath', str(Path(CWD, 'dist')),
             '--hidden-import', 'pkg_resources.py2_warn',
             str(Path(CWD, 'wakatime', 'cli.py')),
-        ],
-        check=True,
-    )
+        ]
+    elif tool == 'nuitka':
+        return [
+            'python',
+            '-m',
+            'nuitka',
+            '--standalone',
+            '--recurse-all',
+            '--include-plugin-directory', str(Path(inspect.getfile(Lexer.__class__)).resolve().parent.joinpath('lexers')),
+            '--include-plugin-files', str(Path(certifi.where()).resolve()),
+            '--output-dir', str(Path(CWD, 'dist')),
+            '--remove-output',
+            '--show-modules',
+            str(Path(CWD, 'wakatime', 'cli.py')),
+        ]
+
+
+def main():
+    tool = os.environ.get('BUILD_WAKA_USING') or 'pyinstaller'
+    if tool not in ['pyinstaller', 'nuitka']:
+        raise Exception('Invalid build tool: {}'.format(tool))
+
+    print('{timestamp} Building standalone binary wakatime-{ver}-{os}-{arch} using {tool}'.format(
+        timestamp=datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+        ver=ABOUT["__version__"],
+        os=OS,
+        arch=ARCH,
+        tool=tool,
+    ))
+    start = datetime.utcnow()
+    subprocess.run(build_command(tool), check=True)
     seconds = (datetime.utcnow() - start).total_seconds()
     minutes = seconds // 60
 
@@ -126,3 +150,7 @@ if __name__ == '__main__':
             timestamp=datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
             filename=s3_filename,
         ))
+
+
+if __name__ == '__main__':
+    main()
