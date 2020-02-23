@@ -12,6 +12,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 from pygments.lexer import Lexer
+from shutil import make_archive
 
 
 CWD = Path(__file__).resolve().parent
@@ -30,10 +31,9 @@ def build_command(tool):
     if tool == 'pyinstaller':
         return [
             'pyinstaller',
-            '--onefile',
             '--noconfirm',
             '--clean',
-            '--name', 'wakatime',
+            '--name', 'wakatime-cli',
             '--distpath', str(Path(CWD, 'dist')),
             '--hidden-import', 'pkg_resources.py2_warn',
             str(Path(CWD, 'wakatime', 'cli.py')),
@@ -59,7 +59,7 @@ def main():
     if tool not in ['pyinstaller', 'nuitka']:
         raise Exception('Invalid build tool: {}'.format(tool))
 
-    print('{timestamp} Building standalone binary wakatime-{ver}-{os}-{arch} using {tool}'.format(
+    print('{timestamp} Building standalone wakatime-{ver}-{os}-{arch} using {tool}'.format(
         timestamp=datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
         ver=ABOUT["__version__"],
         os=OS,
@@ -71,9 +71,7 @@ def main():
     seconds = (datetime.utcnow() - start).total_seconds()
     minutes = seconds // 60
 
-    filename = Path(CWD, 'dist', 'wakatime.exe' if OS == 'windows' else 'wakatime')
-
-    print('{timestamp} Created standalone binary wakatime-{ver}-{os}-{arch} in {minutes} minute{mplural} {seconds} second{splural}.'.format(
+    print('{timestamp} Created standalone wakatime-{ver}-{os}-{arch} in {minutes} minute{mplural} {seconds} second{splural}.'.format(
         timestamp=datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
         ver=ABOUT["__version__"],
         os=OS,
@@ -84,13 +82,18 @@ def main():
         splural='' if seconds == 1 else 's',
     ))
 
+    folder = str(Path(CWD, 'dist', 'wakatime-cli'))
+    make_archive(folder, 'zip', folder)
+    zipfile = folder + '.zip'
+
     sha3 = hashlib.sha3_512()
-    with open(filename, 'rb') as fh:
+    with open(zipfile, 'rb') as fh:
         while True:
             data = fh.read(BUF_SIZE)
             if not data:
                 break
             sha3.update(data)
+
     sha3sum = sha3.hexdigest()
     print('{timestamp} SHA3-512: {sha3}'.format(
         timestamp=datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
@@ -105,33 +108,29 @@ def main():
             aws_secret_access_key=os.environ['ARTIFACTS_SECRET'],
         )
 
-        ext = '.exe' if OS == 'windows' else ''
-
-        shafile = str(Path(CWD, 'dist', 'wakatime{}.sha3-512'.format(ext)))
+        shafile = str(Path(CWD, 'dist', 'wakatime-cli.zip.sha3-512'))
         with open(shafile, 'w') as fh:
             fh.write(sha3sum)
 
-        s3_filename = '{os}-{arch}/releases/wakatime-{ver}-{os}-{arch}{ext}'.format(
+        s3_filename = '{os}-{arch}/releases/wakatime-cli-{ver}-{os}-{arch}.zip'.format(
             ver=ABOUT["__version__"],
             os=OS,
             arch=ARCH,
-            ext=ext,
         )
         client.upload_file(shafile, bucket, s3_filename + '.sha3-512', ExtraArgs={'ACL': 'public-read'})
-        with open(filename, 'rb') as fh:
+        with open(zipfile, 'rb') as fh:
             client.upload_fileobj(fh, bucket, s3_filename, ExtraArgs={'ACL': 'public-read'})
         print('{timestamp} Uploaded artifact {filename} to s3.'.format(
             timestamp=datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
             filename=s3_filename,
         ))
 
-        s3_filename = '{os}-{arch}/wakatime{ext}'.format(
+        s3_filename = '{os}-{arch}/wakatime-cli.zip'.format(
             os=OS,
             arch=ARCH,
-            ext=ext,
         )
         client.upload_file(shafile, bucket, s3_filename + '.sha3-512', ExtraArgs={'ACL': 'public-read'})
-        with open(filename, 'rb') as fh:
+        with open(zipfile, 'rb') as fh:
             client.upload_fileobj(fh, bucket, s3_filename, ExtraArgs={'ACL': 'public-read'})
         print('{timestamp} Uploaded artifact {filename} to s3.'.format(
             timestamp=datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
