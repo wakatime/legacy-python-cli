@@ -83,7 +83,7 @@ def main():
     ))
 
     folder = str(Path(CWD, 'dist', 'wakatime-cli'))
-    make_archive(folder, 'zip', folder)
+    make_archive(folder, 'zip', folder, 'wakatime-cli')
     zipfile = folder + '.zip'
 
     sha3 = hashlib.sha3_512()
