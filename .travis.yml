@@ -37,8 +37,8 @@ jobs:
         - export PATH="$HOME/.pyenv/bin:$PATH"
         - pyenv install --skip-existing
       install:
-        - /Users/travis/pyenv/versions/3.8.1/bin/pip install pip --upgrade
-        - /Users/travis/pyenv/versions/3.8.1/bin/pip install pipenv --upgrade
+        - /Users/travis/.pyenv/versions/3.8.1/bin/pip install pip --upgrade
+        - /Users/travis/.pyenv/versions/3.8.1/bin/pip install pipenv --upgrade
         - pipenv --python /Users/travis/.pyenv/shims/python install --dev --ignore-pipfile
     - name: "Windows 32bit"
       os: windows # Windows 10.0.17134 N/A Build 17134
