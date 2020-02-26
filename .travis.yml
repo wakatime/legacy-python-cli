@@ -12,7 +12,7 @@ jobs:
   include:
     - name: "Linux"
       os: linux
-      dist: precise
+      dist: xenial
       python: 3.8 # this works for Linux but is ignored on macOS and Windows
       before_install:
         - python3 --version || python --version
