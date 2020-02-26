@@ -11,6 +11,8 @@ env:
 jobs:
   include:
     - name: "Linux"
+      os: linux
+      dist: precise
       python: 3.8 # this works for Linux but is ignored on macOS and Windows
       before_install:
         - python3 --version || python --version
@@ -20,10 +22,8 @@ jobs:
         - curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer | bash
         - export PATH="$HOME/.pyenv/bin:$PATH"
         - pyenv install --skip-existing
-      install:
-        - pip3 install pip --upgrade
-        - pip3 install pipenv --upgrade
-        - make
+        - pip3 install pip --upgrade || pip install pip --upgrade
+        - pip3 install pipenv --upgrade || pip install pipenv --upgrade
     - name: "Mac"
       os: osx
       osx_image: xcode6.4
@@ -37,34 +37,32 @@ jobs:
         - export PATH="$HOME/.pyenv/bin:$PATH"
         - export PATH="$HOME/.pyenv/versions/3.8.1/bin:$PATH"
         - pyenv install --skip-existing
-      install:
         - pip install pip --upgrade
         - pip install pipenv --upgrade
+      install:
         - pipenv --python /Users/travis/.pyenv/shims/python install --dev --ignore-pipfile
     - name: "Windows 32bit"
       os: windows # Windows 10.0.17134 N/A Build 17134
       language: shell # 'language: python' is an error on Travis CI Windows
+      env: PATH=/c/Python38:/c/Python38/Scripts:$PATH
       before_install:
         - choco install python --version 3.8.1 --x86
         - choco install make
         - python -m pip install --upgrade pip
-      env: PATH=/c/Python38:/c/Python38/Scripts:$PATH
-      install:
         - pip3 install pip --upgrade
         - pip3 install pipenv --upgrade
-        - make
     - name: "Windows 64bit"
       os: windows # Windows 10.0.17134 N/A Build 17134
       language: shell # 'language: python' is an error on Travis CI Windows
+      env: PATH=/c/Python38:/c/Python38/Scripts:$PATH
       before_install:
         - choco install python --version 3.8.1
         - choco install make
         - python -m pip install --upgrade pip
-      env: PATH=/c/Python38:/c/Python38/Scripts:$PATH
-      install:
         - pip3 install pip --upgrade
         - pip3 install pipenv --upgrade
-        - make
+install:
+  - make
 script: make test
 after_success:
   - coveralls
