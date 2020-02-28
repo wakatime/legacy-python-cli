@@ -43,14 +43,14 @@ class Popen(subprocess.Popen):
     """Patched Popen to prevent opening cmd window on Windows platform."""
 
     def __init__(self, *args, **kwargs):
-        startupinfo = kwargs.get("startupinfo")
-        if is_win or True:
+        if is_win:
+            startupinfo = kwargs.get("startupinfo")
             try:
                 startupinfo = startupinfo or subprocess.STARTUPINFO()
                 startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
             except AttributeError:
                 pass
-        kwargs["startupinfo"] = startupinfo
+            kwargs["startupinfo"] = startupinfo
         if "env" not in kwargs:
             env = os.environ.copy()
             env["LANG"] = "en-US" if is_win else "en_US.UTF-8"
