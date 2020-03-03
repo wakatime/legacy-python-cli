@@ -45,6 +45,7 @@ def build_command(tool):
             '-m',
             'nuitka',
             '--standalone',
+            '--follow-stdlib',
             '--follow-imports',
             '--include-plugin-files', str(Path('wakatime', 'languages', 'default.json').resolve()),
             '--include-plugin-files', str(Path('wakatime', 'languages', 'vim.json').resolve()),
