@@ -2,7 +2,6 @@
 
 
 import boto3
-import certifi
 import hashlib
 import inspect
 import os
@@ -36,22 +35,23 @@ def build_command(tool):
             '--name', 'wakatime-cli',
             '--distpath', str(Path(CWD, 'dist')),
             '--hidden-import', 'pkg_resources.py2_warn',
-            str(Path(CWD, 'wakatime', 'cli.py')),
+            str(Path(CWD, 'wakatime', 'wakatime-cli.py')),
         ]
     elif tool == 'nuitka':
+        hidden_folder = Path(inspect.getfile(Lexer.__class__)).resolve().parent.joinpath('lexers')
+        extra_args = ['--include-module=pygments.lexers.' + x.stem for x in hidden_folder.iterdir() if x.suffix == '.py']
         return [
             'python',
             '-m',
             'nuitka',
             '--standalone',
-            '--recurse-all',
-            '--include-plugin-directory', str(Path(inspect.getfile(Lexer.__class__)).resolve().parent.joinpath('lexers')),
-            '--include-plugin-files', str(Path(certifi.where()).resolve()),
+            '--follow-imports',
+            '--include-plugin-files', str(Path('wakatime', 'languages', 'default.json').resolve()),
+            '--include-plugin-files', str(Path('wakatime', 'languages', 'vim.json').resolve()),
             '--output-dir', str(Path(CWD, 'dist')),
             '--remove-output',
             '--show-modules',
-            str(Path(CWD, 'wakatime', 'cli.py')),
-        ]
+        ] + extra_args + [str(Path(CWD, 'wakatime', 'wakatime-cli.py'))]
 
 
 def main():
@@ -83,7 +83,9 @@ def main():
     ))
 
     distFolder = str(Path(CWD, 'dist'))
-    zipfile = str(Path(CWD, 'dist', 'wakatime-cli'))
+    if tool == 'nuitka':
+        Path(distFolder, 'wakatime-cli.dist').rename(Path(distFolder, 'wakatime-cli'))
+    zipfile = str(Path(distFolder, 'wakatime-cli'))
     make_archive(zipfile, 'zip', distFolder, 'wakatime-cli')
     zipfile = zipfile + '.zip'
 
@@ -109,7 +111,7 @@ def main():
             aws_secret_access_key=os.environ['ARTIFACTS_SECRET'],
         )
 
-        shafile = str(Path(CWD, 'dist', 'wakatime-cli.zip.sha3-512'))
+        shafile = str(Path(distFolder, 'wakatime-cli.zip.sha3-512'))
         with open(shafile, 'w') as fh:
             fh.write(sha3sum)
 
@@ -138,7 +140,7 @@ def main():
             filename=s3_filename,
         ))
 
-        verfile = str(Path(CWD, 'dist', 'current_version.txt'))
+        verfile = str(Path(distFolder, 'current_version.txt'))
         with open(verfile, 'w') as fh:
             fh.write(ABOUT["__version__"])
         s3_filename = '{os}-{arch}/current_version.txt'.format(

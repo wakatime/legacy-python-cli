@@ -8,6 +8,7 @@ env:
     - PIPENV_YES=1
     # - UPLOAD_ARTIFACTS=$TRAVIS_TAG
     - UPLOAD_ARTIFACTS=1
+    - BUILD_WAKA_USING=nuitka
 jobs:
   include:
     - name: "Linux"
