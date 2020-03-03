@@ -49,6 +49,7 @@ jobs:
       before_install:
         - choco install python --version 3.8.1 --x86
         - choco install make
+        - choco install mingw
         - python -m pip install --upgrade pip
         - pip3 install pip --upgrade
         - pip3 install pipenv --upgrade
@@ -59,6 +60,7 @@ jobs:
       before_install:
         - choco install python --version 3.8.1
         - choco install make
+        - choco install mingw
         - python -m pip install --upgrade pip
         - pip3 install pip --upgrade
         - pip3 install pipenv --upgrade
