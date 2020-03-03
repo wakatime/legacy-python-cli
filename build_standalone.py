@@ -68,8 +68,8 @@ def main():
     ))
     start = datetime.utcnow()
     subprocess.run(build_command(tool), check=True)
-    seconds = (datetime.utcnow() - start).total_seconds()
-    minutes = seconds // 60
+    seconds = int((datetime.utcnow() - start).total_seconds())
+    minutes = int(seconds // 60)
 
     print('{timestamp} Created standalone wakatime-{ver}-{os}-{arch} in {minutes} minute{mplural} {seconds} second{splural}.'.format(
         timestamp=datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
