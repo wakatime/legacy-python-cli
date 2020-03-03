@@ -116,10 +116,11 @@ def main():
         with open(shafile, 'w') as fh:
             fh.write(sha3sum)
 
-        s3_filename = '{os}-{arch}/releases/wakatime-cli-{ver}-{os}-{arch}.zip'.format(
+        s3_filename = '{os}-{arch}/{tool}/releases/wakatime-cli-{ver}-{os}-{arch}.zip'.format(
             ver=ABOUT["__version__"],
             os=OS,
             arch=ARCH,
+            tool=tool,
         )
         client.upload_file(shafile, bucket, s3_filename + '.sha3-512', ExtraArgs={'ACL': 'public-read'})
         with open(zipfile, 'rb') as fh:
@@ -129,9 +130,10 @@ def main():
             filename=s3_filename,
         ))
 
-        s3_filename = '{os}-{arch}/wakatime-cli.zip'.format(
+        s3_filename = '{os}-{arch}/{tool}/wakatime-cli.zip'.format(
             os=OS,
             arch=ARCH,
+            tool=tool,
         )
         client.upload_file(shafile, bucket, s3_filename + '.sha3-512', ExtraArgs={'ACL': 'public-read'})
         with open(zipfile, 'rb') as fh:
@@ -144,9 +146,10 @@ def main():
         verfile = str(Path(distFolder, 'current_version.txt'))
         with open(verfile, 'w') as fh:
             fh.write(ABOUT["__version__"])
-        s3_filename = '{os}-{arch}/current_version.txt'.format(
+        s3_filename = '{os}-{arch}/{tool}/current_version.txt'.format(
             os=OS,
             arch=ARCH,
+            tool=tool,
         )
         client.upload_file(verfile, bucket, s3_filename, ExtraArgs={'ACL': 'public-read'})
         print('{timestamp} Uploaded {filename} to s3.'.format(
