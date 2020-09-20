@@ -107,7 +107,7 @@ Common log file location in your User ``$WAKATIME_HOME`` directory::
 
     ~/.wakatime.log
 
-Each plugin also has it's own log file:
+Each plugin also has its own log file:
 
 * **Atom** writes errors to the developer console (View -> Developer -> Toggle Developer Tools)
 * **Brackets** errors go to the developer console (Debug -> Show Developer Tools)
