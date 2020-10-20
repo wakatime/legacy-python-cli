@@ -136,24 +136,37 @@ class HeartbeatTestCase(TestCase):
         self.assertNothingLogged(logs)
 
     @log_capture()
-    def test_sanitize_does_nothing_when_type_not_file(self, logs):
+    def test_sanitize_removes_sensitive_data_when_type_not_file(self, logs):
         logging.disable(logging.NOTSET)
 
         class Args(object):
+            exclude = []
             hide_file_names = ['.*']
             hide_project_names = []
             hide_branch_names = None
+            include = []
             plugin = None
+            include_only_with_project_file = None
+            local_file = None
 
-        branch = 'abc123'
         data = {
-            'entity': 'not.a.file',
+            'entity': os.path.realpath('tests/samples/codefiles/python.py'),
             'type': 'app',
-            'branch': branch,
+            'project': 'aproject',
+            'branch': 'abranch',
         }
-        heartbeat = Heartbeat(data, Args(), None, _clone=True)
+        heartbeat = Heartbeat(data, Args(), None)
         sanitized = heartbeat.sanitize()
-        self.assertEquals(branch, sanitized.branch)
+        self.assertEquals('HIDDEN.py', sanitized.entity)
+        sensitive = [
+            'branch',
+            'dependencies',
+            'lines',
+            'lineno',
+            'cursorpos',
+        ]
+        for item in sensitive:
+            self.assertIsNone(getattr(sanitized, item))
 
         self.assertNothingPrinted()
         self.assertNothingLogged(logs)
