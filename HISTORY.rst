@@ -3,6 +3,14 @@ History
 -------
 
 
+13.1.0 (2020-10-20)
++++++++++++++++++++
+
+- Detect GAS .s files as Assembly language.
+- Sanitize heartbeats for all category types.
+  `#236 <https://github.com/wakatime/wakatime/issues/236>`_
+
+
 13.0.7 (2020-02-13)
 +++++++++++++++++++
 
