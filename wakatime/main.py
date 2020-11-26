@@ -52,7 +52,7 @@ def execute(argv=None):
 
     setup_logging(args, __version__)
 
-    if args.today:
+    if args.today or args.today_goal:
         text, retval = get_time_today(args)
         if text:
             print(text)

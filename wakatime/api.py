@@ -165,6 +165,8 @@ def get_time_today(args, use_ntlm_proxy=False):
     """
 
     url = "https://api.wakatime.com/api/v1/users/current/summaries"
+    if args.today_goal:
+        url = "https://api.wakatime.com/api/v1/users/current/goals/{}".format(args.today_goal)
     timeout = args.timeout
     if not timeout:
         timeout = 60
@@ -196,10 +198,12 @@ def get_time_today(args, use_ntlm_proxy=False):
             should_try_ntlm = "\\" in args.proxy
             proxies["https"] = args.proxy
 
-    params = {
-        "start": "today",
-        "end": "today",
-    }
+    params = {}
+    if not args.today_goal:
+        params = {
+            "start": "today",
+            "end": "today",
+        }
 
     # send request to api
     response, code = None, None
@@ -251,6 +255,12 @@ def get_time_today(args, use_ntlm_proxy=False):
 
     if code == requests.codes.ok:
         try:
+            if args.today_goal:
+                goal = response.json()["data"]["chart_data"][-1]
+                text = goal["actual_seconds_text"]
+                # if goal["range_status"] == "success":
+                #     text = "{} {}".format('✓', text)
+                return text, SUCCESS
             summary = response.json()["data"][0]
             if len(summary["categories"]) > 1:
                 text = ", ".join(
