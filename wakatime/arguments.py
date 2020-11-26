@@ -214,6 +214,12 @@ def parse_arguments():
     parser.add_argument('--today', dest='today',
                         action='store_true',
                         help='Prints dashboard time for Today, then exits.')
+    parser.add_argument('--today-goal', dest='today_goal', metavar='GOAL_ID',
+                        action=StoreWithoutQuotes,
+                        help='Prints time for then given goal id Today, ' +
+                             'then exits. Visit ' +
+                             'wakatime.com/api/v1/users/current/goals to ' +
+                             'find your goal id.')
     parser.add_argument('--config', dest='config', action=StoreWithoutQuotes,
                         metavar='FILE', help='Defaults to ~/.wakatime.cfg.')
     parser.add_argument('--config-section', dest='config_section',
@@ -288,7 +294,7 @@ def parse_arguments():
     if not args.entity:
         if args.file:
             args.entity = args.file
-        elif (not args.sync_offline_activity or args.sync_offline_activity == 'none') and not args.today:
+        elif (not args.sync_offline_activity or args.sync_offline_activity == 'none') and not args.today and not args.today_goal:
             parser.error('argument --entity is required')
 
     if not args.sync_offline_activity:
