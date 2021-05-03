@@ -26,6 +26,8 @@
 WakaTime
 ========
 
+This repo is deprecated. Use the Go version of `wakatime-cli <https://github.com/wakatime/wakatime-cli>`_ instead.
+
 Command line interface to `WakaTime <https://wakatime.com/>`_ used by all WakaTime `text editor plugins <https://wakatime.com/editors>`_.
 
 Go to http://wakatime.com/editors to install the plugin for your text editor or IDE.
